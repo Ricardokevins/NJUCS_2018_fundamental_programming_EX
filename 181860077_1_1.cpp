@@ -1,3 +1,5 @@
+//读取文件，到划分单词以及查询
+
 #include<iostream>
 #include<cstdlib>
 #include<fstream>
