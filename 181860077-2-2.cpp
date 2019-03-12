@@ -83,7 +83,7 @@ void delete_node(TNode *node, int x)
 	{
 		return;
 	}
-	if (root->data == x)
+	if (root->data == x&&root->num==0)
 	{
 		delete root;
 		root = NULL;
