@@ -1,5 +1,5 @@
 
-    int equalstr(char*a, char *b)
+int equalstr(char*a, char *b)
 {
 	int flag(1);
 	while (*a != '\0'&&*b != '\0')
@@ -20,8 +20,6 @@
 	return flag;
 
 }
-
-
 
 int main() {
 	char A[50];
