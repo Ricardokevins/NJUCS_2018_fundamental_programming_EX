@@ -139,7 +139,9 @@ void reverse_print(Node *node,int n)
 		}
 	}
 	if (n > 0)
-	{
+	{ 	
+		if(!node)
+			return;
 		links temp = node;
 		int i(1);
 		for (; i < n&&temp->next; i++)
@@ -217,12 +219,6 @@ int main() {
 			reverse_print(head,x);
 		}
 	}
-	links temp = head;
-	while (temp)
-	{
-		temp = temp->next;
-		delete head;
-		head = temp;
-	}
+
 	return 0;
 }
