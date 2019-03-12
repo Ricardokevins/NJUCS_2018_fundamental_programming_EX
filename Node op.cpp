@@ -119,7 +119,7 @@ struct Node{
 	int data;
 	Node * next;
 };
-//²åÈë½¨Á¢Î²²¿²åÈë
+//æ’å…¥å»ºç«‹å°¾éƒ¨æ’å…¥
 hehe * wbcr(hehe * p)
 {
 	hehe *head = p;
@@ -133,7 +133,7 @@ hehe * wbcr(hehe * p)
 	}
 	return p;
 }
-//²åÈë½¨Á¢Í·²¿²åÈë
+//æ’å…¥å»ºç«‹å¤´éƒ¨æ’å…¥
 hehe *tbcr(hehe *p)
 {
 	hehe *head = p;
@@ -148,11 +148,11 @@ hehe *tbcr(hehe *p)
 }
 void PrintList(hehe * p)
 {
-	if (!p) //Èç¹ûÊÇ¿ÕÁ´±í
+	if (!p) //å¦‚æœæ˜¯ç©ºé“¾è¡¨
 		printf("List is empty. \n");
 	else
 	{
-		while (p) //±éÀúÁ´±í£¬µÈ¼ÛÓÚwhile(head != NULL)
+		while (p) //éå†é“¾è¡¨ï¼Œç­‰ä»·äºwhile(head != NULL)
 		{
 			cout<<p->data<<" ";
 			p = p->next;
@@ -191,17 +191,17 @@ int  main()
 	return 0;
 
 
-//²åÈë½¨Á¢Á´±í
+//æ’å…¥å»ºç«‹é“¾è¡¨
 #define N 10
 Node *AppCreate( )
 { Node *head = NULL, *tail = NULL;
 for(int i = 0; i < N; i++)
-{ Node *p = (Node *)malloc(sizeof(Node)); //´´½¨ĞÂ½Úµã
-p -> data = i; //¸øĞÂ½ÚµãµÄÊı¾İ³ÉÔ±ÊäÈëÖµ
-p -> next = NULL; //¸øĞÂ½ÚµãµÄÖ¸Õë³ÉÔ±¸³Öµ
-if(head == NULL) //ÒÑÓĞÁ´±íÎª¿ÕÁ´±íµÄÇé¿ö
+{ Node *p = (Node *)malloc(sizeof(Node)); //åˆ›å»ºæ–°èŠ‚ç‚¹
+p -> data = i; //ç»™æ–°èŠ‚ç‚¹çš„æ•°æ®æˆå‘˜è¾“å…¥å€¼
+p -> next = NULL; //ç»™æ–°èŠ‚ç‚¹çš„æŒ‡é’ˆæˆå‘˜èµ‹å€¼
+if(head == NULL) //å·²æœ‰é“¾è¡¨ä¸ºç©ºé“¾è¡¨çš„æƒ…å†µ
 head = p;
-else //ÒÑÓĞÁ´±í²»¿ÕµÄÇé¿ö
+else //å·²æœ‰é“¾è¡¨ä¸ç©ºçš„æƒ…å†µ
 tail -> next = p;
 tail = p;
 }
@@ -213,7 +213,7 @@ tail = p;
 void DeleteList(Node *head)
 {
 	 while(head)
-//±éÀúÁ´±í£¬Èç¹ûĞ´³Éwhile(head -> next)Ôò²»ÄÜÉ¾³ıÎ²½Úµã£¡£¡
+//éå†é“¾è¡¨ï¼Œå¦‚æœå†™æˆwhile(head -> next)åˆ™ä¸èƒ½åˆ é™¤å°¾èŠ‚ç‚¹ï¼ï¼
 { Node *current = head;
 head = head -> next;
 free(current);
@@ -223,7 +223,7 @@ free(current);
 
 
 
-//ÄÃµ½Á´±íµÄÎ²°Í
+//æ‹¿åˆ°é“¾è¡¨çš„å°¾å·´
 Node *gettailer(Node*head)
 {
 	Node *tailer = NULL;

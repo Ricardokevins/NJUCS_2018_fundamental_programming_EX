@@ -61,7 +61,7 @@ int equalstr(char*a,char *b)
 }
 
 
-//²âÊÔ 
+//Â²Ã¢ÃŠÃ” 
 int main()
 {
 	char A[30];
