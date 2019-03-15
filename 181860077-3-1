@@ -1,0 +1,78 @@
+#include<iostream>
+#include<cstdlib>
+using namespace std;
+
+
+void getnum(char *A,int *num)
+{
+	
+	for (int i(0);*A!='\0';A++)
+	{
+		if (*A <= '9'&&*A > '0')
+		{
+			num[i] = *A - '0';
+			i++;
+			A++;
+			continue;
+
+		}
+		if (*A == 'J'&&*(A+1)=='O')
+		{
+			num[i] = 15;
+			i++;
+			A += 4;
+			continue;
+		}
+		if (*A == 'j'&&*(A+1)=='o')
+		{
+			num[i] = 14;
+			i++;
+			A += 4;
+			continue;
+		}
+		if (*A == 'J')
+		{
+			num[i] = 11;
+			i++;
+			A++;
+			continue;
+		}
+		if (*A == 'Q')
+		{
+			num[i]= 12;
+			A++;
+			i++;
+			continue;
+		}
+		if (*A == 'K')
+		{
+			num [i]= 13;
+			A++;
+			i++;
+			continue;
+		}
+	}
+	
+
+}
+int main()
+{
+	char A[30] = {};
+	A[0] = getchar();
+	int i(0);
+	for (; A[i] != '\n';)
+	{
+		i++;
+		A[i] = getchar();
+		
+	}
+	A[i] = '\0';
+	int B[30] = {};
+	getnum(A, B);
+	for (int i(0); B[i]!=0; i++)
+	{
+		cout << B[i] << endl;
+	}
+	
+	return 0;
+}
