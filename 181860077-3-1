@@ -1,32 +1,6 @@
 #include<iostream>
 #include<cstdlib>
 using namespace std;
-
-
-void getnum(char *A,int *num)
-{
-	
-	for (int i(0);*A!='\0';A++)
-	{
-		if (*A <= '9'&&*A > '0')
-		{
-			num[i] = *A - '0';
-			i++;
-			A++;
-			continue;
-
-		}
-		if (*A == 'J'&&*(A+1)=='O')
-		{
-			num[i] = 15;
-			i++;
-			A += 4;
-			continue;
-		}
-		if (*A == 'j'&&*(A+1)=='o')
-#include<iostream>
-#include<cstdlib>
-using namespace std;
 //使用了桶来保存数据，免除了排序，也节约了空间
 void mygetnum(char *A, int *B)
 {
