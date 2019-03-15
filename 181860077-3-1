@@ -24,40 +24,136 @@ void getnum(char *A,int *num)
 			continue;
 		}
 		if (*A == 'j'&&*(A+1)=='o')
+#include<iostream>
+#include<cstdlib>
+using namespace std;
+//使用了桶来保存数据，免除了排序，也节约了空间
+void mygetnum(char *A, int *B)
+{
+	for (; *A != '\0'; A++)
+	{
+		if (*A <= '9'&&*A > '0')
 		{
-			num[i] = 14;
-			i++;
+			int j = *A - '0';
+			B[j]++;
+			A++;
+			continue;
+
+		}
+		if (*A == 'J'&&*(A + 1) == 'O'&&*(A+2)=='K')
+		{
+			int j = 15;
+			B[j]++;
+			A += 4;
+			continue;
+		}
+		if (*A == 'j'&&*(A + 1) == 'o')
+		{
+			int j = 14;
+			B[j]++;
 			A += 4;
 			continue;
 		}
 		if (*A == 'J')
 		{
-			num[i] = 11;
-			i++;
+			int j = 11;
+			B[j]++;
 			A++;
 			continue;
 		}
 		if (*A == 'Q')
 		{
-			num[i]= 12;
+			int j = 12;
+			B[j]++;
 			A++;
-			i++;
 			continue;
 		}
 		if (*A == 'K')
 		{
-			num [i]= 13;
+			int j = 13;
+			B[j]++;
 			A++;
-			i++;
 			continue;
 		}
 	}
-	
-
 }
+//对于对手不同的出牌的模式进行思考
+int singlecard(int *cardnum, int q)
+{
+	for (int i(q+1); i < 16; i++)
+	{
+		if (cardnum[i] > 0)
+		{
+			cout << i << endl;
+			return i;
+		}
+	}
+	return -1;
+}
+int doublecard(int *cardnum, int q)
+{
+	for (int i(q+1); i < 16; i++)
+	{
+		if (cardnum[i] > 1)
+		{
+			cout << i << " " << i << endl;
+			return i;
+		}
+	}
+	return -1;
+}
+int triblecard(int *cardnum, int q, int p)
+{
+	for (int i(q+1); i < 16; i++)
+	{
+		if (cardnum[i] > 2)
+		{
+			if (p == 0)
+			{
+				cout << i << " " << i << " " << i << " " << endl;
+				return i;
+			}
+			for (int j(0); j < 16; j++)
+			{
+				if (cardnum[j] >= p)
+				{
+					if(p==1)
+						cout << i << " " << i << " " << i << " " << j << endl;
+					else 
+						cout<<i<<" " << i << " " << i << " " << j <<" "<< j << endl;
+					return 1;
+				}	
+			}
+			return -1;
+		}
+
+	}
+	return -1;
+}
+int bombcard(int *cardnum, int q)
+{
+	for (int i(q+1); i < 16; i++)
+	{
+		if (cardnum[i] == 4)
+		{
+			for (int i(0); i < 4; i++)
+			{
+				cout << i << " ";
+			}
+			cout << endl;
+			return i;
+		}
+	}
+	if (cardnum[14] == 1 && cardnum[15] == 1)
+	{
+		return 0;
+	}
+	return -1;
+}
+int 
 int main()
 {
-	char A[30] = {};
+	char A[100] = {};
 	A[0] = getchar();
 	int i(0);
 	for (; A[i] != '\n';)
@@ -67,12 +163,26 @@ int main()
 		
 	}
 	A[i] = '\0';
-	int B[30] = {};
-	getnum(A, B);
-	for (int i(0); B[i]!=0; i++)
+	int B[16] = {};
+	B[0] = 0;
+	mygetnum(A, B);
+	int j(1);
+	//调试0
+	for (int s(1); s < 16; s++)
 	{
-		cout << B[i] << endl;
+		cout << s << "\t";
 	}
-	
+	cout << endl;
+	for (; j<16; j++)
+	{
+		cout << B[j] <<"\t";
+	}
+	cout << endl;
+	//调试1
+	if (singlecard(B, 2) == -1)  cout << -1 << endl;
+	if (doublecard(B, 2) == 1) cout << -1 << endl;
+	if (triblecard(B, 1, 2) == -1) cout << -1 << endl;
+	cout << bombcard(B, 5) << endl;
 	return 0;
+
 }
