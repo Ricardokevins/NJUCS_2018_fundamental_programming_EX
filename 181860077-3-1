@@ -87,17 +87,6 @@ int findmax(int *B,int *num)//num就是张数，返回的是牌的值
 	*num = B[pos];
 	return pos;
 }
-int findit(int *B,int p)//这个函数是为了找到特定的数目的张数，返回值是这个牌的值，如果返回-1就是没有找到
-{
-	for (int i(3); i < max; i++)
-	{
-		if (B[i] == p)
-		{
-			return i;
-		}
-	}
-	return -1;
-}
 //输出函数
 void myprint(int *B)
 {
@@ -353,13 +342,15 @@ void jiexi(char *A, int *type, int *cardm,int* q,int *p)//type保存的是牌的
 //编号为第一种，单张
 int singlecard(int *cardnum, int q)
 {
+	int B[18] = {};
 	for (int i(q+1); i < max; i++)
 	{
 		if (cardnum[i] > 0)
 		{
-			cout << i << endl;
 			cardnum[i]--;
-			return i;
+			B[i]++;
+			myprint(B);
+			return 1;
 		}
 	}
 	return -1;
@@ -367,13 +358,15 @@ int singlecard(int *cardnum, int q)
 //编号为第二种，对子
 int doublecard(int *cardnum, int q)
 {
+	int B[18] = {};
 	for (int i(q+1); i < max; i++)
 	{
 		if (cardnum[i] > 1)
 		{
-			cout << i << " " << i << endl;
 			cardnum[i] -= 2;
-			return i;
+			B[i]+=2;
+			myprint(B);
+			return 1;
 		}
 	}
 	return -1;
@@ -390,7 +383,7 @@ int triblecard(int *cardnum, int q, int p)//q是起始点，p是带的牌的种�
 			B[i]+=3;
 			if (p == 0)
 			{
-				cout << i << " " << i << " " << i << " " << endl;
+				myprint(B);
 				return i;
 			}
 			for (int j(3); j < max; j++)
@@ -406,7 +399,7 @@ int triblecard(int *cardnum, int q, int p)//q是起始点，p是带的牌的种�
 					}
 					else
 					{
-						B[j]++;
+						B[j]+=2;
 						cardnum[j] -= 2;
 						myprint(B);
 						return 0;
@@ -423,24 +416,24 @@ int triblecard(int *cardnum, int q, int p)//q是起始点，p是带的牌的种�
 //第四，炸弹
 int bombcard(int *cardnum, int q)
 {
+	int B[18] = {};
 	for (int i(q+1); i < max; i++)
 	{
 		if (cardnum[i] == 4)
 		{
-			for (int j(0); j < 4; j++)
-			{
-				cout << i << " ";
-			}
-			cout << endl;
+			B[i] += 4;
+			myprint(B);
 			cardnum[i] -= 4;
-			return i;
+			return 0;
 		}
 	}
 	if (cardnum[16] == 1 && cardnum[17] == 1)
 	{
 		cardnum[16]--; 
 		cardnum[17]--;
-		cout << "Rocket!!!" << endl;
+		B[16]++;
+		B[17]++;
+		myprint(B);
 		return 0;
 	}
 	return -1;
@@ -540,10 +533,16 @@ int planecard(int *cardnum, int q,int p,int s)//仍然是q代表的是三的最�
 						if (daipaishu == 2)
 						{
 							d2 = d;
+							cardnum[d2] -= p;
+							B[d2] += p;
 							break;
 						}
 						else
+						{
 							d1 = d;
+							cardnum[d1] -= p;
+							B[d1] += p;
+						}
 						
 					}
 					else
@@ -551,20 +550,6 @@ int planecard(int *cardnum, int q,int p,int s)//仍然是q代表的是三的最�
 				}
 				if (daipaishu == 2)
 				{
-					if (p == 1)
-					{
-						B[d1]++;
-						cardnum[d1]--;
-						B[d2]++;
-						cardnum[d2]--;
-					}
-					else
-					{
-						cardnum[d1] -= 2;
-						B[d1] += 2;
-						B[d2]+=2;
-						cardnum[d2]-=2;
-					}
 					myprint(B);
 					return 0;
 				}
@@ -572,6 +557,11 @@ int planecard(int *cardnum, int q,int p,int s)//仍然是q代表的是三的最�
 				{
 					cardnum[i] += 3;
 					cardnum[i + 1] += 3;
+					if (daipaishu == 1)
+					{
+						B[d1] -= p;
+						cardnum[d1] += p;
+					}
 					return -1;
 				}
 
@@ -667,6 +657,7 @@ int planecard(int *cardnum, int q,int p,int s)//仍然是q代表的是三的最�
 //第七，顺子
 int shunzi(int *cardnum, int q, int p)//仍然q作为开始点的数值，p是连续的数量
 {
+	int B[18] = {};
 	for (int i(q+1); i < max - p + 1; i++)
 	{
 		int j = i;
@@ -680,9 +671,9 @@ int shunzi(int *cardnum, int q, int p)//仍然q作为开始点的数值，p是�
 			for (int ws(p-1); ws >= 0; ws--)
 			{
 				cardnum[i + ws]--;
-				cout << i + ws << " ";
+				B[i + ws]++;
 			}
-			cout << endl;
+			myprint(B);
 			return 1;
 		}
 	}
@@ -691,7 +682,7 @@ int shunzi(int *cardnum, int q, int p)//仍然q作为开始点的数值，p是�
 //第八，连对
 int doubleshunzi(int *cardnum, int q, int p)
 {
-
+	int B[18] = {};
 	for (int i(q+1); i < max - p + 1; i++)
 	{
 		int j = i;
@@ -705,10 +696,9 @@ int doubleshunzi(int *cardnum, int q, int p)
 			for (int ws(p - 1); ws >= 0; ws--)
 			{
 				cardnum[i + ws] -= 2;
-				cout << i + ws << " ";
-				cout << i + ws << " ";
+				B[i + ws]+=2;
 			}
-			cout << endl;
+			myprint(B);
 			return 1;
 		}
 	}
@@ -716,6 +706,11 @@ int doubleshunzi(int *cardnum, int q, int p)
 }
 int main()
 {
+	int wa(0);
+	int wb(0);
+	cin >> wa;
+	cin >> wb;
+	char WA = getchar();
 	//A是输入的我的牌
 	char A[100] = {};
 	A[0] = getchar();
@@ -728,96 +723,116 @@ int main()
 	}
 	A[i] = '\0';
 	char C[100] = {};
-	C[0] = getchar();
-	int i(0);
-	for (; C[i] != '\n';)
+	C[0] = getchar();//C是对手的牌
+	int sj(0);
+	for (; C[sj] != '\n';)
 	{
-		i++;
-		C[i] = getchar();
+		sj++;
+		C[sj] = getchar();
 
 	}
-	C[i] = '\0';
-	//B是对我的手牌进行转化为数字
+	C[sj] = '\0';
+	//B是我的手牌,C是对手的
 	int B[18] = {};
 	B[0] = 0;
 	B[1] = 0;
 	B[2] = 0;
 	mygetnum(A, B);
 	int j(1);
-	//调试0
-	//myprint(B);
-
-	for (int s(3); s < 18; s++)
+	int type = 0;//出牌的种类
+	int q = 0;//带牌的种类
+	int p = 0;//连续的数目
+	int cardm = 0;//牌的起始点
+	jiexi(C, &type, &cardm, &q, &p);
+	if (type == 1)
 	{
-		cout << s << "\t";
+		if (singlecard(B, cardm) == -1)
+		{
+			if (bombcard(B, 2)==-1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
 	}
-	cout << endl;
-	for (int j(3); j<18; j++)
+	if (type == 2)
 	{
-		cout << B[j] <<"\t";
+		if (doublecard(B, cardm) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
 	}
-	cout << endl;
-	
-	//if (singlecard(B, 3) == -1)  cout << -1 << endl;
-	//if (doublecard(B, 3) == 1) cout << -1 << endl;
-	//if (triblecard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (bombcard(B, 5)== -1) cout << -1 << endl;
-	//if (forthcard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (forthcard(B, 3, 1) == -1) cout << -1 << endl;
-	//if (planecard(B,  3, 2, 2) == -1) cout << -1 << endl;
-	//if (triblecard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (triblecard(B, 3, 1) == -1) cout << -1 << endl;
-	//if (bombcard(B, 4) == -1) cout << -1 << endl;
-	//if (forthcard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (forthcard(B, 3, 1) == -1) cout << -1 << endl;
-	//if (forthcard(B, 5, 1) == -1) cout << -1 << endl;
-	//if (planecard(B,3,0,2) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 1, 2) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 2, 2) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 0, 3) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 1, 3) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 2, 3) == -1) cout << -1 << endl;
-	//if (shunzi(B, 4, 5) == -1) cout << -1 << endl;
-	//if (shunzi(B, 3, 6) == -1) cout << -1 << endl;
-	//if (shunzi(B, 5, 5) == -1) cout << -1 << endl;
-	//if (doubleshunzi(B, 3, 3) == -1) cout << -1 << endl;
-	//if (doubleshunzi(B, 3, 4) == -1) cout << -1 << endl;
-	//if (doubleshunzi(B, 5, 3) == -1) cout << -1 << endl;
-	//if(planecard(B, 3, 0, 2) == -1) cout << -1 << endl;
-	for (int j(3); j < 18; j++)
+	if (type == 3)
 	{
-		cout << B[j] << "\t";
+		if (triblecard(B, cardm, q) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
 	}
-	cout << endl;
+	if (type == 4)
+	{
+		if (bombcard(B, cardm) == -1)
+		{
+			cout << "YAO BU QI" << endl;
+			return 0;
+			
+		}
+	}
+	if (type == 5)
+	{
+		if (forthcard(B, cardm, q) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
+	}
+	if (type == 6)
+	{
+		if (planecard(B, cardm, q, p) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
+	}
+	if (type == 7)
+	{
+		if (shunzi(B, cardm, p) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
+	}
+	if (type == 8)
+	{
+		if (doubleshunzi(B, cardm , p ) == -1)
+		{
+			if (bombcard(B, 2) == -1)
+			{
+				cout << "YAO BU QI" << endl;
+				return 0;
+			}
+		}
+	}
+	if (type == 41)
+		cout << "YAO BU QI" << endl;
 	return 0;
-	int type = 0;
-	int q = 0;
-	int p = 0;
-	int s = 0;
 
-	/*
-	int mynum(0);
-	cout << findmax(B,&mynum)<<endl;
-	cout << mynum;
-	
-	//测试解析函数
-	int type = 0;
-	int cardm = 0;
-	int q = 0;
-	int p = 0;
-	jiexi(A, &type, &cardm, &q, &p);
-	cout << type << endl;//手牌种类
-	cout << cardm << endl;//手牌起始值
-	cout << q << endl;//带的张数种类
-	cout << p << endl;//连续的数目
-	*/
-	//if (singlecard(B, 3) == -1)  cout << -1 << endl;
-	//if (doublecard(B, 3) == 1) cout << -1 << endl;
-	//if (triblecard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (bombcard(B, 5) == -1) cout << -1 << endl;
-	//if (forthcard(B, 3, 2) == -1) cout << -1 << endl;
-	//if (planecard(B, 3, 1,2) == -1) cout << -1 << endl;
-	//if (shunzi(B, 3, 5) == -1) cout << -1 << endl;
-	//if (doubleshunzi(B, 3, 3) == -1) cout << -1 << endl;
 
 }
