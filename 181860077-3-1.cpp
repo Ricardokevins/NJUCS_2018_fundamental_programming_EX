@@ -88,7 +88,7 @@ int findmax(int *B,int *num)//num就是张数，返回的是牌的值
 //输出函数
 void myprint(int *B)
 {
-	for (int i(max); i > 2; i--)
+	for (int i(17); i > 2; i--)
 	{
 		for (int j(0); j < B[i]; j++)
 		{
@@ -823,6 +823,4 @@ int main()
 	if (type == 41)
 		cout << "YAO BU QI" << endl;
 	return 0;
-
-
 }
