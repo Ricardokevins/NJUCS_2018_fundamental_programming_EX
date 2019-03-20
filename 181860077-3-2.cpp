@@ -3,7 +3,7 @@
 using namespace std;
 #define max 18
 int yingdui(int *B, int *D, int type, int cardm, int q, int p);
-//3-10ÊÇÕı³£µÄÊı¾İ£¬JQKÊÇ11-13£¬AÊÇ14£¬2ÊÇ15£¬×îºóµÄÊÇ´óĞ¡Íõ
+//3-10æ˜¯æ­£å¸¸çš„æ•°æ®ï¼ŒJQKæ˜¯11-13ï¼ŒAæ˜¯14ï¼Œ2æ˜¯15ï¼Œæœ€åçš„æ˜¯å¤§å°ç‹
 void mygetnum(char *A, int *B)
 {
 	for (; *A != '\0'; A++)
@@ -73,7 +73,7 @@ void mygetnum(char *A, int *B)
 		}
 	}
 }
-int findmax(int *B, int *num)//num¾ÍÊÇÕÅÊı£¬·µ»ØµÄÊÇÅÆµÄÖµ
+int findmax(int *B, int *num)//numå°±æ˜¯å¼ æ•°ï¼Œè¿”å›çš„æ˜¯ç‰Œçš„å€¼
 {
 	int pos(3);
 	for (int i(3); i < max; i++)
@@ -86,10 +86,10 @@ int findmax(int *B, int *num)//num¾ÍÊÇÕÅÊı£¬·µ»ØµÄÊÇÅÆµÄÖµ
 	*num = B[pos];
 	return pos;
 }
-//Êä³öº¯Êı
+//è¾“å‡ºå‡½æ•°
 void myprint(int *B)
 {
-	for (int i(max); i > 2; i--)
+	for (int i(17); i > 2; i--)
 	{
 		for (int j(0); j < B[i]; j++)
 		{
@@ -133,14 +133,14 @@ void myprint(int *B)
 	}
 	cout << endl;
 }
-//½âÎö¶ÔÊÖµÄÅÆ
-void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£¬cardm±£´æµÄÊÇÅÆµÄÊıÖµ£¨×îĞ¡µÄ£©£¬qÊÇ´øµÄÕÅÊı£¨ÖÖÀà£¬Ò»ÕÅ»¹ÊÇÒ»¶ÔµÄ£©£¬pÊÇÁ¬ĞøµÄÕÅÊı¡£
+//è§£æå¯¹æ‰‹çš„ç‰Œ
+void jiexi(int *B, int *type, int *cardm, int* q, int *p)//typeä¿å­˜çš„æ˜¯ç‰Œçš„ç§ç±»ï¼Œcardmä¿å­˜çš„æ˜¯ç‰Œçš„æ•°å€¼ï¼ˆæœ€å°çš„ï¼‰ï¼Œqæ˜¯å¸¦çš„å¼ æ•°ï¼ˆç§ç±»ï¼Œä¸€å¼ è¿˜æ˜¯ä¸€å¯¹çš„ï¼‰ï¼Œpæ˜¯è¿ç»­çš„å¼ æ•°ã€‚
 {
 	int allnum(0);
-	//¼ÆËã¶Ô·½µÄ³öÅÆÊı
+	//è®¡ç®—å¯¹æ–¹çš„å‡ºç‰Œæ•°
 	int initmax1(0);
 	int initmax2 = findmax(B, &initmax1);
-	if (initmax1 == 1)//Ë³×ÓµÄ¿ÉÄÜĞÔ
+	if (initmax1 == 1)//é¡ºå­çš„å¯èƒ½æ€§
 	{
 		if (B[16] == 1 && B[17] == 1)
 		{
@@ -164,7 +164,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 		}
 
 	}
-	if (initmax1 == 2)//ÅÅ³ıÁ¬¶ÔµÄ¿ÉÄÜĞÔ
+	if (initmax1 == 2)//æ’é™¤è¿å¯¹çš„å¯èƒ½æ€§
 	{
 		int doublenum(0);
 		for (int i(3); i < max; i++)
@@ -182,7 +182,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			return;
 		}
 	}
-	for (int i(3); i < max; i++)//¼ÆËã×ÜµÄÅÆÊı
+	for (int i(3); i < max; i++)//è®¡ç®—æ€»çš„ç‰Œæ•°
 	{
 		allnum += B[i];
 	}
@@ -230,7 +230,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı´ø¶ş
+		if (maxnumzhang == 3)//ä¸‰å¸¦äºŒ
 		{
 			*type = 3;
 			*cardm = maxnumzhi;
@@ -242,7 +242,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//·É»ú²»´ø
+		if (maxnumzhang == 3)//é£æœºä¸å¸¦
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -250,7 +250,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			*p = 2;
 			return;
 		}
-		if (maxnumzhang == 4)//ËÄ´ø¶ş
+		if (maxnumzhang == 4)//å››å¸¦äºŒ
 		{
 			*type = 5;
 			*cardm = maxnumzhi;
@@ -262,7 +262,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//·É»ú´øÒ»
+		if (maxnumzhang == 3)//é£æœºå¸¦ä¸€
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -270,7 +270,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			*p = 2;
 			return;
 		}
-		if (maxnumzhang == 4)//ËÄ´ø¶ş¶Ô
+		if (maxnumzhang == 4)//å››å¸¦äºŒå¯¹
 		{
 			*type = 5;
 			*cardm = maxnumzhi;
@@ -282,7 +282,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú²»´ø
+		if (maxnumzhang == 3)//ä¸‰é£æœºä¸å¸¦
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -295,7 +295,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//¶ş·É»ú´øÁ½¶Ô
+		if (maxnumzhang == 3)//äºŒé£æœºå¸¦ä¸¤å¯¹
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -308,7 +308,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú´øÒ»
+		if (maxnumzhang == 3)//ä¸‰é£æœºå¸¦ä¸€
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -321,7 +321,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú´ø¶ş
+		if (maxnumzhang == 3)//ä¸‰é£æœºå¸¦äºŒ
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -332,7 +332,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	}
 
 }
-//¶ÔÓÚ¶ÔÊÖ²»Í¬µÄ³öÅÆµÄÄ£Ê½½øĞĞË¼¿¼
+//å¯¹äºå¯¹æ‰‹ä¸åŒçš„å‡ºç‰Œçš„æ¨¡å¼è¿›è¡Œæ€è€ƒ
 int singlecard(int *cardnum, int q,int *B)
 {
 	for (int i(q + 1); i < max; i++)
@@ -361,13 +361,13 @@ int doublecard(int *cardnum, int q,int *B)
 	}
 	return -1;
 }
-int triblecard(int *cardnum, int q, int p,int *B)//qÊÇÆğÊ¼µã£¬pÊÇ´øµÄÅÆµÄÖÖÀà
+int triblecard(int *cardnum, int q, int p,int *B)//qæ˜¯èµ·å§‹ç‚¹ï¼Œpæ˜¯å¸¦çš„ç‰Œçš„ç§ç±»
 {
 	for (int i(q + 1); i < max; i++)
 	{
 		if (cardnum[i] > 2)
 		{
-			cardnum[i] -= 3;//ÕÅÊı¼õÉÙ±ÜÃâ¿ÉÄÜµÄÅÆÖØ¸´³ö
+			cardnum[i] -= 3;//å¼ æ•°å‡å°‘é¿å…å¯èƒ½çš„ç‰Œé‡å¤å‡º
 			B[i] += 3;
 			if (p == 0)
 			{
@@ -394,7 +394,7 @@ int triblecard(int *cardnum, int q, int p,int *B)//qÊÇÆğÊ¼µã£¬pÊÇ´øµÄÅÆµÄÖÖÀà
 					}
 				}
 			}
-			cardnum[i] += 3;//×éºÏÊ§°Ü¾ÍÖØĞÂ»ØÈ¥¼ÆËã
+			cardnum[i] += 3;//ç»„åˆå¤±è´¥å°±é‡æ–°å›å»è®¡ç®—
 			return -1;
 		}
 
@@ -481,14 +481,14 @@ int forthcard(int *cardnum, int q, int p,int *B)
 	}
 	return -1;
 }
-int planecard(int *cardnum, int q, int p, int s,int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ¡µÄÆğµã£¬È»ºóºóÃæ±íÊ¾µÄÊÇ´øµÄÕÅÊı£¬×îºóÊÇ·É»úµÄÁ¬ĞøÊıÄ¿
+int planecard(int *cardnum, int q, int p, int s,int *B)//ä»ç„¶æ˜¯qä»£è¡¨çš„æ˜¯ä¸‰çš„æœ€å°çš„èµ·ç‚¹ï¼Œç„¶ååé¢è¡¨ç¤ºçš„æ˜¯å¸¦çš„å¼ æ•°ï¼Œæœ€åæ˜¯é£æœºçš„è¿ç»­æ•°ç›®
 {
 	if (s == 2)
 	{
 		for (int i(q + 1); i < max - 1; i++)
 		{
 			int k(0);
-			for (; k < 2; k++)//´Óµ±Ç°µÄÆğµã¿ªÊ¼ÏòºóÃæÕÒs¸öÊıÖµµÄÅÆÊÇ·ñÒ²ÊÇ·É»ú
+			for (; k < 2; k++)//ä»å½“å‰çš„èµ·ç‚¹å¼€å§‹å‘åé¢æ‰¾sä¸ªæ•°å€¼çš„ç‰Œæ˜¯å¦ä¹Ÿæ˜¯é£æœº
 			{
 				if (cardnum[i + k] < 3)
 					break;
@@ -556,7 +556,7 @@ int planecard(int *cardnum, int q, int p, int s,int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ¡
 		for (int i(q + 1); i < max - 1; i++)
 		{
 			int k(0);
-			for (; k < 3; k++)//´Óµ±Ç°µÄÆğµã¿ªÊ¼ÏòºóÃæÕÒs¸öÊıÖµµÄÅÆÊÇ·ñÒ²ÊÇ·É»ú
+			for (; k < 3; k++)//ä»å½“å‰çš„èµ·ç‚¹å¼€å§‹å‘åé¢æ‰¾sä¸ªæ•°å€¼çš„ç‰Œæ˜¯å¦ä¹Ÿæ˜¯é£æœº
 			{
 				if (cardnum[i + k] < 3)
 					break;
@@ -636,12 +636,12 @@ int planecard(int *cardnum, int q, int p, int s,int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ¡
 	}
 	return -1;
 }
-int shunzi(int *cardnum, int q, int p,int *B)//ÈÔÈ»q×÷Îª¿ªÊ¼µãµÄÊıÖµ£¬pÊÇÁ¬ĞøµÄÊıÁ¿
+int shunzi(int *cardnum, int q, int p,int *B)//ä»ç„¶qä½œä¸ºå¼€å§‹ç‚¹çš„æ•°å€¼ï¼Œpæ˜¯è¿ç»­çš„æ•°é‡
 {
 	for (int i(q + 1); i < max - p + 1; i++)
 	{
 		int j = i;
-		for (; j < 16; j++)//Ë³×Ó×î´óµ½2ÎªÖ¹£¬¶ÔÓ¦µÄÊıÖµ¾ÍÊÇ15+1
+		for (; j < 16; j++)//é¡ºå­æœ€å¤§åˆ°2ä¸ºæ­¢ï¼Œå¯¹åº”çš„æ•°å€¼å°±æ˜¯15+1
 		{
 			if (cardnum[j] < 1)
 				break;
@@ -664,7 +664,7 @@ int doubleshunzi(int *cardnum, int q, int p,int *B)
 	for (int i(q + 1); i < max - p + 1; i++)
 	{
 		int j = i;
-		for (; j < 16; j++)//Ë³×Ó×î´óµ½2ÎªÖ¹£¬¶ÔÓ¦µÄÊıÖµ¾ÍÊÇ15+1
+		for (; j < 16; j++)//é¡ºå­æœ€å¤§åˆ°2ä¸ºæ­¢ï¼Œå¯¹åº”çš„æ•°å€¼å°±æ˜¯15+1
 		{
 			if (cardnum[j] < 2)
 				break;
@@ -685,13 +685,13 @@ int doubleshunzi(int *cardnum, int q, int p,int *B)
 int addnum(int *A)
 {
 	int allnum(0);
-	for (int i(3); i < max; i++)//¼ÆËã×ÜµÄÅÆÊı
+	for (int i(3); i < max; i++)//è®¡ç®—æ€»çš„ç‰Œæ•°
 	{
 		allnum += A[i];
 	}
 	return allnum;
 }
-//ÓÃÀ´³õÊ¼»¯³öÅÆÊı×é
+//ç”¨æ¥åˆå§‹åŒ–å‡ºç‰Œæ•°ç»„
 void initialop1(int *A)
 {
 	for (int i(3); i < max; i++)
@@ -699,8 +699,8 @@ void initialop1(int *A)
 		A[i] = 0;
 	}
 }
-//ÓÃÀ´³õÊ¼»¯³öµÄµÚÒ»ÂÖÅÆ
-void initialop2(int *A,int *B)//AÊÇµ±Ç°Íæ¼ÒÊÖÅÆ£¬BÊÇËû±¾´Î³öÅÆ
+//ç”¨æ¥åˆå§‹åŒ–å‡ºçš„ç¬¬ä¸€è½®ç‰Œ
+void initialop2(int *A,int *B)//Aæ˜¯å½“å‰ç©å®¶æ‰‹ç‰Œï¼ŒBæ˜¯ä»–æœ¬æ¬¡å‡ºç‰Œ
 {
 	for (int i(3); i < max; i++)
 	{
@@ -723,7 +723,7 @@ void initialop2(int *A,int *B)//AÊÇµ±Ç°Íæ¼ÒÊÖÅÆ£¬BÊÇËû±¾´Î³öÅÆ
 	}
 	for (int i(3); i <12 ; i++)
 	{
-		int flag = 0;//²é¿´ÊÇ·ñÓĞË³×ÓµÄ´æÔÚ
+		int flag = 0;//æŸ¥çœ‹æ˜¯å¦æœ‰é¡ºå­çš„å­˜åœ¨
 		for (int j(i); j < 16; j++)
 		{
 			if (A[j] == 0)
@@ -754,7 +754,7 @@ void initialop2(int *A,int *B)//AÊÇµ±Ç°Íæ¼ÒÊÖÅÆ£¬BÊÇËû±¾´Î³öÅÆ
 	}
 
 }
-//ÓÃÀ´³õÊ¼»¯½âÎö²ÎÊı
+//ç”¨æ¥åˆå§‹åŒ–è§£æå‚æ•°
 void initialop3(int *type, int *cardm, int* q, int *p)
 {
 	type = 0;
@@ -764,7 +764,7 @@ void initialop3(int *type, int *cardm, int* q, int *p)
 }
 int main()
 {
-	char A[200] = {};
+	char A[200] = {0};
 	A[0] = getchar();
 	int i(0);
 	for (; A[i] != '\n';)
@@ -775,7 +775,7 @@ int main()
 	}
 	A[i] = '\0';
 
-	char B[200] = {};
+	char B[200] = {0};
 	B[0] = getchar();
 	int j(0);
 	for (; B[j] != '\n';)
@@ -786,7 +786,7 @@ int main()
 	}
 	B[j] = '\0';
 
-	char C[200] = {};
+	char C[200] = {0};
 	C[0] = getchar();
 	int k(0);
 	for (; C[k] != '\n';)
@@ -797,23 +797,23 @@ int main()
 	}
 	C[k] = '\0';
 
-	int A1[18] = {};
-	int B1[18] = {};
-	int C1[18] = {};
+	int A1[18] = {0};
+	int B1[18] = {0};
+	int C1[18] = {0};
 	mygetnum(A, A1);
 	mygetnum(B, B1);
 	mygetnum(C, C1);
-	int D[18] = {};//´æ´¢³öµÄÅÆ
-	cout << "rich man" << " ";
+	int D[18] = {0};//å­˜å‚¨å‡ºçš„ç‰Œ
+	cout << "Rich man" << " ";
 	myprint(A1);
 	initialop2(A1, D);
 	int type(0);
 	int cardm(0);
 	int q(0);
 	int p(0);
-	//BÊÇ×¼±¸³öÅÆµÄÍæ¼ÒµÄÊÖÅÆ£¨ÔİÊ±ÓÃB1£©£¬DÊÇ³öµÄÅÆ,¶¨Òå±äÁ¿¼ÇÂ¼³öÅÆµÄÇé¿ö
-	int gaichule(2);//³¢ÊÔ×ÅÓÃÕâ¸ö×÷Îª±êÖ¾Î»£¬±íÊ¾¸ÃË­³öÅÆ
-	int chule(1);//±íÊ¾³öÁËÅÆÁË£¬Èç¹ûÔÙÒ»´Î¶şÕßÏàµÈ¾ÍÊÇËµÃ÷´ó¼Ò¶¼³ö²»ÁËÁË
+	//Bæ˜¯å‡†å¤‡å‡ºç‰Œçš„ç©å®¶çš„æ‰‹ç‰Œï¼ˆæš‚æ—¶ç”¨B1ï¼‰ï¼ŒDæ˜¯å‡ºçš„ç‰Œ,å®šä¹‰å˜é‡è®°å½•å‡ºç‰Œçš„æƒ…å†µ
+	int gaichule(2);//å°è¯•ç€ç”¨è¿™ä¸ªä½œä¸ºæ ‡å¿—ä½ï¼Œè¡¨ç¤ºè¯¥è°å‡ºç‰Œ
+	int chule(1);//è¡¨ç¤ºå‡ºäº†ç‰Œäº†ï¼Œå¦‚æœå†ä¸€æ¬¡äºŒè€…ç›¸ç­‰å°±æ˜¯è¯´æ˜å¤§å®¶éƒ½å‡ºä¸äº†äº†
 	while (1)
 	{
 		if (gaichule == 1)
@@ -921,7 +921,7 @@ int main()
 		}
 	}
 }
-int yingdui(int *B, int *D, int type, int cardm, int q, int p)//×÷Îª¶Ô¶ÔÊÖ³öÅÆµÄÓ¦¶Ô
+int yingdui(int *B, int *D, int type, int cardm, int q, int p)//ä½œä¸ºå¯¹å¯¹æ‰‹å‡ºç‰Œçš„åº”å¯¹
 {
 	if (type == 1)
 	{
