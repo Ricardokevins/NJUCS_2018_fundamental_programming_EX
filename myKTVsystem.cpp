@@ -14,6 +14,7 @@
 #include <fstream>
 #include <Windows.h>
 #include<iomanip>
+#include <winbase.h>
 //#include <stdlib.h>
 using namespace std;
 class song {//打算是在用一个类的数组来保存很多的歌曲对象实体
@@ -24,7 +25,8 @@ public:
 	int serialnum;//序列号，就是在歌单里的序列
 	int ranknum;//排行的位置
 	int playstatus;//是否处于播放状态
-	int frequence;//播放的次数，作为计算的根据
+	int playfrequence;
+	int judgefrequence;//播放的次数，作为计算的根据
 	double totalscore;//总分，也是计算的根据
 	double starnum;//评分数
 };
@@ -71,8 +73,6 @@ public:
 private:
 	string ID;
 	string password;//保存密码
-	int adopnum;//作为管理员的操作值，作为判断执行函数的参数
-
 };
 
 class user {
@@ -101,7 +101,7 @@ public:
 	int search_song(admin &A);
 
 private:
-	int usopnum;//操作值
+	//int usopnum;//操作值
 	vector<int>playing_queue;//正在播放的队列，保存所有的播放的歌曲
 };
 
@@ -112,14 +112,13 @@ public:
 	int pmainmenu();
 	int initialsys();
 	void run();
-	vector<song> mysong;
 private:
 	int syoperationnum;//system的操作代码
 };
 
 bool comp_srerial(const song&A, const song&B)
 {
-	return A.starnum < B.starnum;
+	return A.serialnum < B.serialnum;
 }
 
 bool comp_starnum(const song&A, const song &B)
@@ -127,6 +126,10 @@ bool comp_starnum(const song&A, const song &B)
 	return A.starnum > B.starnum;
 }
 
+bool comp_frenum(const song&A, const song &B)
+{
+	return A.playfrequence > B.playfrequence;
+}
 #include"alldefine.h"
 //备注歌曲的序列号和在数组里面的下标是不一样的
 
@@ -149,17 +152,17 @@ int admin::admenu()
 	system("cls");
 	system("color f1");
 	cout << "\n\n\t\t\t＋==============================＋\n";
-	cout << "\t\t\t ｜                                 ｜\n";
-	cout << "\t\t\t ｜ 1->查看所有的歌曲                 ｜\n";
-	cout << "\t\t\t ｜ 2->添加歌曲                      |\n";
-	cout << "\t\t\t ｜ 3->批量的导入歌曲                 ｜\n";
-	cout << "\t\t\t ｜ 4->批量的导出歌曲                 ｜\n";
-	cout << "\t\t\t ｜ 5->删除歌曲                      ｜\n";
-	cout << "\t\t\t ｜ 6->歌曲排序                      ｜\n";
-	cout << "\t\t\t ｜ 7->修改密码                      ｜\n";
-	cout << "\t\t\t ｜ 8->退出                          ｜\n";
-	cout << "\t\t\t ｜                                  ｜\n";
-	cout << "\n\n\t\t\t＋==============================＋\n";
+	cout << "\t\t\t ｜                            \n";
+	cout << "\t\t\t ｜ 1->查看所有的歌曲            \n";
+	cout << "\t\t\t ｜ 2->添加歌曲                 \n";
+	cout << "\t\t\t ｜ 3->批量的导入歌曲            \n";
+	cout << "\t\t\t ｜ 4->批量的导出歌曲            \n";
+	cout << "\t\t\t ｜ 5->删除歌曲                  \n";
+	cout << "\t\t\t ｜ 6->歌曲排序                  \n";
+	cout << "\t\t\t ｜ 7->修改密码                  \n";
+	cout << "\t\t\t ｜ 8->退出                     \n";
+	cout << "\t\t\t ｜                             \n";
+	cout << "\t\t\t＋==============================＋\n";
 	rewind(stdin);
 	while (1)
 	{
@@ -192,15 +195,15 @@ int admin::admenu()
 		system("color f1");
 		cout << "\n\n\t\t\t＋==============================＋\n";
 		cout << "\t\t\t ｜ ｜\n";
-		cout << "\t\t\t ｜ 1->查看所有的歌曲  ｜\n";
-		cout << "\t\t\t ｜ 2->添加歌曲       ｜\n";
-		cout << "\t\t\t ｜ 3->批量的导入歌曲  ｜\n";
-		cout << "\t\t\t ｜ 4->批量的导出歌曲  ｜\n";
-		cout << "\t\t\t ｜ 5->删除歌曲       ｜\n";
-		cout << "\t\t\t ｜ 6->歌曲排序       ｜\n";
-		cout << "\t\t\t ｜ 7->修改密码       ｜\n";
-		cout << "\t\t\t ｜ 8->退出           ｜\n";
-		cout << "\t\t\t ｜                   ｜\n";
+		cout << "\t\t\t ｜ 1->查看所有的歌曲  \n";
+		cout << "\t\t\t ｜ 2->添加歌曲       \n";
+		cout << "\t\t\t ｜ 3->批量的导入歌曲  \n";
+		cout << "\t\t\t ｜ 4->批量的导出歌曲 \n";
+		cout << "\t\t\t ｜ 5->删除歌曲       \n";
+		cout << "\t\t\t ｜ 6->歌曲排序       \n";
+		cout << "\t\t\t ｜ 7->修改密码       \n";
+		cout << "\t\t\t ｜ 8->退出           \n";
+		cout << "\t\t\t ｜                   \n";
 		cout << "\t\t\t＋==============================＋\n";
 		rewind(stdin);
 	}
@@ -212,11 +215,11 @@ int admin::login()
 	system("cls");
 	system("color f1");
 	printf("\n\n\t\t\t＋==============================＋\n");
-	printf("\t\t\t ｜ ｜\n");
-	printf("\t\t\t｜ *********************管理员登陆**********************  ｜\n");
-	printf("\t\t\t ｜ 管理员ID：        ｜\n");
-	printf("\t\t\t ｜ 管理员密码：      ｜\n");
-	printf("\n\n\t\t\t＋==============================＋\n");
+	printf("\t\t\t｜                              \n");
+	printf("\t\t\t｜  *********管理员登陆********  \n");
+	printf("\t\t\t｜ 管理员ID：                    \n");
+	printf("\t\t\t｜ 管理员密码：                  \n");
+	printf("\t\t\t＋==============================＋\n");
 	rewind(stdin);
 
 	string IDtemp;
@@ -366,14 +369,14 @@ int admin::login()
 				break;
 			}
 		}
-		if (times != 3)
+		if (times != 3&&boolsuccess==0)
 		{
 			cout << "你还有" << 3 - times << "次的机会" << endl;
 		}
 	}
 	if (times == 3)
 	{
-		cout << "|*****你根本就不是管理员，再见！*****|" << endl;
+		cout << "|*****你根本就不是管理员，再见！******|" << endl;
 		Sleep(1500);
 		return 0;
 	}
@@ -439,14 +442,15 @@ int admin::file_in()
 		infile >> temp.singername;
 		infile >> temp.songname;
 		infile >> temp.pinyin;
-		temp.frequence = 0;
+		temp.judgefrequence = 0;
+		temp.playfrequence = 0;
 		temp.totalscore = 0;
-		if (temp.frequence == 0)
+		if (temp.judgefrequence == 0)
 		{
 			temp.starnum = 0;
 		}
 		else
-			temp.starnum = temp.totalscore / temp.frequence;
+			temp.starnum = temp.totalscore / temp.judgefrequence;
 		temp.serialnum = j + n;
 		temp.playstatus = 0;
 		temp.starnum = 0;
@@ -473,7 +477,7 @@ int admin::file_in()
 	}
 	mysong.pop_back();
 	cout << "文件导入成功" << endl;
-	cout << "导入成功 " << sus << "首" << "，失败了 " << fai << "首" << endl;
+	cout << "导入成功 " << sus-1 << "首" << "，失败了 " << fai+1 << "首" << endl;
 	cout << "正在返回上一级" << endl;
 	Sleep(2000);
 	return 1;
@@ -501,7 +505,17 @@ int admin::add_song()
 
 	int i = mysong.size();
 	temp.serialnum = i + 1;
+	
 	initialsong(temp);
+	for (int i(0); i < mysong.size(); i++)
+	{
+		if (temp.singername == mysong[i].singername&&temp.songname == mysong[i].songname)
+		{
+			cout << "已经有这一首歌了，即将返回上一级" << endl;
+			Sleep(1500);
+			return 0;
+		}
+	}
 	mysong.push_back(temp);
 	cout << "歌曲添加成功正在返回上一级" << endl;
 	Sleep(2000);
@@ -519,10 +533,16 @@ int admin::delete_song()
 		Sleep(2000);
 		return 0;
 	}
-	mysong.erase(mysong.begin() + serielnumber - 1);
-	for (int i(serielnumber - 1); i < mysong.size(); i++)
+	for (int i(0); i < mysong.size(); i++)
 	{
-		mysong[i].serialnum--;
+		if (mysong[i].serialnum == serielnumber)
+		{
+			mysong.erase(mysong.begin()+i);
+		}
+	}
+	for (int i(0); i < mysong.size(); i++)
+	{
+		mysong[i].serialnum=i+1;
 	}
 	cout << "删除成功！！！" << endl;
 	Sleep(2000);
@@ -531,11 +551,12 @@ int admin::delete_song()
 
 int admin::initialsong(song&temp)
 {
-	temp.frequence = 0;
+	temp.judgefrequence = 0;
 	temp.playstatus = 0;
 	temp.ranknum = 0;
 	temp.starnum = 0;
 	temp.totalscore = 0;
+	temp.playfrequence = 0;
 	return 0;
 }
 
@@ -552,10 +573,11 @@ int admin::printall(vector<song>&A)
 	system("cls");
 	system("color f1");
 	cout << "这是第 " << pagenum << " 页" << endl;
-	cout << left << setw(15) << "序列号" << "|";
-	cout << left << setw(15) << "歌手" << "|";
-	cout << left << setw(15) << "歌名" << "|";
-	cout << left << setw(15) << "评分" << endl;
+	cout << left << setw(10) << "序列号" << "|";
+	cout << left << setw(30) << "歌手" << "|";
+	cout << left << setw(30) << "歌名" << "|";
+	cout << left << setw(15) << "评分" << "|";
+	cout << left << setw(15) << "播放次数" << endl;
 	for (int i(-5); i < 0 && (i + pagenum * 5) < songsize; i++)
 	{
 		song temp = A[i + pagenum * 5];
@@ -580,10 +602,11 @@ int admin::printall(vector<song>&A)
 				else
 					pagenum++;
 				cout << "这是第 " << pagenum << " 页" << endl;
-				cout << left << setw(15) << "序列号" << "|";
-				cout << left << setw(15) << "歌手" << "|";
-				cout << left << setw(15) << "歌名" << "|";
-				cout << left << setw(15) << "总分" << endl;
+				cout << left << setw(10) << "序列号" << "|";
+				cout << left << setw(30) << "歌手" << "|";
+				cout << left << setw(30) << "歌名" << "|";
+				cout << left << setw(15) << "评分" << "|";
+				cout << left << setw(15) << "播放次数" << endl;
 				for (int i(-5); i < 0 && (i + pagenum * 5) < songsize; i++)
 				{
 					song temp = A[i + pagenum * 5];
@@ -603,10 +626,11 @@ int admin::printall(vector<song>&A)
 				else
 					pagenum--;
 				cout << "这是第 " << pagenum << " 页" << endl;
-				cout << left << setw(15) << "序列号" << "|";
-				cout << left << setw(15) << "歌手" << "|";
-				cout << left << setw(15) << "歌名" << "|";
-				cout << left << setw(15) << "总分" << endl;
+				cout << left << setw(10) << "序列号" << "|";
+				cout << left << setw(30) << "歌手" << "|";
+				cout << left << setw(30) << "歌名" << "|";
+				cout << left << setw(15) << "评分" << "|";
+				cout << left << setw(15) << "播放次数" << endl;
 				for (int i(-5); i < 0 && (i + pagenum * 5) < songsize; i++)
 				{
 					song temp = A[i + pagenum * 5];
@@ -622,10 +646,11 @@ int admin::printall(vector<song>&A)
 				system("cls");
 				system("color f1");
 				cout << "这是第 " << pagenum << " 页" << endl;
-				cout << left << setw(15) << "序列号" << "|";
-				cout << left << setw(15) << "歌手" << "|";
-				cout << left << setw(15) << "歌名" << "|";
-				cout << left << setw(15) << "总分" << endl;
+				cout << left << setw(10) << "序列号" << "|";
+				cout << left << setw(30) << "歌手" << "|";
+				cout << left << setw(30) << "歌名" << "|";
+				cout << left << setw(15) << "评分" << "|";
+				cout << left << setw(15) << "播放次数" << endl;
 				for (int i(-5); i < 0 && (i + pagenum * 5) < songsize; i++)
 				{
 					song temp = A[i + pagenum * 5];
@@ -643,10 +668,11 @@ int admin::printall(vector<song>&A)
 
 int admin::printsong(song&temp)
 {
-	cout << left << setw(15) << temp.serialnum << "|";
-	cout << left << setw(15) << temp.singername << "|";
-	cout << left << setw(15) << temp.songname << "|";
+	cout << left << setw(10) << temp.serialnum << "|";
+	cout << left << setw(30) << temp.singername << "|";
+	cout << left << setw(30) << temp.songname << "|";
 	cout << left << setw(15) << temp.starnum << "|";
+	cout << left << setw(15) << temp.playfrequence << "|";
 	if (temp.playstatus == 1)
 		cout << "--playing" << " ";
 	cout << endl;
@@ -700,17 +726,18 @@ int admin::sort_song()
 	system("cls");
 	system("color f1");
 	printf("\n\n\t\t\t＋==============================＋\n");
-	printf("\t\t\t｜                              ｜\n");
-	printf("\t\t\t｜ 1->序列号排序                 ｜\n");
-	printf("\t\t\t｜ 2->评分排序                   ｜\n");
-	printf("\t\t\t｜ 请输入选项[ ]                 ｜\n");
-	printf("\t\t\t｜                              ｜\n");
+	printf("\t\t\t｜                              \n");
+	printf("\t\t\t｜ 1->序列号排序                \n");
+	printf("\t\t\t｜ 2->评分排序                   \n");
+	printf("\t\t\t｜ 3->播放次数排序                 \n");
+	printf("\t\t\t｜ 请输入选项[ ]                 \n");
+	printf("\t\t\t｜                              \n");
 	printf("\t\t\t＋==============================＋\n");
 	char i;
 	int opnum;
 	rewind(stdin);
 	cin >> i;
-	if (i<'1' || i>'2')
+	if (i<'1' || i>'3')
 	{
 		cout << "输入不合法，返回上一级" << endl;
 		Sleep(2000);
@@ -720,14 +747,32 @@ int admin::sort_song()
 	if (opnum == 1)
 	{
 		sort(mysong.begin(), mysong.end(), comp_srerial);
-		cout << "排序完成，正在返回上一级" << endl;
+		cout << "正在排序中" << endl;
+		Sleep(1000);
+		realprintall();
+		cout << "正在返回上一级" << endl;
 		Sleep(1500);
 		return 1;
 	}
 	if (opnum == 2)
 	{
 		sort(mysong.begin(), mysong.end(), comp_starnum);
-		cout << "排序完成，正在返回上一级" << endl;
+		cout << "正在排序中" << endl;
+		Sleep(1000);
+		realprintall();
+		sort(mysong.begin(), mysong.end(), comp_srerial);
+		cout << "正在返回上一级" << endl;
+		Sleep(1500);
+		return 1;
+	}
+	if (opnum == 3)
+	{
+		sort(mysong.begin(), mysong.end(), comp_frenum);
+		cout << "正在排序中" << endl;
+		Sleep(1000);
+		realprintall();
+		sort(mysong.begin(), mysong.end(), comp_srerial);
+		cout << "正在返回上一级" << endl;
 		Sleep(1500);
 		return 1;
 	}
@@ -804,12 +849,12 @@ int ktvsystem::pmainmenu()
 		system("cls");
 		system("color f1");
 		printf("\n\n\t\t\t＋==============================＋\n");
-		printf("\t\t\t｜                              ｜\n");
-		printf("\t\t\t｜  1->用户直达                 ｜\n");
-		printf("\t\t\t｜  2->管理员登陆               ｜\n");
-		printf("\t\t\t｜  3->退出系统                 ｜\n");
-		printf("\t\t\t｜  请输入选项[]                 | \n");
-		printf("\t\t\t｜                              ｜\n");
+		printf("\t\t\t｜                              \n");
+		printf("\t\t\t｜  1->用户直达                 \n");
+		printf("\t\t\t｜  2->管理员登陆               \n");
+		printf("\t\t\t｜  3->退出系统                \n");
+		printf("\t\t\t｜  请输入选项[]                  \n");
+		printf("\t\t\t｜                              \n");
 		printf("\t\t\t＋==============================＋\n");
 		rewind(stdin);
 		char temp;
@@ -873,14 +918,15 @@ int ktvsystem::initialsys()
 		infile >> temp.singername;
 		infile >> temp.songname;
 		infile >> temp.pinyin;
-		temp.frequence = 0;
+		temp.judgefrequence = 0;
+		temp.playfrequence = 0;
 		temp.totalscore = 0;
-		if (temp.frequence == 0)
+		if (temp.judgefrequence == 0)
 		{
 			temp.starnum = 0;
 		}
 		else
-			temp.starnum = temp.totalscore / temp.frequence;
+			temp.starnum = temp.totalscore / temp.judgefrequence;
 		temp.serialnum = j;
 		temp.playstatus = 0;
 		temp.starnum = 0;
@@ -888,7 +934,7 @@ int ktvsystem::initialsys()
 		A.mysong.push_back(temp);
 	}
 	A.mysong.pop_back();
-	cout << "文件导入成功" << endl;
+	cout << "初始化成功" << endl;
 	return 1;
 }
 
@@ -899,16 +945,16 @@ int user::usmenu(admin &A)
 	system("cls");
 	system("color f1");
 	printf("\n\n\t\t\t＋=====================================＋\n");
-	printf("\t\t\t｜                                    |\n");
-	printf("\t\t\t｜ 1->点歌                            |\n");
-	printf("\t\t\t｜ 2->置顶歌曲                        |\n");
-	printf("\t\t\t｜ 3->删除歌曲                        ｜\n");
-	printf("\t\t\t｜ 4->歌曲评分                        |\n");
-	printf("\t\t\t｜ 5->查看已点歌曲                    ｜\n");
-	printf("\t\t\t｜ 6->播放选择                        ｜\n");
-	printf("\t\t\t｜ 7->搜索歌曲                        ｜\n");
-	printf("\t\t\t｜ 8->退出                            ｜\n");
-	printf("\t\t\t｜                                    |\n");
+	printf("\t\t\t｜                                   \n");
+	printf("\t\t\t｜ 1->点歌                            \n");
+	printf("\t\t\t｜ 2->置顶歌曲                        \n");
+	printf("\t\t\t｜ 3->删除歌曲                        \n");
+	printf("\t\t\t｜ 4->歌曲评分                        \n");
+	printf("\t\t\t｜ 5->查看已点歌曲                    \n");
+	printf("\t\t\t｜ 6->播放选择                        \n");
+	printf("\t\t\t｜ 7->搜索歌曲                        \n");
+	printf("\t\t\t｜ 8->退出                            \n");
+	printf("\t\t\t｜                                    \n");
 	printf("\t\t\t＋=====================================＋\n");
 	rewind(stdin);
 	int adnumtemp = 100;
@@ -938,16 +984,16 @@ int user::usmenu(admin &A)
 		system("cls");
 		system("color f1");
 		printf("\n\n\t\t\t＋=====================================＋\n");
-		printf("\t\t\t｜                                    |\n");
-		printf("\t\t\t｜ 1->点歌                            |\n");
-		printf("\t\t\t｜ 2->置顶歌曲                        |\n");
-		printf("\t\t\t｜ 3->删除歌曲                        ｜\n");
-		printf("\t\t\t｜ 4->歌曲评分                        |\n");
-		printf("\t\t\t｜ 5->查看已点歌曲                    ｜\n");
-		printf("\t\t\t｜ 6->播放选择                        ｜\n");
-		printf("\t\t\t｜ 7->搜索歌曲                        ｜\n");
-		printf("\t\t\t｜ 8->退出                            ｜\n");
-		printf("\t\t\t｜                                    |\n");
+		printf("\t\t\t｜                                    \n");
+		printf("\t\t\t｜ 1->点歌                            \n");
+		printf("\t\t\t｜ 2->置顶歌曲                        \n");
+		printf("\t\t\t｜ 3->删除歌曲                        \n");
+		printf("\t\t\t｜ 4->歌曲评分                        \n");
+		printf("\t\t\t｜ 5->查看已点歌曲                    \n");
+		printf("\t\t\t｜ 6->播放选择                        \n");
+		printf("\t\t\t｜ 7->搜索歌曲                        \n");
+		printf("\t\t\t｜ 8->退出                            \n");
+		printf("\t\t\t｜                                    \n");
 		printf("\t\t\t＋=====================================＋\n");
 		rewind(stdin);
 	}
@@ -1000,16 +1046,11 @@ int user::make_song_top(admin &A)
 {
 	system("cls");
 	system("color f1");
+	see_playingqueue(A);
 	if (playing_queue.size() == 0)
 	{
-		cout << "空空如也的歌单，先去点首试试？" << endl;
 		Sleep(1000);
 		return 0;
-	}
-	cout << "你已经点的歌如下" << endl;
-	for (int i(0); i < playing_queue.size(); i++)
-	{
-		A.printsong(A.mysong[playing_queue[i] - 1]);
 	}
 	cout << "输入你想置顶的歌曲的编号" << endl;
 	int i(0);
@@ -1054,25 +1095,34 @@ int user::delete_song_inqueue(admin&A)
 	int number;
 	rewind(stdin);
 	cin >> number;
-	if (number == 0 || number > playing_queue.size())
+	if (number < 1)
 	{
 		cout << "输入有误，将会返回上一级" << endl;
 		Sleep(2000);
 		return 0;
 	}
 	vector<int>::iterator it;
+	int flag = 0;
 	for (it = playing_queue.begin(); it != playing_queue.end(); )
 	{
 		if (*it == number)
 		{
 			it = playing_queue.erase(it);
+			flag = 1;
 		}
 		else
 		{
 			++it;
 		}
 	}
-	cout << "删除成功,正在返回上一级" << endl;
+	if (flag == 1)
+	{
+		cout << "删除成功,正在返回上一级" << endl;
+	}
+	else
+	{
+		cout << "没有这一首歌" << endl;
+	}
 	Sleep(2000);
 	return 0;
 }
@@ -1104,8 +1154,8 @@ int user::judge_song(admin&A)
 		return 0;
 	}
 	A.mysong[IDnum - 1].totalscore += star;
-	A.mysong[IDnum - 1].frequence += 1;
-	A.mysong[IDnum - 1].starnum = A.mysong[IDnum - 1].totalscore / A.mysong[IDnum - 1].frequence;
+	A.mysong[IDnum - 1].judgefrequence += 1;
+	A.mysong[IDnum - 1].starnum = A.mysong[IDnum - 1].totalscore / A.mysong[IDnum - 1].judgefrequence;
 	cout << "评分成功，正在返回上一级" << endl;
 	Sleep(2000);
 	return 1;
@@ -1149,7 +1199,7 @@ int user::change_song(admin &A)
 		Sleep(2000);
 		return 0;
 	}
-	cout << "请输入你想改变的歌曲的编号" << endl;
+	cout << "请输入你想开始播放的歌曲的编号" << endl;
 	int number;
 	rewind(stdin);
 	cin >> number;
@@ -1164,6 +1214,7 @@ int user::change_song(admin &A)
 		if (number == playing_queue[i])
 		{
 			A.mysong[number - 1].playstatus = 1;
+			A.mysong[number - 1].playfrequence++;
 			for (int i(0); i < playing_queue.size(); i++)
 			{
 				if (playing_queue[i] == number)
@@ -1187,10 +1238,10 @@ int user::search_song(admin &A)
 	system("color f1");
 	printf("\n\n\t\t\t＋==============================＋\n");
 	printf("\t\t\t｜ ｜\n");
-	printf("\t\t\t｜ 1->歌名搜索                      ｜\n");
-	printf("\t\t\t｜ 2->歌手搜索                      ｜\n");
-	printf("\t\t\t｜ 3->拼音搜索                      ｜\n");
-	printf("\t\t\t｜ 请输入选项[ ]                    ｜\n");
+	printf("\t\t\t｜ 1->歌名搜索                      \n");
+	printf("\t\t\t｜ 2->歌手搜索                      \n");
+	printf("\t\t\t｜ 3->拼音搜索                      \n");
+	printf("\t\t\t｜ 请输入选项[ ]                    \n");
 	printf("\t\t\t｜ ｜\n");
 	printf("\t\t\t\t\t＋==============================＋\n");
 	vector<song>result;
@@ -1210,7 +1261,54 @@ int user::search_song(admin &A)
 				result.push_back(A.mysong[i]);
 			}
 		}
+		if (result.size() == 0)
+		{
+			cout << "没有找到,返回上一级" << endl;
+			Sleep(1500);
+			return 0;
+		}
 		A.printall(result);
+		cout << "输入1点歌,其他键返回" << endl;
+		rewind(stdin);
+		char s;
+		cin >> s;
+		if (s == '1')
+		{
+			while (1)
+			{
+				cout << "输入你想点的歌曲的编号" << endl;
+				int i(0);
+				rewind(stdin);
+				cin >> i;
+				if (i<1 || i>A.mysong.size())
+				{
+					cout << "输入的号码不合法，返回上一级" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				for (int j(0); j < playing_queue.size(); j++)
+				{
+					if (playing_queue[j] == i)
+					{
+						cout << "歌单里面已经有这一首歌了,准备返回上一级" << endl;
+						Sleep(2000);
+						return 0;
+					}
+				}
+				if (i != -1)
+				{
+					playing_queue.push_back(i);
+					cout << "添加成功" << endl;
+				}
+				cout << "继续点歌？输入1继续，其他键返回" << endl;
+				char nextop;
+				rewind(stdin);
+				cin >> nextop;
+				if (nextop == '1');
+				else
+					return 1;
+			}
+		}
 		return 0;
 	}
 	if (i == 2)
@@ -1225,7 +1323,54 @@ int user::search_song(admin &A)
 				result.push_back(A.mysong[i]);
 			}
 		}
+		if (result.size() == 0)
+		{
+			cout << "没有找到,返回上一级" << endl;
+			Sleep(1500);
+			return 0;
+		}
 		A.printall(result);
+		cout << "输入1点歌,其他键返回" << endl;
+		rewind(stdin);
+		char s;
+		cin >> s;
+		if (s == '1')
+		{
+			while (1)
+			{
+				cout << "输入你想点的歌曲的编号" << endl;
+				int i(0);
+				rewind(stdin);
+				cin >> i;
+				if (i<1 || i>A.mysong.size())
+				{
+					cout << "输入的号码不合法，返回上一级" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				for (int j(0); j < playing_queue.size(); j++)
+				{
+					if (playing_queue[j] == i)
+					{
+						cout << "歌单里面已经有这一首歌了,准备返回上一级" << endl;
+						Sleep(2000);
+						return 0;
+					}
+				}
+				if (i != -1)
+				{
+					playing_queue.push_back(i);
+					cout << "添加成功" << endl;
+				}
+				cout << "继续点歌？输入1继续，其他键返回" << endl;
+				char nextop;
+				rewind(stdin);
+				cin >> nextop;
+				if (nextop == '1');
+				else
+					return 1;
+			}
+		}
 		return 0;
 	}
 	if (i == 3)
@@ -1240,9 +1385,57 @@ int user::search_song(admin &A)
 				result.push_back(A.mysong[i]);
 			}
 		}
+		if (result.size() == 0)
+		{
+			cout << "没有找到,返回上一级" << endl;
+			Sleep(1500);
+			return 0;
+		}
 		A.printall(result);
+		cout << "输入1点歌,其他键返回" << endl;
+		rewind(stdin);
+		char s;
+		cin >> s;
+		if (s == '1')
+		{
+			while (1)
+			{
+				cout << "输入你想点的歌曲的编号" << endl;
+				int i(0);
+				rewind(stdin);
+				cin >> i;
+				if (i<1 || i>A.mysong.size())
+				{
+					cout << "输入的号码不合法，返回上一级" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				for (int j(0); j < playing_queue.size(); j++)
+				{
+					if (playing_queue[j] == i)
+					{
+						cout << "歌单里面已经有这一首歌了,准备返回上一级" << endl;
+						Sleep(2000);
+						return 0;
+					}
+				}
+				if (i != -1)
+				{
+					playing_queue.push_back(i);
+					cout << "添加成功" << endl;
+				}
+				cout << "继续点歌？输入1继续，其他键返回" << endl;
+				char nextop;
+				rewind(stdin);
+				cin >> nextop;
+				if (nextop == '1');
+				else
+					return 1;
+			}
+		}
 		return 0;
 	}
 	cout << "输入不合法" << endl;
 	return 0;
 }
+
