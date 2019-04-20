@@ -1,0 +1,3 @@
+NJUCS 123456
+student 1 1 1 1 1
+lecture 1 1 1 1 1

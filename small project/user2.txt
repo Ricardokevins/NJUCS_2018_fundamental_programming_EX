@@ -1,0 +1,3 @@
+njucs 123456
+student 0 0 0 0 0
+lecture 0 0 0 0 0
