@@ -1,3 +1,0 @@
-用户 user1 user2
-库名 lecture student
-文件名 mylecture mystudent
