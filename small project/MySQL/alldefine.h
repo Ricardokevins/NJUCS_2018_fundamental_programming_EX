@@ -19,10 +19,10 @@
 using namespace std;
 
 class mydata {
-	vector<string> table_head;//0µÄÎ»ÖÃÊÇID²»ÊÇÊı¾İµÄÒ»²¿·Ö
-	vector<vector<string>> real_data;//±£´æµÄÊÇ¶àĞĞÊı¾İ¡¢
-	vector<string>single_data;//±£´æµ¥ĞĞµÄÊı¾İ
-	int hrow;//±£´æµÄÊÇÕæÊµĞĞÊı
-	int lrow;//±£´æµÄÊÇÕæÊµÁĞÊı
+	vector<string> table_head;//0çš„ä½ç½®æ˜¯IDä¸æ˜¯æ•°æ®çš„ä¸€éƒ¨åˆ†
+	vector<vector<string>> real_data;//ä¿å­˜çš„æ˜¯å¤šè¡Œæ•°æ®ã€
+	vector<string>single_data;//ä¿å­˜å•è¡Œçš„æ•°æ®
+	int hrow;//ä¿å­˜çš„æ˜¯çœŸå®è¡Œæ•°
+	int lrow;//ä¿å­˜çš„æ˜¯çœŸå®åˆ—æ•°
 };
 
