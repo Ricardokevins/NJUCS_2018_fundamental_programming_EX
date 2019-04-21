@@ -6,7 +6,7 @@ int mysystem::read_initial_file()
 	myoperate.open("initial.txt");	
 	if (myoperate.fail())
 	{
-		cout << "ÎÄ¼þ²»´æÔÚ" << endl;
+		cout << "æ–‡ä»¶ä¸å­˜åœ¨" << endl;
 		Sleep(2000);
 		return 0;
 	}
@@ -15,17 +15,17 @@ int mysystem::read_initial_file()
 	{
 		string temp;
 		myoperate >> temp;
-		if (temp == "ÓÃ»§") 
+		if (temp == "ç”¨æˆ·") 
 		{
 			flag = 1;
 			myoperate >> temp;
 		}
-		if (temp == "¿âÃû")
+		if (temp == "åº“å")
 		{
 			flag = 2;
 			myoperate >> temp;
 		}
-		if (temp == "ÎÄ¼þÃû")
+		if (temp == "æ–‡ä»¶å")
 		{
 			flag = 3;
 			myoperate >> temp;
@@ -53,7 +53,7 @@ int mysystem::load_user()
 		loaduser.open(path);
 		if (loaduser.fail())
 		{
-			cout << "ÎÄ¼þ²»´æÔÚ" << endl;
+			cout << "æ–‡ä»¶ä¸å­˜åœ¨" << endl;
 			Sleep(2000);
 			return 0;
 		}
@@ -77,9 +77,9 @@ int mysystem::load_user()
 				iter = temp.command_table.erase(iter);
 			}
 		}
-		
+		cur_user.push_back(temp);
 	}
-	cout << "È«²¿ÔØÈëÍê±Ï" << endl;
+	cout << "å…¨éƒ¨è½½å…¥å®Œæ¯•" << endl;
 	Sleep(2000);
 
 	return 0;
@@ -89,5 +89,79 @@ void mysystem::run()
 {
 	read_initial_file();
 	load_user();
+	while (1)
+	{
+		cout << "~$ ";
+		string temp;
+		cin >> temp;
+		if (temp == "mySQL")
+		{
+			while (!login_user());
+			
+		}
+		
+	}
 }
 
+int mysystem::login_user()
+{
+	cout << "(mysql)==> login:";
+	string tempID;
+	string temppassword;
+	rewind(stdin);
+	cin >> tempID;
+	int IDflag(0);
+	int passwordflag(0);
+	for (int i(0); i < cur_user.size(); i++)
+	{
+		if (tempID == cur_user[i].username)
+		{
+			IDflag += 1;
+			if (IDflag == 0)
+				goto L1;
+			cout << "(mysql)==> password:";
+			char  temp = 's';
+			while (temp != '\r'&&temp != '\n')
+			{
+				temp = _getch();
+				if (temp != '\r'&&temp != '\b'&&temp != '\n')
+				{
+					putchar('*');
+					temppassword += temp;
+				}
+				if ((temp & 0xff) == 8)
+				{
+					if (temppassword.length() > 0)
+					{
+						cout << temp;
+						cout << " ";
+						cout << temp;
+						temppassword.pop_back();
+					}
+					rewind(stdin);
+				}
+			}
+			cout << endl;
+			if (temppassword == cur_user[i].password)
+			{
+				passwordflag += 1;
+				break;
+			}
+		}
+
+	}
+	if (IDflag == 1 && passwordflag == 1)
+	{
+		cout << "(mysql)==> login successfully";
+		printf("\r");
+		cout << "                                                                               "; 
+		printf("\r");
+		cout << "(mysql) == > ";
+		return 1;
+	}
+L1:	cout << "(mysql)==> fail to login";
+	printf("\r");
+	cout << "                                                                               ";
+	printf("\r");
+	return 0;
+}
