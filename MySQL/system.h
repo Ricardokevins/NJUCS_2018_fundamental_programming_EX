@@ -3,13 +3,17 @@
 #include"user.h"
 class mysystem {
 public:
-	vector<string> cur_username;//±£´æµ±Ç°ÔÚÏµÍ³ÀïµÄÓÃ»§
+	vector<string> cur_username;//ä¿å­˜å½“å‰åœ¨ç³»ç»Ÿé‡Œçš„ç”¨æˆ·
 	vector<user>cur_user;
-	vector<string>table_name;//±£´æµ±Ç°´æÔÚµÄÊı¾İ¿âÃû×Ö
-	vector<string>file_name;//±£´æµ±Ç°´æÔÚµÄÎÄ¼şµÄÃû×Ö
+	vector<string>table_name;//ä¿å­˜å½“å‰å­˜åœ¨çš„æ•°æ®åº“åå­—
+	vector<string>file_name;//ä¿å­˜å½“å‰å­˜åœ¨çš„æ–‡ä»¶çš„åå­—
+	bool login_ornot;
+
 	void run();
 
 	int read_initial_file();
 
 	int load_user();
+
+	int login_user();
 };
