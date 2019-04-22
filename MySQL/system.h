@@ -7,6 +7,8 @@ public:
 	vector<user>cur_user;
 	vector<string>table_name;//保存当前存在的数据库名字
 	vector<string>file_name;//保存当前存在的文件的名字
+	int cur_user_ID;
+
 	bool login_ornot;
 
 	void run();
