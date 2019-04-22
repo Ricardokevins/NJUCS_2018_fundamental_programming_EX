@@ -3,9 +3,9 @@
 
 class user {
 public:
-	vector<string>touch_table;//¿É²Ù×÷µÄÊı¾İ¿â
-	vector<vector<string>>table_power;//¶ÔÓ¦Ã¿Ò»¸öÊı¾İ¿â
-	vector<string>command_table;//×÷Îª×ÓÊı×é±£´æ¾ßÌåµÄÈ¨ÏŞĞÅÏ¢£¬ºÍÉÏÃæµÄvector¹²Í¬¹¹³ÉÒ»¸öÀàËÆÓÚ¶şÎ¬Êı×éµÄ¶«Î÷
+	vector<string>touch_table;//å¯æ“ä½œçš„æ•°æ®åº“
+	vector<vector<string>>table_power;//å¯¹åº”æ¯ä¸€ä¸ªæ•°æ®åº“
+	vector<string>command_table;//ä½œä¸ºå­æ•°ç»„ä¿å­˜å…·ä½“çš„æƒé™ä¿¡æ¯ï¼Œå’Œä¸Šé¢çš„vectorå…±åŒæ„æˆä¸€ä¸ªç±»ä¼¼äºäºŒç»´æ•°ç»„çš„ä¸œè¥¿
 	int create();
 	int drop();
 	int tablelist();
@@ -14,8 +14,10 @@ public:
 	int select();
 	int grant();
 	int revoke();
-	int command_analyse(string A);
-	string username;//ÓÃ»§Ãû
-	string password;//ÓÃ»§µÄÃÜÂë
+	int command_analyse();
+	vector<string> command_split(const string &s, const string &seperator);
+	vector<string> command_spilted;
+	string username;//ç”¨æˆ·å
+	string password;//ç”¨æˆ·çš„å¯†ç 
 
 };
