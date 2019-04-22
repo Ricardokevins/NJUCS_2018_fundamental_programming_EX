@@ -1,5 +1,6 @@
 #include"alldefine.h"
 #include"system.h"
+
 int mysystem::read_initial_file()
 {
 	ifstream myoperate;
@@ -92,14 +93,25 @@ void mysystem::run()
 	while (1)
 	{
 		cout << "~$ ";
-		string temp;
-		cin >> temp;
-		if (temp == "mySQL")
+		string tmp;
+		rewind(stdin);
+		cin >> tmp;
+		if (tmp == "mySQL")
 		{
 			while (!login_user());
-			
+			goto L2;
 		}
-		
+	}
+L2:	string temp;
+	while (1)
+	{
+		temp = "";
+		rewind(stdin);
+		getline(cin, temp);
+		cur_user[cur_user_ID].command_spilted=cur_user[cur_user_ID].command_split(temp, " ");
+		int haha=cur_user[cur_user_ID].command_analyse();
+		if (haha == 0)
+			return;
 	}
 }
 
@@ -145,6 +157,7 @@ int mysystem::login_user()
 			if (temppassword == cur_user[i].password)
 			{
 				passwordflag += 1;
+				cur_user_ID = i;
 				break;
 			}
 		}
@@ -153,13 +166,15 @@ int mysystem::login_user()
 	if (IDflag == 1 && passwordflag == 1)
 	{
 		cout << "(mysql)==> login successfully";
+		Sleep(2000);
 		printf("\r");
 		cout << "                                                                               "; 
 		printf("\r");
-		cout << "(mysql) == > ";
+		cout << "(mysql)==> ";
 		return 1;
 	}
 L1:	cout << "(mysql)==> fail to login";
+	Sleep(2000);
 	printf("\r");
 	cout << "                                                                               ";
 	printf("\r");
