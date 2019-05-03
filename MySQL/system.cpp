@@ -94,6 +94,7 @@ void mysystem::run()
 {
 	read_initial_file();
 	load_user();
+	read_table_file();
 	while (1)
 	{
 		cout << "~$ ";
@@ -287,7 +288,7 @@ vector<string> mysystem::command_split(const string &s, const string &seperator)
 	return result;
 }
 
-int mysystem::file_in(string path, mydata &A)
+int mysystem::file_in(string path, mydata &A)//这个函数是用于载入数据库的信息文件
 {
 	ifstream myoperate;
 	myoperate.open(path);
@@ -300,6 +301,12 @@ int mysystem::file_in(string path, mydata &A)
 	myoperate >> A.owner;
 	myoperate >> A.lrow;//lrow就是有多少的列（不包括ID就是新建的那一列）
 	myoperate >> A.hrow;//就是有多少行
+	for (int i(0); i < A.lrow + 1; i++)
+	{
+		string temp;
+		myoperate >> temp;
+		A.table_head.push_back(temp);
+	}
 	for (int j(1); !myoperate.eof(); )
 	{
 		vector<string> data_temp;
@@ -311,10 +318,51 @@ int mysystem::file_in(string path, mydata &A)
 		}
 		A.real_data.push_back(data_temp);
 	}
+	A.real_data.pop_back();
 	return 0;
 
+}
 
-
+int mysystem::file_out(string path,mydata &A)
+{
+	ofstream outfile(path);
+	if (!outfile)
+	{
+		cout << "创建文件失败" << endl;
+		Sleep(2000);
+	}
+	else
+	{
+		outfile << A.owner << " ";
+		outfile << A.lrow << " ";
+		outfile << A.hrow << " ";
+		outfile << endl;
+		for (int i(0); i < A.table_head.size(); i++)
+		{
+			outfile << A.table_head[i];
+			if (i == A.table_head.size() - 1)
+			{
+				outfile << endl;
+			}
+			else
+				outfile << " ";
+		}
+		for (int i(0); i < A.real_data.size(); i++)
+		{
+			for (int j(0); j < A.real_data[i].size(); j++)
+			{
+				outfile << A.real_data[i][j];
+				if (j == A.real_data[i].size() - 1)
+				{
+					outfile << endl;
+				}
+				else
+					outfile << " ";
+			}
+		}
+	}
+	outfile.close();
+	return 0;
 }
 
 int mysystem::create()
@@ -334,7 +382,7 @@ int mysystem::create()
 				if (target == file_name[i] || source == table_name[i])
 				{
 					cout << "文件或者是数据库已经存在" << endl;
-					goto L3;//防止重复的建立库
+					goto L3;//防止重复的建立库 
 				}
 			}
 			ifstream loaduser;
@@ -448,7 +496,7 @@ int mysystem::create()
 								if (i != cur_user_ID)
 								{
 									cur_user[i].touch_table.push_back(target1);
-									cur_user[i].table_power.push_back(command_temp);
+									cur_user[i].table_power.push_back(temp2);
 								}
 							}
 							cur_user[cur_user_ID].table_power.push_back(command_temp);
@@ -468,6 +516,15 @@ int mysystem::create()
 							{
 								update_user_file(i);//这里是更新一下用户的信息的文件，因为新建了一个表
 							}
+							mydata temp;
+							for (int i(0); i < data_para.size(); i++)
+							{
+								temp.table_head.push_back(data_para[i]);
+							}
+							temp.owner = cur_username[cur_user_ID];
+							temp.hrow = 0;
+							temp.lrow = data_para.size() - 1;
+							all_mydata.push_back(temp);
 						}
 					}
 				}
@@ -591,6 +648,219 @@ int mysystem::tablelist()
 
 int mysystem::insert()
 {
+	if (command_spilted[0] == "INSERT"&&command_spilted[1] == "INTO");
+	else
+	{
+		cout << "指令不合法" << endl;
+		Sleep(2000);
+		return 0;
+	}
+	if (command_spilted[3] == "VALUES")
+	{
+		string target = command_spilted[2];
+		vector<string>data_para;
+		for (int i(4); i < command_spilted.size(); i++)
+		{
+			data_para.push_back(command_spilted[i]);
+		}
+		if (data_para[0][0] != '(')
+		{
+			cout << "输入的指令是不合法的" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		if (data_para[data_para.size() - 1][data_para[data_para.size() - 1].size() - 1] != ')')
+		{
+			cout << "输入的指令是不合法的" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		for (int i(0); i < data_para.size(); i++)
+		{
+			if (data_para[i][data_para[i].size() - 1] != ',')//检查命令的合法是否都是以,结尾的
+			{
+
+				if (i == data_para.size() - 1)
+				{
+					data_para[i].pop_back();//是的话就去掉这个逗号
+					continue;
+				}
+				else
+				{
+					cout << "输入的指令是不合法的" << endl;
+					Sleep(2000);
+					return 0;
+				}
+			}
+			else
+			{
+				if (data_para[i][0] == '(')
+					data_para[i].erase(0, 1);
+				data_para[i].pop_back();//如果是第一个的话就去掉开头的括号
+			}
+		}
+		int flag = 0;//设置一个标志位来表示是否有这个文件
+		int pos = 0;//保存的是地址
+		for (int i(0); i < table_name.size(); i++)
+		{
+			if (table_name[i] == target)
+			{
+				flag = 1;
+				pos = i;
+			}
+		}
+		if (flag == 1)
+		{
+			string target2;
+			target2= file_name[pos];
+			if (data_para.size() != all_mydata[pos].lrow)
+			{
+				cout << "输入的指令不合法" << endl;
+				Sleep(2000);
+				return 0;
+			}
+			int cur_size = all_mydata[pos].real_data.size();
+			vector<string>data_temp;
+			string now_temp = to_string(cur_size + 1);
+			data_temp.push_back(now_temp);
+			all_mydata[pos].hrow++;
+			for (int i(0); i < data_para.size(); i++)
+			{
+				data_temp.push_back(data_para[i]);
+			}
+			all_mydata[pos].real_data.push_back(data_temp);
+			string ini_path = file_name[pos];
+			ini_path += ".txt";
+			file_out(ini_path, all_mydata[pos]);
+		}
+		return 0;
+	}
+	else
+	{
+		int val_pos(0);
+		for (int i(0); i < command_spilted.size(); i++)
+		{
+			if (command_spilted[i] == "VALUES")
+			{
+				val_pos = i;
+			}
+		}
+		if (val_pos < 5)
+		{
+			cout << "输入有问题" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		vector<string>col_para;
+		vector<string>val_para;
+		string mytarget2;
+		mytarget2 = command_spilted[2];
+		for (int i(3); i < val_pos; i++)
+		{
+			col_para.push_back(command_spilted[i]);
+		}
+		for (int i(val_pos + 1); i < command_spilted.size(); i++)
+		{
+			val_para.push_back(command_spilted[i]);
+		}
+		if (val_para.size() != col_para.size())
+		{
+			cout << "输入有问题" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		for (int i(0); i < val_para.size(); i++)
+		{
+			if (val_para[i][val_para[i].size() - 1] != ',')//检查命令的合法是否都是以,结尾的
+			{
+
+				if (i == val_para.size() - 1)
+				{
+					val_para[i].pop_back();//是的话就去掉这个逗号
+					continue;
+				}
+				else
+				{
+					cout << "输入的指令是不合法的" << endl;
+					Sleep(2000);
+					return 0;
+				}
+			}
+			else
+			{
+				if (val_para[i][0] == '(')
+					val_para[i].erase(0, 1);
+				val_para[i].pop_back();//如果是第一个的话就去掉开头的括号
+			}
+		}
+		for (int i(0); i < col_para.size(); i++)
+		{
+			if (col_para[i][col_para[i].size() - 1] != ',')//检查命令的合法是否都是以,结尾的
+			{
+
+				if (i == col_para.size() - 1)
+				{
+					col_para[i].pop_back();//是的话就去掉这个逗号
+					continue;
+				}
+				else
+				{
+					cout << "输入的指令是不合法的" << endl;
+					Sleep(2000);
+					return 0;
+				}
+			}
+			else
+			{
+				if (col_para[i][0] == '(')
+					col_para[i].erase(0, 1);
+				col_para[i].pop_back();//如果是第一个的话就去掉开头的括号
+			}
+		}
+		int flag2 = 0;//设置一个标志位来表示是否有这个文件
+		int pos2 = 0;//保存的是地址
+		for (int i(0); i < table_name.size(); i++)
+		{
+			if (table_name[i] == mytarget2)
+			{
+				flag2 = 1;
+				pos2 = i;
+			}
+		}
+		if (flag2 == 1)
+		{
+			string target2;
+			target2 = file_name[pos2];
+			int cur_size = all_mydata[pos2].real_data.size();
+			vector<string>data_temp;
+			string now_temp = to_string(cur_size + 1);
+			data_temp.push_back(now_temp);
+			all_mydata[pos2].hrow++;
+			/*
+			这里是要插入关于在内存里改变数据的内容
+			*/
+			vector<int>data_pos;
+			for (int i(0); i < col_para.size();i++)
+			{
+				
+				for (int j(0); j < all_mydata[pos2].table_head.size(); j++)
+				{
+					data_pos.push_back(j);
+				}
+			}
+			int pos_temp(0);//设置一个作为数据的第几个的保存
+			for (int i(0); i < all_mydata[pos2].table_head.size(); i++)
+			{
+				if(i==)
+			}
+			all_mydata[pos2].real_data.push_back(data_temp);
+			string ini_path = file_name[pos2];
+			ini_path += ".txt";
+			file_out(ini_path, all_mydata[pos2]);
+		}
+		vector<int> pos_vector;
+		
+	}
 	return 0;
 }
 
@@ -691,4 +961,14 @@ L5:cout << "error" << endl;
 	return 0;
 }
 
-
+int mysystem::read_table_file()
+{
+	for (int i(0); i < file_name.size(); i++)
+	{
+		mydata temp;
+		string path = file_name[i] + ".txt";
+		file_out(path, temp);
+		all_mydata.push_back(temp);
+	}
+	return 0;
+}
