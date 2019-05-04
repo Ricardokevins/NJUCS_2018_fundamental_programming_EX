@@ -95,6 +95,7 @@ void mysystem::run()
 	read_initial_file();
 	load_user();
 	read_table_file();
+	read_power_file();
 	while (1)
 	{
 		cout << "~$ ";
@@ -539,6 +540,7 @@ int mysystem::create()
 
 int mysystem::drop()
 {
+	int power_flag(0);
 	string target;
 	if (command_spilted[0] == "DROP"&&command_spilted[1] == "TABLE"&&command_spilted.size()==3)
 	{
@@ -555,23 +557,10 @@ int mysystem::drop()
 	{
 		if (cur_user[cur_user_ID].touch_table[i] == target)
 		{
-			if (cur_user[cur_user_ID].table_power[i][0] == "1")
-			{
-				pos2 = i;
-			}
-			else
-			{
-				cout << "没有相关权限" << endl;
-				Sleep(2000);
-				return 0;
-			}
+
+			pos2 = i;
 		}
-		else
-		{
-			cout << "没有相关权限" << endl;
-			Sleep(2000);
-			return 0;
-		}
+
 	}
 	int flag = 0;//设置一个标志位来表示是否有这个文件
 	int pos = 0;//保存的是地址
@@ -582,6 +571,13 @@ int mysystem::drop()
 			flag = 1;
 			pos = i;
 		}
+	}
+	power_flag = exam_power("DROP", pos);
+	if (power_flag <= 0)
+	{
+		cout << "你没有相关的权限" << endl;
+		Sleep(2000);
+		return 0;
 	}
 	if (flag == 1)
 	{
@@ -648,6 +644,30 @@ int mysystem::tablelist()
 
 int mysystem::insert()
 {
+	int power_flag(0);
+	int flag6 = 0;//设置一个标志位来表示是否有这个文件
+	int pos6= 0;//保存的是地址
+	for (int i(0); i < table_name.size(); i++)
+	{
+		if (table_name[i] == command_spilted[2])
+		{
+			flag6 = 1;
+			pos6 = i;
+		}
+	}
+	if (!flag6)
+	{
+		cout << "文件不存在" << endl;
+		Sleep(2000);
+		return 0;
+	}
+	power_flag = exam_power("INSERT", flag6);
+	if (power_flag == 0)
+	{
+		cout << "你没有相关的权限" << endl;
+		Sleep(2000);
+		return 0;
+	}
 	if (command_spilted[0] == "INSERT"&&command_spilted[1] == "INTO");
 	else
 	{
@@ -743,6 +763,7 @@ int mysystem::insert()
 			if (command_spilted[i] == "VALUES")
 			{
 				val_pos = i;
+				break;
 			}
 		}
 		if (val_pos < 5)
@@ -842,45 +863,596 @@ int mysystem::insert()
 			vector<int>data_pos;
 			for (int i(0); i < col_para.size();i++)
 			{
-				
-				for (int j(0); j < all_mydata[pos2].table_head.size(); j++)
+				int j(1);
+				for (; j < all_mydata[pos2].table_head.size(); j++)
 				{
-					data_pos.push_back(j);
+					if (col_para[i] == all_mydata[pos2].table_head[j])
+					{
+						data_pos.push_back(j);
+						break;
+					}
 				}
 			}
-			int pos_temp(0);//设置一个作为数据的第几个的保存
-			for (int i(0); i < all_mydata[pos2].table_head.size(); i++)
+			int j(0);
+			for (int i(1); i < all_mydata[pos2].table_head.size(); i++)
 			{
-				if(i==)
+				if (j != data_pos.size())
+				{
+					if (i == data_pos[j])
+					{
+						data_temp.push_back(val_para[j]);
+						j++;
+					}
+					else
+					{
+						data_temp.push_back("       ");
+					}
+				}
 			}
 			all_mydata[pos2].real_data.push_back(data_temp);
 			string ini_path = file_name[pos2];
 			ini_path += ".txt";
 			file_out(ini_path, all_mydata[pos2]);
-		}
-		vector<int> pos_vector;
-		
+		}		
 	}
 	return 0;
 }
 
 int mysystem::mydelete()
 {
+	if (command_spilted[0] == "DELETE" && command_spilted[1] == "FROM"&&command_spilted.size()==7)
+	{
+		string target;
+		target = command_spilted[2];
+		if (command_spilted[3] != "WHERE"||command_spilted[5]!="=")
+		{
+			cout << "输入不合法" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		string col;
+		string val;
+		col = command_spilted[4];
+		val = command_spilted[6];
+		int flag = 0;//设置一个标志位来表示是否有这个文件
+		int pos = 0;//保存的是地址
+		for (int i(0); i < table_name.size(); i++)
+		{
+			if (table_name[i] == target)
+			{
+				flag = 1;
+				pos = i;
+			}
+		}
+		if (!exam_power("DELETE", pos))
+		{
+			cout << "你没有相关的权限" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		if (flag == 0)
+		{
+			cout << "输入不合法" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		int col_pos(0);
+		int i(0);
+		for (; i < all_mydata[pos].table_head.size(); i++)
+		{
+			if (all_mydata[pos].table_head[i] == col)
+			{
+				col_pos = i;
+				break;
+			}
+		}
+		if (i == all_mydata[pos].table_head.size())
+		{
+			cout << "没有这个列表的数据" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		for (int i(0); i < all_mydata[pos].real_data.size(); )
+		{
+			if (all_mydata[pos].real_data[i][col_pos] == val)
+			{
+				all_mydata[pos].real_data.erase(all_mydata[pos].real_data.begin() + i);
+				all_mydata[pos].hrow -= 1;
+			}
+			else
+			{
+				i++;
+			}
+		}
+		for (int i(0); i < all_mydata[pos].real_data.size(); i++)
+		{
+			stringstream ss;
+			ss << (i+1);
+			string tempID;
+			ss >> tempID;
+			all_mydata[pos].real_data[i].erase(all_mydata[pos].real_data[i].begin());
+			all_mydata[pos].real_data[i].insert(all_mydata[pos].real_data[i].begin(),tempID);
+		}
+		string ini_path = file_name[pos];
+		ini_path += ".txt";
+		file_out(ini_path, all_mydata[pos]);		
+	}
+	else
+	{
+		if (command_spilted[0] == "DELETE"&&command_spilted[1] == "*"&&command_spilted[2] == "FROM"&&command_spilted.size()==4)
+		{
+			string target2;
+			target2 = command_spilted[3];
+			int flag2 = 0;//设置一个标志位来表示是否有这个文件
+			int pos2 = 0;//保存的是地址
+			for (int i(0); i < table_name.size(); i++)
+			{
+				if (table_name[i] == target2)
+				{
+					flag2 = 1;
+					pos2 = i;
+				}
+			}
+			if (!exam_power("DELETE", pos2))
+			{
+				cout << "你没有相关的权限" << endl;
+				Sleep(2000);
+				return 0;
+			}
+			if (flag2 == 0)
+			{
+				cout << "输入不合法" << endl;
+				Sleep(2000);
+				return 0;
+			}
+			while (all_mydata[pos2].real_data.size() != 0)
+			{
+				all_mydata[pos2].real_data.pop_back();
+			}
+			all_mydata[pos2].hrow = 0;
+			string ini_path = file_name[pos2];
+			ini_path += ".txt";
+			file_out(ini_path, all_mydata[pos2]);
+			return 0;
+		}
+		else
+		{
+			cout << "输入有问题" << endl;
+			Sleep(2000);
+			return 0;
+		}
+	}
 	return 0;
 }
 
 int mysystem::select()
 {
+		if (command_spilted[command_spilted.size() - 2] == "FROM"&&command_spilted.size()>4&&command_spilted[1]!="DISTINCT")
+		{
+			vector<string> col_para;
+			for (int i(1); i < command_spilted.size() - 2; i++)
+			{
+				col_para.push_back(command_spilted[i]);
+			}
+			for (int i(0); i < col_para.size(); i++)
+			{
+				if (col_para[i][col_para[i].size() - 1] == ','&& i!=col_para.size()-1)
+				{
+					col_para[i].pop_back();
+				}
+			}
+			string target;
+			target = command_spilted[command_spilted.size() - 1];
+			int flag = 0;//设置一个标志位来表示是否有这个文件
+			int pos = 0;//保存的是地址
+			for (int i(0); i < table_name.size(); i++)
+			{
+				if (table_name[i] == target)
+				{
+					flag = 1;
+					pos = i;
+				}
+			}
+			if (!exam_power("SELECT", pos))
+			{
+				cout << "你没有相关的权限" << endl;
+				Sleep(2000);
+				return 0;
+			}
+			if (flag == 0)
+			{
+				cout << "输入不合法" << endl;
+				Sleep(2000);
+				return 0;
+			}
+			vector<int>col_pos;//设置一个vector用来保存一下他的要展示的列的位置
+			for (int i(0); i < col_para.size(); i++)
+			{
+				int flag2 = 0;
+				for (int j(0); j < all_mydata[pos].table_head.size(); j++)
+				{
+					if (col_para[i] == all_mydata[pos].table_head[j])
+					{
+						col_pos.push_back(j);
+						flag2 = 1;
+						break;
+					}
+				}
+				if (!flag2)
+				{
+					cout << "输入有问题" << endl;
+					Sleep(3000);
+					return 0;
+				}
+				
+			}
+			for (int i(0); i < col_para.size(); i++)
+			{
+				cout << col_para[i];
+				if (i == col_para.size() - 1)
+				{
+					cout << endl;
+				}
+				else
+					cout << " ";
+			}
+			for (int i(0); i < all_mydata[pos].real_data.size(); i++)
+			{
+				int s(0);
+				for (int j(0); i < all_mydata[pos].real_data[i].size(); j++)
+				{
+					if (s == col_pos.size())
+					{
+						break;
+					}
+					if (j == col_pos[s])
+					{
+						cout << all_mydata[pos].real_data[i][j];
+						s++;
+						if (s == col_pos.size())
+						{
+							cout << endl;
+						}
+						else
+						{
+							cout << " ";
+						}
+					}
+				}
+			}
+		}	
+		else 
+		{
+			if (command_spilted[1] == "*"&&command_spilted.size() == 4)
+			{
+				string target;
+				target = command_spilted[command_spilted.size() - 1];
+				int flag = 0;//设置一个标志位来表示是否有这个文件
+				int pos = 0;//保存的是地址
+				for (int i(0); i < table_name.size(); i++)
+				{
+					if (table_name[i] == target)
+					{
+						flag = 1;
+						pos = i;
+					}
+				}
+				if (!exam_power("SELECT", pos))
+				{
+					cout << "你没有相关的权限" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				if (flag == 0)
+				{
+					cout << "输入不合法" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				for (int i(0); i < all_mydata[pos].table_head.size(); i++)
+				{
+					cout << all_mydata[pos].table_head[i];
+					if (i == all_mydata[pos].table_head.size() - 1)
+					{
+						cout << endl;
+					}
+					else
+						cout << " ";
+				}
+				for (int i(0); i < all_mydata[pos].real_data.size(); i++)
+				{
+					for (int j(0); j < all_mydata[pos].real_data[i].size(); j++)
+					{
+						cout << all_mydata[pos].real_data[i][j];
+						if (j == all_mydata[pos].real_data[i].size() - 1)
+						{
+							cout << endl;
+						}
+						else
+						{
+							cout << " ";
+						}
+					}
+				}
+			}
+			else
+			{
+				if (command_spilted[1]=="DISTINCT"&&command_spilted[command_spilted.size()-2]=="FROM")
+				{
+					string target3;
+					target3 = command_spilted[command_spilted.size() - 1];
+					int flag = 0;//设置一个标志位来表示是否有这个文件
+					int pos = 0;//保存的是地址
+					for (int i(0); i < table_name.size(); i++)
+					{
+						if (table_name[i] == target3)
+						{
+							flag = 1;
+							pos = i;
+						}
+					}
+					if (!exam_power("SELECT", pos))
+					{
+						cout << "你没有相关的权限" << endl;
+						Sleep(2000);
+						return 0;
+					}
+					if (flag == 0)
+					{
+						cout << "输入不合法" << endl;
+						Sleep(2000);
+						return 0;
+					}
+					vector<string>col_para2;//保存的是要进入排列的数据的列
+					for (int i(2); i < command_spilted.size() - 2; i++)
+					{
+						col_para2.push_back(command_spilted[i]);
+					}
+					for (int i(0); i < col_para2.size(); i++)
+					{
+						if (col_para2[i][col_para2.size() - 1] == ',')
+							col_para2.pop_back();
+					}
+					vector<int>col_pos2;//记录的是要排列的数据的位置
+					int j(0);
+					for (; j < col_para2.size(); j++)
+					{
+						int flag2=0;
+						for (int i(0); i < all_mydata[pos].table_head.size(); i++)
+						{
+							if (all_mydata[pos].table_head[i] == col_para2[j])
+							{
+								col_pos2.push_back(i);
+								j++;
+								flag2 = 1;
+								break;
+							}
+						}
+						if (!flag2)
+						{
+							cout << "输入不合法" << endl;
+							Sleep(2000);
+							return 0;
+						}
+					}
+					vector<vector<string>>data_temp_para;
+					for (int i(0); i < col_pos2.size(); i++)//对于每一个等待收集数据的列
+					{
+						vector<string>data_mytemp;
+						for (int j(0); j < all_mydata[pos].real_data.size(); j++)
+						{
+							int flag3 = 0;
+							for (int s(0); s < data_mytemp.size(); s++)//遍历寻找是否有一样的
+							{
+								if (data_mytemp[s] == all_mydata[pos].real_data[j][col_pos2[i]])
+								{
+									flag3 = 1;
+									break;
+								}
+							}
+							if (!flag3)
+							{
+								data_mytemp.push_back(all_mydata[pos].real_data[j][col_pos2[i]]);
+							}
+						}
+						data_temp_para.push_back(data_mytemp);
+					}
+					for (int i(0); i < col_para2.size(); i++)
+					{
+						cout << col_para2[i];
+						if (i == col_para2.size() - 1)
+							cout << endl;
+						else
+							cout << " ";
+					}
+					for (int i(0); i < data_temp_para.size(); i++)
+					{
+						for (int j(0); j < data_temp_para[i].size(); j++)
+						{
+							cout << data_temp_para[i][j];
+							if (j == data_temp_para[i].size() - 1)
+								cout << endl;
+							else
+								cout << " ";
+						}
+					}
+					return 0;
+				}
+				else
+				{
+					cout << "输入有问题" << endl;
+					Sleep(2000);
+					return 0;
+				}
+			}
+		}
 	return 0;
 }
 
 int mysystem::grant()
-{
+{	
+	int on_pos(0);
+	int on_flag(0);//设置的标志位来表示是否找到这个on
+	for (int i(0); i < command_spilted.size(); i++)
+	{
+		if (command_spilted[i] == "on")
+		{
+			on_pos = i;
+			break;
+		}
+	}
+	vector<string>power_temp;
+	for (int i(1); i < on_pos; i++)
+	{
+		power_temp.push_back(command_spilted[i]);
+	}
+	for (int i(0); i < power_temp.size(); i++)
+	{
+		if (power_temp[i][power_temp[i].size() - 1] == ',')
+		{
+			power_temp[i].pop_back();
+		}
+	}
+	string table_target;
+	table_target = command_spilted[on_pos + 1];
+	if (command_spilted[on_pos + 2] != "to")
+	{
+		cout << "输入有误，请检查" << endl;
+	}
+	string user_target;
+	user_target = command_spilted[on_pos + 3];
+	int table_flag(0);
+	int table_pos(0);
+	for (int i(0); i < table_name.size(); i++)
+	{
+		if (table_name[i] == table_target)
+		{
+			table_flag = 1;
+			table_pos = i;
+		}
+	}
+	if (table_flag == 0)
+	{
+		cout << "没有这个数据库" << endl;
+		Sleep(2000);
+		return 0;
+	}
+	int user_pos(0);
+	int user_flag(0);
+	if (user_target == "public")
+	{
+		for (int i(0); i < cur_user.size(); i++)
+		{
+			if (i == cur_user_ID)
+				continue;
+			user_pos = i;
+			for (int i(0); i < power_temp.size(); i++)//对每一个权限进行相关的操作
+			{
+				int power_ID(0);//判断要操作的是哪个权限
+				if (power_temp[i] == "DROP")
+					power_ID = 0;
+				if (power_temp[i] == "INSERT")
+					power_ID = 1;
+				if (power_temp[i] == "DELETE")
+					power_ID = 2;
+				if (power_temp[i] == "SELECT")
+					power_ID = 3;
+				stringstream ss;
+				ss << cur_user[cur_user_ID].table_power[table_pos][power_ID];
+				int  power_num(0);
+				ss >> power_num;
+				if (power_num == 0)
+				{
+					cout << "你也没有这个权限" << endl;
+					Sleep(2000);
+					return 0;
+				}
+				all_mydata[table_pos].mypower[power_ID][cur_user_ID][user_pos] += 1;
+				int target_user_power(0);//查看一下这个用户是不是本来就有这个权限
+				stringstream sw;
+				string temp_power1;
+				sw << cur_user[user_pos].table_power[table_pos][power_ID];
+				sw >> target_user_power;
+				target_user_power += 1;
+				stringstream sa;
+				sa << target_user_power;
+				sa >> temp_power1;
+				cur_user[user_pos].table_power[table_pos].erase(cur_user[user_pos].table_power[table_pos].begin() + power_ID);
+				cur_user[user_pos].table_power[table_pos].insert(cur_user[user_pos].table_power[table_pos].begin() + power_ID, temp_power1);
+				for (int i(0); i < cur_user.size(); i++)
+				{
+					update_user_file(i);//这里是更新一下用户的信息的文件，因为新建了一个表
+				}
+				for (int i(0); i < all_mydata.size(); i++)
+				{
+					update_powerfile(i);
+				}
+			}
+			return 0;
+		}
+	}
+	for (int i(0); i < cur_username.size(); i++)
+	{
+		if (cur_username[i] == user_target)
+		{
+			user_pos = i;
+			user_flag = 1;
+		}
+	}
+	if (user_flag == 0)
+	{
+		cout << "没有这个用户" << endl;
+		Sleep(2000);
+		return 0;
+	}
+	for (int i(0); i < power_temp.size(); i++)//对每一个权限进行相关的操作
+	{
+		int power_ID(0);//判断要操作的是哪个权限
+		if (power_temp[i] == "DROP")
+			power_ID = 0;
+		if (power_temp[i] == "INSERT")
+			power_ID = 1;
+		if (power_temp[i] == "DELETE")
+			power_ID = 2;
+		if (power_temp[i] == "SELECT")
+			power_ID = 3;
+		stringstream ss;
+		ss << cur_user[cur_user_ID].table_power[table_pos][power_ID];
+		int  power_num(0);
+		ss >> power_num;
+		if (power_num == 0)
+		{
+			cout << "你也没有这个权限" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		all_mydata[table_pos].mypower[power_ID][cur_user_ID][user_pos] += 1;
+		int target_user_power(0);//查看一下这个用户是不是本来就有这个权限
+		stringstream sw;
+		string temp_power1;
+		sw << cur_user[user_pos].table_power[table_pos][power_ID];
+		sw >> target_user_power;
+		target_user_power += 1;
+		stringstream sa;
+		sa << target_user_power;
+		sa >> temp_power1;
+		cur_user[user_pos].table_power[table_pos].erase(cur_user[user_pos].table_power[table_pos].begin()+power_ID);
+		cur_user[user_pos].table_power[table_pos].insert(cur_user[user_pos].table_power[table_pos].begin()+power_ID, temp_power1);
+		for (int i(0); i < cur_user.size(); i++)
+		{
+			update_user_file(i);//这里是更新一下用户的信息的文件，因为新建了一个表
+		}
+		for (int i(0); i < all_mydata.size(); i++)
+		{
+			update_powerfile(i);
+		}
+	}
 	return 0;
 }
 
 int mysystem::revoke()
 {
+
 	return 0;
 }
 
@@ -967,8 +1539,98 @@ int mysystem::read_table_file()
 	{
 		mydata temp;
 		string path = file_name[i] + ".txt";
-		file_out(path, temp);
+		file_in(path, temp);
 		all_mydata.push_back(temp);
 	}
 	return 0;
+}
+
+int mysystem::read_power_file()
+{
+	for (int i(0); i < file_name.size(); i++)
+	{
+		string path;
+		path = file_name[i] + "_power.txt";
+		ifstream myoperate;
+		myoperate.open(path);
+		if (myoperate.fail())
+		{
+			cout << "文件不存在" << endl;
+			Sleep(2000);
+			return 0;
+		}
+		for (int w(0); w < 4; w++)
+		{
+			vector<vector<int>>temp5;
+			for (int k(0); k < cur_user.size(); k++)
+			{
+				vector<int>temp;
+				for (int l(0); l < cur_user.size(); l++)
+				{
+					int q(0);
+					myoperate >> q;
+					temp.push_back(q);
+				}
+				temp5.push_back(temp);
+			}
+			all_mydata[i].mypower.push_back(temp5);
+		}
+	}
+	return 0;
+}
+
+int mysystem::update_powerfile(int i)
+{
+	string mytarget = file_name[i];
+	mytarget += "_power.txt";
+	ofstream outfile(mytarget, ios::out);
+	if (!outfile)
+	{
+		cout << "创建文件失败" << endl;
+		goto L5;
+	}
+	for (int w(0); w < 4; w++)
+	{
+		for (int k(0); k < cur_user.size(); k++)
+		{
+			for (int l(0); l < cur_user.size(); l++)
+			{
+				outfile << all_mydata[i].mypower[w][k][l];
+				if (l == cur_user.size() - 1)
+				{
+					outfile << endl;
+				}
+				else
+					outfile << " ";
+			}
+		}
+	}
+	return 0;
+L5:cout << "error" << endl;
+	return 0;
+}
+
+int mysystem::exam_power(string A,int file_pos)
+{
+	int power_ID(0);
+	if (A == "DROP")
+		power_ID = 0;
+	if (A == "INSERT")
+		power_ID = 1;
+	if (A == "DELETE")
+		power_ID = 2;
+	if (A == "SELECT")
+		power_ID = 3;
+	int power_temp(0);
+	stringstream ss;
+	ss << cur_user[cur_user_ID].table_power[file_pos][power_ID];
+	ss >> power_temp;
+	if (power_temp > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
