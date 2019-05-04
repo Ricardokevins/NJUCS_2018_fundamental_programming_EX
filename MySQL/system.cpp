@@ -619,19 +619,48 @@ int mysystem::drop()
 
 int mysystem::tablelist()
 {
-	cout << "共有"<<cur_user[cur_user_ID].touch_table.size() <<"个"<< endl;
-	for (int i(0); i < cur_user[cur_user_ID].touch_table.size(); i++)
+	int totalnum(0);
+	vector<int> enable_table;
+
+	int flag(0);
+	for (int j(0); j < cur_user[cur_user_ID].touch_table.size(); j++)
 	{
-		cout << cur_user[cur_user_ID].touch_table[i] << " ";
+		for (int k(0); k < 4; k++)
+		{
+			if (cur_user[cur_user_ID].table_power[j][k] != "0")
+			{
+				flag++;
+			}
+		}
+		if (flag > 0)
+		{
+			enable_table.push_back(j);
+		}
+	}
+	cout << "共有"<<enable_table.size() <<"个"<< endl;
+	for (int i(0); i < enable_table.size(); i++)
+	{
+		cout << cur_user[cur_user_ID].touch_table[enable_table[i]] << " ";
+		cout << "(" << all_mydata[enable_table[i]].lrow << "," << all_mydata[enable_table[i]].hrow << ")"<< " ";
+		for (int k(0); k < all_mydata[enable_table[i]].table_head.size(); k++)
+		{
+			cout << all_mydata[enable_table[i]].table_head[k];
+			if (k == all_mydata[enable_table[i]].table_head.size() - 1)
+			{
+				cout << endl;
+			}
+			else
+				cout << " ";
+		}
 		for (int j(0); j < 5; j++)
 		{
-			if (cur_user[cur_user_ID].table_power[i][j] == "1")
+			if (cur_user[cur_user_ID].table_power[enable_table[i]][j] != "0")
 			{
 				if (j == 0)cout << "DROP";
 				if (j == 1)cout << "INSERT";
 				if (j == 2)cout << "DELETE";
 				if (j == 3)cout << "SELECT";
-				if (j == 4)cout << "owner" ;
+				if (j == 4)cout << "[Owner]" ;
 				if (j == 5)cout << endl;
 				else
 					cout << " ";
