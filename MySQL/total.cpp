@@ -2,9 +2,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-#include <cassert>
 #include <functional>
-#include <conio.h>
 #include <cstring>
 #include <stdio.h>
 #include <string>
@@ -12,12 +10,11 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
-#include <Windows.h>
 #include <iomanip>
-#include <winbase.h>
 #include <functional>
 #include <ctime>
 #include <time.h>
+#include<cstring>
 using namespace std;
 
 class mydata
@@ -25,20 +22,20 @@ class mydata
 public:
   string owner;
   vector<string> table_head;        //0的位置是ID不是数据的一部分
-  vector<vector<string>> real_data; //保存的是多行数据、
+  vector<vector<string> > real_data; //保存的是多行数据、
   int hrow;                         //保存的是真实行数
   int lrow;                         //保存的是真实列数
-  vector<vector<vector<int>>> mypower;
+  vector<vector<vector<int> > > mypower;
 };
 
 class user
 {
 public:
   vector<string> touch_table;         //可操作的数据库
-  vector<vector<string>> table_power; //对应每一个数据库
+  vector<vector<string> > table_power; //对应每一个数据库
   string username;                    //用户名
   string password;                    //用户的密码
-  vector<vector<string>> power_request;
+  vector<vector<string> > power_request;
 };
 
 class mysystem
@@ -77,7 +74,7 @@ public:
 
   int exam_power(string A, int file_pos);
 
-  int revoke_power(vector<vector<int>> &A, int grantor, int granted, int file_pos, int power_pos);
+  int revoke_power(vector<vector<int> > &A, int grantor, int granted, int file_pos, int power_pos);
 
   int send_power_req(int power_ID, int file_pos, int user_pos);
   int exam_power_req();
@@ -104,8 +101,6 @@ int main()
   return 0;
 }
 
-#include "alldefine.h"
-#include "system.h"
 
 extern bool mycmp_up(vector<string> A, vector<string> B)
 {
@@ -119,11 +114,12 @@ extern bool mycmp_down(vector<string> A, vector<string> B)
 int mysystem::read_initial_file() //打开初始化的文件写入信息
 {
   ifstream myoperate;
-  myoperate.open("initial.txt");
+  char A[40]="initial.txt";
+  myoperate.open(A);
   if (myoperate.fail())
   {
     cout << "文件不存在" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   int flag = 0;
@@ -173,11 +169,11 @@ int mysystem::load_user() //根据用户的名字作为文件名打开对应的�
     path = cur_username[i];
     path.append(".txt"); //保存的是用户的名字，后面还要加上txt的后缀哦
     ifstream loaduser;
-    loaduser.open(path);
+    loaduser.open(B);
     if (loaduser.fail())
     {
       cout << "文件不存在" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     user temp;
@@ -201,7 +197,7 @@ int mysystem::load_user() //根据用户的名字作为文件名打开对应的�
     cur_user.push_back(temp);
   }
   cout << "全部载入完毕" << endl;
-  Sleep(2000);
+    
   return 0;
 }
 
@@ -259,28 +255,8 @@ int mysystem::login_user()
       if (IDflag == 0)
         goto L1;
       cout << "(mysql)==> password:";
-      char temp = 's';
-      while (temp != '\r' && temp != '\n')
-      {
-        temp = _getch();
-        if (temp != '\r' && temp != '\b' && temp != '\n')
-        {
-          putchar('*');
-          temppassword += temp;
-        }
-        if ((temp & 0xff) == 8)
-        {
-          if (temppassword.length() > 0)
-          {
-            cout << temp;
-            cout << " ";
-            cout << temp;
-            temppassword.pop_back();
-          }
-          rewind(stdin);
-        }
-      }
-      cout << endl;
+      string temppassword;
+      cin>>temppassword;
       if (temppassword == cur_user[i].password)
       {
         passwordflag += 1;
@@ -292,18 +268,10 @@ int mysystem::login_user()
   if (IDflag == 1 && passwordflag == 1)
   {
     cout << "(mysql)==> login successfully";
-    Sleep(2000);
-    printf("\r");
-    cout << "                                                                               ";
-    printf("\r");
     return 1;
   }
 L1:
   cout << "(mysql)==> fail to login";
-  Sleep(2000);
-  printf("\r");
-  cout << "                                                                               ";
-  printf("\r");
   return 0;
 }
 
@@ -423,7 +391,7 @@ int mysystem::file_in(string path, mydata &A) //这个函数是用于载入数�
   if (myoperate.fail())
   {
     cout << "文件不存在" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   myoperate >> A.owner;
@@ -456,7 +424,7 @@ int mysystem::file_out(string path, mydata &A)
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
-    Sleep(2000);
+      
   }
   else
   {
@@ -654,7 +622,7 @@ int mysystem::create()
               temp.lrow = data_para.size() - 1;
               for (int k(0); k < 4; k++)
               {
-                vector<vector<int>> temp13;
+                vector<vector<int> > temp13;
                 for (int i(0); i < cur_user.size(); i++)
                 {
                   vector<int> temp12;
@@ -680,7 +648,7 @@ int mysystem::create()
   else
   L3:
     cout << "指令不合法" << endl;
-  Sleep(2000);
+    
   return 0;
 }
 
@@ -695,7 +663,7 @@ int mysystem::drop()
   else
   {
     cout << "输入的不合法" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   int pos2;
@@ -722,7 +690,7 @@ int mysystem::drop()
   {
     cout << "你没有相关的权限" << endl;
     send_power_req(0, pos, cur_user_ID);
-    Sleep(2000);
+      
     return 0;
   }
   if (flag == 1)
@@ -842,14 +810,14 @@ int mysystem::insert()
   if (!flag6)
   {
     cout << "文件不存在" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   power_flag = exam_power("INSERT", pos6);
   if (power_flag == 0)
   {
     cout << "你没有相关的权限" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   if (command_spilted[0] == "INSERT" && command_spilted[1] == "INTO")
@@ -857,7 +825,7 @@ int mysystem::insert()
   else
   {
     cout << "指令不合法" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   if (command_spilted[3] == "VALUES")
@@ -871,13 +839,13 @@ int mysystem::insert()
     if (data_para[0][0] != '(')
     {
       cout << "输入的指令是不合法的" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     if (data_para[data_para.size() - 1][data_para[data_para.size() - 1].size() - 1] != ')')
     {
       cout << "输入的指令是不合法的" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     for (int i(0); i < data_para.size(); i++)
@@ -893,7 +861,7 @@ int mysystem::insert()
         else
         {
           cout << "输入的指令是不合法的" << endl;
-          Sleep(2000);
+            
           return 0;
         }
       }
@@ -921,7 +889,7 @@ int mysystem::insert()
       if (data_para.size() != all_mydata[pos].lrow)
       {
         cout << "输入的指令不合法" << endl;
-        Sleep(2000);
+          
         return 0;
       }
       int cur_size = all_mydata[pos].real_data.size();
@@ -954,7 +922,7 @@ int mysystem::insert()
     if (val_pos < 5)
     {
       cout << "输入有问题" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     vector<string> col_para;
@@ -972,7 +940,7 @@ int mysystem::insert()
     if (val_para.size() != col_para.size())
     {
       cout << "输入有问题" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     for (int i(0); i < val_para.size(); i++)
@@ -988,7 +956,7 @@ int mysystem::insert()
         else
         {
           cout << "输入的指令是不合法的" << endl;
-          Sleep(2000);
+            
           return 0;
         }
       }
@@ -1012,7 +980,7 @@ int mysystem::insert()
         else
         {
           cout << "输入的指令是不合法的" << endl;
-          Sleep(2000);
+            
           return 0;
         }
       }
@@ -1092,7 +1060,7 @@ int mysystem::mydelete()
     if (command_spilted[3] != "WHERE" || command_spilted[5] != "=")
     {
       cout << "输入不合法" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     string col;
@@ -1112,13 +1080,13 @@ int mysystem::mydelete()
     if (!exam_power("DELETE", pos))
     {
       cout << "你没有相关的权限" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     if (flag == 0)
     {
       cout << "输入不合法" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     int col_pos(0);
@@ -1134,7 +1102,7 @@ int mysystem::mydelete()
     if (i == all_mydata[pos].table_head.size())
     {
       cout << "没有这个列表的数据" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     for (int i(0); i < all_mydata[pos].real_data.size();)
@@ -1181,13 +1149,13 @@ int mysystem::mydelete()
       if (!exam_power("DELETE", pos2))
       {
         cout << "你没有相关的权限" << endl;
-        Sleep(2000);
+          
         return 0;
       }
       if (flag2 == 0)
       {
         cout << "输入不合法" << endl;
-        Sleep(2000);
+          
         return 0;
       }
       while (all_mydata[pos2].real_data.size() != 0)
@@ -1203,7 +1171,7 @@ int mysystem::mydelete()
     else
     {
       cout << "输入有问题" << endl;
-      Sleep(2000);
+        
       return 0;
     }
   }
@@ -1241,13 +1209,13 @@ int mysystem::select()
     if (!exam_power("SELECT", pos))
     {
       cout << "你没有相关的权限" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     if (flag == 0)
     {
       cout << "输入不合法" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     vector<int> col_pos; //设置一个vector用来保存一下他的要展示的列的位置
@@ -1266,7 +1234,6 @@ int mysystem::select()
       if (!flag2)
       {
         cout << "输入有问题" << endl;
-        Sleep(3000);
         return 0;
       }
     }
@@ -1324,13 +1291,13 @@ int mysystem::select()
       if (!exam_power("SELECT", pos))
       {
         cout << "你没有相关的权限" << endl;
-        Sleep(2000);
+          
         return 0;
       }
       if (flag == 0)
       {
         cout << "输入不合法" << endl;
-        Sleep(2000);
+          
         return 0;
       }
       for (int i(0); i < all_mydata[pos].table_head.size(); i++)
@@ -1378,13 +1345,13 @@ int mysystem::select()
         if (!exam_power("SELECT", pos))
         {
           cout << "你没有相关的权限" << endl;
-          Sleep(2000);
+            
           return 0;
         }
         if (flag == 0)
         {
           cout << "输入不合法" << endl;
-          Sleep(2000);
+            
           return 0;
         }
         vector<string> col_para2; //保存的是要进入排列的数据的列
@@ -1415,11 +1382,11 @@ int mysystem::select()
           if (!flag2)
           {
             cout << "输入不合法" << endl;
-            Sleep(2000);
+              
             return 0;
           }
         }
-        vector<vector<string>> data_temp_para;
+        vector<vector<string> > data_temp_para;
         for (int i(0); i < col_pos2.size(); i++) //对于每一个等待收集数据的列
         {
           vector<string> data_mytemp;
@@ -1484,7 +1451,7 @@ int mysystem::select()
           if (!table_flag)
           {
             cout << "没有这个数据库" << endl;
-            Sleep(2000);
+              
             return 0;
           }
           string target_col;
@@ -1503,10 +1470,10 @@ int mysystem::select()
           if (!col_flag)
           {
             cout << "没有这一列" << endl;
-            Sleep(2000);
+              
             return 0;
           }
-          vector<vector<string>> temp;
+          vector<vector<string> > temp;
           for (int i(0); i < all_mydata[table_pos].real_data.size(); i++)
           {
             vector<string> temp1;
@@ -1533,7 +1500,7 @@ int mysystem::select()
             else
             {
               cout << "输入的排序模式不正确" << endl;
-              Sleep(2000);
+                
               return 0;
             }
           }
@@ -1566,7 +1533,7 @@ int mysystem::select()
         else
         {
           cout << "输入有问题" << endl;
-          Sleep(2000);
+            
           return 0;
         }
       }
@@ -1620,7 +1587,7 @@ int mysystem::grant()
   if (table_flag == 0)
   {
     cout << "没有这个数据库" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   int user_pos(0);
@@ -1650,7 +1617,7 @@ int mysystem::grant()
         if (power_num == 0)
         {
           cout << "你也没有这个权限" << endl;
-          Sleep(2000);
+            
           return 0;
         }
         all_mydata[table_pos].mypower[power_ID][cur_user_ID][user_pos] += 1;
@@ -1688,7 +1655,7 @@ int mysystem::grant()
   if (user_flag == 0)
   {
     cout << "没有这个用户" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   for (int i(0); i < power_temp.size(); i++) //对每一个权限进行相关的操作
@@ -1709,7 +1676,7 @@ int mysystem::grant()
     if (power_num == 0)
     {
       cout << "你也没有这个权限" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     all_mydata[table_pos].mypower[power_ID][cur_user_ID][user_pos] += 1;
@@ -1757,7 +1724,7 @@ int mysystem::revoke()
   if (!on_pos)
   {
     cout << "输入的不合法" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   table_target = command_spilted[on_pos + 1];
@@ -1775,7 +1742,7 @@ int mysystem::revoke()
   if (!table_flag)
   {
     cout << "没有这个数据库" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   for (int i(1); i < on_pos; i++)
@@ -1826,7 +1793,7 @@ int mysystem::revoke()
     if (!user_flag)
     {
       cout << "输入了不存在的用户" << endl;
-      Sleep(2000);
+        
       return 0;
     }
   }
@@ -1954,12 +1921,12 @@ int mysystem::read_power_file()
     if (myoperate.fail())
     {
       cout << "文件不存在" << endl;
-      Sleep(2000);
+        
       return 0;
     }
     for (int w(0); w < 4; w++)
     {
-      vector<vector<int>> temp5;
+      vector<vector<int> > temp5;
       for (int k(0); k < cur_user.size(); k++)
       {
         vector<int> temp;
@@ -2058,10 +2025,10 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
   if (readoperate.fail())
   {
     cout << "文件不存在" << endl;
-    Sleep(2000);
+      
     return 0;
   }
-  vector<vector<string>> temp;
+  vector<vector<string> > temp;
 
   for (int j(1); !readoperate.eof();)
   {
@@ -2156,7 +2123,7 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
 int mysystem::exam_power_req()
 {
   string target_file;
-  vector<vector<string>> temp;
+  vector<vector<string> > temp;
   string mytarget = "power_req.txt";
   ifstream readoperate;
   readoperate.open(mytarget);
@@ -2172,7 +2139,7 @@ int mysystem::exam_power_req()
     temp.push_back(temp2); //这里是把所有的请求都读入
   }
   temp.pop_back();
-  vector<vector<string>> temp15;
+  vector<vector<string> > temp15;
   for (int i(0); i < temp.size();)
   {
     if (temp[i][0] == cur_username[cur_user_ID])
@@ -2222,7 +2189,7 @@ int mysystem::exam_power_req()
   return 0;
 }
 
-int mysystem::revoke_power(vector<vector<int>> &A, int grantor, int granted, int file_pos, int power_pos)
+int mysystem::revoke_power(vector<vector<int> > &A, int grantor, int granted, int file_pos, int power_pos)
 {
   int power_num = A[grantor][granted];
   A[grantor][granted] = 0;
@@ -2260,7 +2227,7 @@ int mysystem::multi_file()
   if (myoperate.fail())
   {
     cout << "文件不存在" << endl;
-    Sleep(2000);
+      
     return 0;
   }
   vector<string> all_command;
@@ -2277,3 +2244,6 @@ int mysystem::multi_file()
   }
   return 0;
 }
+
+
+
