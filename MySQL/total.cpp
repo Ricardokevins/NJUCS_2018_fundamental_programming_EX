@@ -114,7 +114,8 @@ extern bool mycmp_down(vector<string> A, vector<string> B)
 int mysystem::read_initial_file() //打开初始化的文件写入信息
 {
   ifstream myoperate;
-  char A[40]="initial.txt";
+  string hehe="initial.txt";
+  const char *A=hehe.c_str();
   myoperate.open(A);
   if (myoperate.fail())
   {
@@ -169,6 +170,8 @@ int mysystem::load_user() //根据用户的名字作为文件名打开对应的�
     path = cur_username[i];
     path.append(".txt"); //保存的是用户的名字，后面还要加上txt的后缀哦
     ifstream loaduser;
+    const char *B;
+    B=path.c_str();
     loaduser.open(B);
     if (loaduser.fail())
     {
@@ -215,8 +218,7 @@ void mysystem::run()
     cin >> tmp;
     if (tmp == "mySQL")
     {
-      while (!login_user())
-        ;
+      while (!login_user());
       goto L2;
     }
     return;
@@ -224,17 +226,22 @@ void mysystem::run()
 L2:
   string temp;
   exam_power_req();
-  while (1)
-  {
-    cout << "(mysql)==> ";
-    temp = "";
+  int kl(1);
+  while (kl)
+  { 
+    if(kl>1)
+    {
+      cout << "(mysql)==> ";
+    }
     rewind(stdin);
+    fflush(stdin);
+    cin.sync();
     getline(cin, temp);
     command_spilted = command_split(temp, " ");
-
     int haha = command_analyse();
     if (haha == 0)
       return;
+    kl++;
   }
 }
 
@@ -267,11 +274,11 @@ int mysystem::login_user()
   }
   if (IDflag == 1 && passwordflag == 1)
   {
-    cout << "(mysql)==> login successfully";
+    cout << "(mysql)==> login successfully"<<endl;
     return 1;
   }
 L1:
-  cout << "(mysql)==> fail to login";
+  cout << "(mysql)==> fail to login"<<endl;
   return 0;
 }
 
@@ -279,7 +286,7 @@ int mysystem::command_analyse()
 {
   length_command = command_spilted.size();
   if (length_command == 0)
-    return 1;
+    return 12;
   int flag = 0;
   if (command_spilted[0] == "CREATE")
     flag = 1;
@@ -387,7 +394,9 @@ vector<string> mysystem::command_split(const string &s, const string &seperator)
 int mysystem::file_in(string path, mydata &A) //这个函数是用于载入数据库的信息文件
 {
   ifstream myoperate;
-  myoperate.open(path);
+  const char*L;
+  L=path.c_str();
+  myoperate.open(L);
   if (myoperate.fail())
   {
     cout << "文件不存在" << endl;
@@ -420,7 +429,9 @@ int mysystem::file_in(string path, mydata &A) //这个函数是用于载入数�
 
 int mysystem::file_out(string path, mydata &A)
 {
-  ofstream outfile(path);
+  const char*M;
+  M=path.c_str();
+  ofstream outfile(M);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -481,7 +492,9 @@ int mysystem::create()
         }
       }
       ifstream loaduser;
-      loaduser.open(source);
+      const char *hehe;
+      hehe=source.c_str();
+      loaduser.open(hehe);
       mydata A;
       int flag = file_in(source, A);
       if (flag == 1)
@@ -564,7 +577,9 @@ int mysystem::create()
             }
             file_name.push_back(source1); //放入系统的内存里
             table_name.push_back(target1);
-            ofstream outfile(command_spilted[length_command - 1]);
+            const char* LK;
+            LK=command_spilted[length_command - 1].c_str();
+            ofstream outfile(LK);
             if (!outfile)
             {
               cout << "创建文件失败" << endl;
@@ -685,6 +700,8 @@ int mysystem::drop()
       pos = i;
     }
   }
+  
+
   power_flag = exam_power("DROP", pos);
   if (power_flag <= 0)
   {
@@ -723,6 +740,7 @@ int mysystem::drop()
     {
       cout << "删除失败" << endl;
     }
+    all_mydata.erase(all_mydata.begin()+pos);
     return 0;
   }
   else
@@ -817,7 +835,7 @@ int mysystem::insert()
   if (power_flag == 0)
   {
     cout << "你没有相关的权限" << endl;
-      
+    send_power_req(1, pos6, cur_user_ID);
     return 0;
   }
   if (command_spilted[0] == "INSERT" && command_spilted[1] == "INTO")
@@ -1080,7 +1098,7 @@ int mysystem::mydelete()
     if (!exam_power("DELETE", pos))
     {
       cout << "你没有相关的权限" << endl;
-        
+        send_power_req(2, pos, cur_user_ID);
       return 0;
     }
     if (flag == 0)
@@ -1149,7 +1167,7 @@ int mysystem::mydelete()
       if (!exam_power("DELETE", pos2))
       {
         cout << "你没有相关的权限" << endl;
-          
+          send_power_req(2, pos2, cur_user_ID);
         return 0;
       }
       if (flag2 == 0)
@@ -1209,7 +1227,7 @@ int mysystem::select()
     if (!exam_power("SELECT", pos))
     {
       cout << "你没有相关的权限" << endl;
-        
+      send_power_req(3, pos, cur_user_ID);
       return 0;
     }
     if (flag == 0)
@@ -1260,7 +1278,7 @@ int mysystem::select()
         {
           cout << all_mydata[pos].real_data[i][j];
           s++;
-          if (s == col_pos.size())
+          if (s == col_pos.size()-1)
           {
             cout << endl;
           }
@@ -1291,7 +1309,7 @@ int mysystem::select()
       if (!exam_power("SELECT", pos))
       {
         cout << "你没有相关的权限" << endl;
-          
+        send_power_req(3, pos, cur_user_ID);
         return 0;
       }
       if (flag == 0)
@@ -1345,7 +1363,7 @@ int mysystem::select()
         if (!exam_power("SELECT", pos))
         {
           cout << "你没有相关的权限" << endl;
-            
+          send_power_req(3, pos, cur_user_ID);
           return 0;
         }
         if (flag == 0)
@@ -1410,21 +1428,13 @@ int mysystem::select()
         }
         for (int i(0); i < col_para2.size(); i++)
         {
-          cout << col_para2[i];
-          if (i == col_para2.size() - 1)
-            cout << endl;
-          else
-            cout << " ";
+          cout << col_para2[i]<<endl;
         }
         for (int i(0); i < data_temp_para.size(); i++)
         {
           for (int j(0); j < data_temp_para[i].size(); j++)
           {
-            cout << data_temp_para[i][j];
-            if (j == data_temp_para[i].size() - 1)
-              cout << endl;
-            else
-              cout << " ";
+            cout << data_temp_para[i][j]<<endl;
           }
         }
         return 0;
@@ -1452,6 +1462,12 @@ int mysystem::select()
           {
             cout << "没有这个数据库" << endl;
               
+            return 0;
+          }
+          if (!exam_power("SELECT", table_pos))
+          { 
+            cout << "你没有相关的权限" << endl;  
+            send_power_req(3, table_pos, cur_user_ID);     
             return 0;
           }
           string target_col;
@@ -1817,7 +1833,10 @@ int mysystem::revoke()
 
 int mysystem::initial_file_out()
 {
-  ofstream outfile("initial.txt", ios::out);
+  string ha="initial.txt";
+  const char*N;
+  N=ha.c_str();
+  ofstream outfile(N, ios::out);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -1871,7 +1890,9 @@ int mysystem::update_user_file(int w)
   string mytarget = cur_username[w];
 
   mytarget += ".txt";
-  ofstream outfile(mytarget, ios::out);
+  const char *Y;
+  Y=mytarget.c_str();
+  ofstream outfile(Y, ios::out);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -1917,7 +1938,9 @@ int mysystem::read_power_file()
     string path;
     path = file_name[i] + "_power.txt";
     ifstream myoperate;
-    myoperate.open(path);
+    const char *heha;
+    heha=path.c_str();
+    myoperate.open(heha);
     if (myoperate.fail())
     {
       cout << "文件不存在" << endl;
@@ -1948,7 +1971,9 @@ int mysystem::update_powerfile(int i)
 {
   string mytarget = file_name[i];
   mytarget += "_power.txt";
-  ofstream outfile(mytarget, ios::out);
+  const char *y;
+  y=mytarget.c_str();
+  ofstream outfile(y, ios::out);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -2007,7 +2032,9 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
   target_file = file_name[file_pos] + ".txt";
   string owner;
   ifstream myoperate;
-  myoperate.open(target_file);
+  const char *L;
+  L=target_file.c_str();
+  myoperate.open(L);
   myoperate >> owner;
   myoperate.close();
   int owner_pos(0);
@@ -2021,7 +2048,9 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
   }
   string mytarget = "power_req.txt";
   ifstream readoperate;
-  readoperate.open(mytarget);
+  const char *U;
+  U=mytarget.c_str();
+  readoperate.open(U);
   if (readoperate.fail())
   {
     cout << "文件不存在" << endl;
@@ -2055,11 +2084,11 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
   }
   if (power_ID == 2)
   {
-    power_target = "SELECT";
+    power_target = "DELETE";
   }
   if (power_ID == 3)
   {
-    power_target = "DELETE";
+    power_target = "SELECT";
   }
   temp4.push_back(power_target);
   temp4.push_back(file_name[file_pos]);
@@ -2098,8 +2127,9 @@ int mysystem::send_power_req(int power_ID, int file_pos, int user_pos)
   temp4.push_back(myseconds);
 
   temp.push_back(temp4);
-
-  ofstream outfile(mytarget, ios::out);
+  const char *Q;
+  Q=mytarget.c_str();
+  ofstream outfile(Q, ios::out);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -2126,7 +2156,9 @@ int mysystem::exam_power_req()
   vector<vector<string> > temp;
   string mytarget = "power_req.txt";
   ifstream readoperate;
-  readoperate.open(mytarget);
+  const char *F;
+  F=mytarget.c_str();
+  readoperate.open(F);
   for (int j(1); !readoperate.eof();)
   {
     vector<string> temp2;
@@ -2144,7 +2176,7 @@ int mysystem::exam_power_req()
   {
     if (temp[i][0] == cur_username[cur_user_ID])
     {
-      cout << temp[i][3] << " request " << temp[i][1] << " on " << temp[i][2];
+      cout << temp[i][3] << " request " << temp[i][1] << " on " << temp[i][2]<<" ";
       for (int l(4); l < temp[i].size(); l++)
       {
         cout << temp[i][l];
@@ -2163,12 +2195,17 @@ int mysystem::exam_power_req()
         temp.erase(temp.begin() + i);
       }
       else
-        i++;
+      {
+        temp.erase(temp.begin() + i);
+      }
+        
     }
     else
       i++;
   }
-  ofstream outfile(mytarget, ios::out);
+  const char *T;
+  T=mytarget.c_str();
+  ofstream outfile(T, ios::out);
   if (!outfile)
   {
     cout << "创建文件失败" << endl;
@@ -2223,7 +2260,9 @@ int mysystem::multi_file()
   string file_path;
   file_path = command_spilted[1];
   ifstream myoperate;
-  myoperate.open(file_path);
+  const char *I;
+  I=file_path.c_str();
+  myoperate.open(I);
   if (myoperate.fail())
   {
     cout << "文件不存在" << endl;
@@ -2235,13 +2274,17 @@ int mysystem::multi_file()
   int count(1);
   while (getline(myoperate, temp1234))
   {
-    cout << "正在执行第 " << count << " 条" << endl;
-    count++;
-    command_spilted = command_split(temp1234, " ");
-    int haha1 = command_analyse();
-    if (haha1 == 0)
-      return 0;
+    if(temp1234!="")
+    {
+      cout << "正在执行第 " << count << " 条" << endl;
+      count++;
+      command_spilted = command_split(temp1234, " ");
+      int haha1 = command_analyse();
+      if (haha1 == 0)
+        return 0;
+    }
   }
+  cout<<"执行结束"<<endl;
   return 0;
 }
 
