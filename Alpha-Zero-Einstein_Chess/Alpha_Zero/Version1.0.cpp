@@ -25,9 +25,9 @@ int mychessboard[5][5];
 int prechessboard[5][5];
 int bluechess_num;
 int redchess_num;
-int mypos;//±íÊ¾ÎÒÊÇÀ¶·½»¹ÊÇºì·½£¬1ÊÇÀ¶·½£¬0ÊÇºì·½
+int mypos;//è¡¨ç¤ºæˆ‘æ˜¯è“æ–¹è¿˜æ˜¯çº¢æ–¹ï¼Œ1æ˜¯è“æ–¹ï¼Œ0æ˜¯çº¢æ–¹
 
-bool comp(const chesser&a,const chesser&b)
+bool comp(const chesser&a, const chesser&b)
 {
 	return a.chess_id < b.chess_id;
 }
@@ -39,7 +39,7 @@ vector<string> command_split(const string &s, const string &seperator)
 	string_size i = 0;
 	while (i != s.size())
 	{
-		//ÕÒµ½×Ö·û´®ÖĞÊ×¸ö²»µÈÓÚ·Ö¸ô·ûµÄ×ÖÄ¸£»
+		//æ‰¾åˆ°å­—ç¬¦ä¸²ä¸­é¦–ä¸ªä¸ç­‰äºåˆ†éš”ç¬¦çš„å­—æ¯ï¼›
 		int flag = 0;
 		while (i != s.size() && flag == 0)
 		{
@@ -52,7 +52,7 @@ vector<string> command_split(const string &s, const string &seperator)
 				}
 		}
 
-		//ÕÒµ½ÓÖÒ»¸ö·Ö¸ô·û£¬½«Á½¸ö·Ö¸ô·ûÖ®¼äµÄ×Ö·û´®È¡³ö£»
+		//æ‰¾åˆ°åˆä¸€ä¸ªåˆ†éš”ç¬¦ï¼Œå°†ä¸¤ä¸ªåˆ†éš”ç¬¦ä¹‹é—´çš„å­—ç¬¦ä¸²å–å‡ºï¼›
 		flag = 0;
 		string_size j = i;
 		while (j != s.size() && flag == 0) {
@@ -209,7 +209,7 @@ int count_dif()
 
 int find_nearest(int mydice)
 {
-	int pos(All_chess.size()-1);
+	int pos(All_chess.size() - 1);
 	for (int i(0); i < All_chess.size(); i++)
 	{
 		if (All_chess[i].chess_id > 6)
@@ -243,11 +243,11 @@ int find_nearest(int mydice)
 
 }
 
-int check_board(int col, int line,int op,int side)//colÊÇÁĞÊılineÊÇĞĞÊı
+int check_board(int col, int line, int op, int side)//colæ˜¯åˆ—æ•°lineæ˜¯è¡Œæ•°
 {
 	if (side == 0)
 	{
-		if (op == 0&&col+1>4)
+		if (op == 0 && col + 1 > 4)
 		{
 			return 0;
 		}
@@ -258,7 +258,7 @@ int check_board(int col, int line,int op,int side)//colÊÇÁĞÊılineÊÇĞĞÊı
 				return 0;
 			}
 		}
-		if (op == 2&&line+1>4)
+		if (op == 2 && line + 1 > 4)
 		{
 			return 0;
 		}
@@ -272,7 +272,7 @@ int check_board(int col, int line,int op,int side)//colÊÇÁĞÊılineÊÇĞĞÊı
 		}
 		if (op == 1)
 		{
-			if (col - 1 < 0 || line - 1 <0 )
+			if (col - 1 < 0 || line - 1 < 0)
 			{
 				return 0;
 			}
@@ -288,10 +288,10 @@ int check_board(int col, int line,int op,int side)//colÊÇÁĞÊılineÊÇĞĞÊı
 
 int Einstein::handle()
 {
-	ofstream outfile("log.txt",ios::app);
+	ofstream outfile("log.txt", ios::app);
 	if (!outfile)
 	{
-		cout << "ÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		return 1;
 	}
 
@@ -314,7 +314,7 @@ int Einstein::handle()
 	{
 		for (int j(0); j < 5; j++)
 		{
-			cout <<setw(3) << mychessboard[i][j] << "  ";
+			cout << setw(3) << mychessboard[i][j] << "  ";
 		}
 		cout << endl;
 	}
@@ -339,7 +339,7 @@ int Einstein::handle()
 	int target = find_nearest(dice);
 	string temp;
 	temp = to_string(All_chess[target].chess_id);
-	string op; 
+	string op;
 	op = temp + "|";
 	if (check_board(All_chess[target].lpos, All_chess[target].hpos, 1, mypos))
 	{
@@ -401,7 +401,7 @@ int Einstein::parse(std::string A)
 		}
 	}
 	std::string mydice;
-	for (int i(flag_pos+1); i < A.size(); i++)
+	for (int i(flag_pos + 1); i < A.size(); i++)
 	{
 		mydice.push_back(A[i]);
 	}
@@ -446,12 +446,84 @@ int Einstein::parse(std::string A)
 	return 0;
 }
 
-int Einstein::logging(std::string)
+int Einstein::logging(std::string s)
 {
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string time_infor;
+	time_infor = myyears + "-" + mymonths + "-" + mydays + "-" + myhours + "-" + mymins + "-" + myseconds + ":";
+	logger.push_back(time_infor);
+	logger.push_back(s);
+	cout << time_infor << endl;
+	cout << s << endl;
 	return 1;
 }
 
 int Einstein::writelog()
 {
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string myID = "181860077";
+	string finalpath;
+	finalpath = myyears + "-" + mymonths + "-" + mydays + "-" + myID + ".log";
+	ofstream outfile(finalpath, ios::app);
+	if (!outfile)
+	{
+		cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
+		return 1;
+	}
+	list<string>::iterator w;
+	for (w = logger.begin(); w != logger.end(); ++w)
+	{
+		outfile << *w << endl;
+	}
 	return 0;
 }
