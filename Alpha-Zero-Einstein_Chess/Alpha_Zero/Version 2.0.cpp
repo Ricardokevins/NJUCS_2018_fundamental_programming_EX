@@ -1,3 +1,4 @@
+/*使用max_min算法*/
 #include "Einstein.h"
 #include<sstream>
 #include<string>
