@@ -1,3 +1,4 @@
+/*使用的是简单的直接rush算法*/
 #include "Einstein.h"
 #include<sstream>
 #include<string>
