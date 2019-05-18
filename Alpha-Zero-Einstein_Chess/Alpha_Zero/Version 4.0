@@ -1,0 +1,1287 @@
+#include "Einstein.h"
+#include<sstream>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<iomanip>
+#include<fstream>
+#include<stdlib.h>
+#include<Windows.h>
+using namespace std;
+struct chesser {
+	int hpos;
+	int lpos;
+	int chess_id;
+};
+int myround = 0;
+int status(0);
+int totalround(0);
+int timesround(0);
+int winround(0);
+int loseround(0);
+int temp_flag(0);
+int gen_op(vector<int> &A, vector<chesser>B, int pos);
+int find_nearest(int i,vector<chesser> &A);
+vector<chesser> All_chess;
+int mychessboard[5][5];
+int prechessboard[5][5];
+int bluechess_num;
+int redchess_num;
+int mypos;//表示我是蓝方还是红方，1是蓝方，0是红方
+int print_chess(vector<chesser>A);
+double runtime(0.0);
+clock_t mystart;
+clock_t myend;
+clock_t single_start;
+clock_t single_end;
+double running_time(0.0);
+
+#define supermax 1000.0
+#define supermin -1000.0
+
+
+struct Node {
+	int count;//访问次数
+	int enable;
+	int win;//胜利的次数
+	vector<Node*>child;//保存子节点
+	Node *father;//保存父节点
+	double ucb_count;//保存ucb值
+	vector<chesser> cur_status;// 保存当前的棋局
+	int pos;//表示应该是谁下棋了0是·
+	vector<int>pro_go;//表示可能的下法0就是红方下
+	int op_target;
+	int op;//表示的是怎么从父节点过来的
+};
+
+int count_num(vector<chesser> &A);
+int check_board(int col, int line, int op, int side);
+int check_win(vector<chesser> B);
+
+int random_dice()
+{
+	srand((int)time(0));
+	return (rand() % 6+1);
+}
+
+int  cleantree(Node *root)
+{
+	for (int i = 0; i < root->child.size(); i++)
+	{
+		cleantree(root->child[i]);
+	}
+	delete root;
+	return 1;
+}
+
+int update_node(Node * A, int i)
+{
+	Node*temp = A;
+	cout << " 更新节点" << endl;
+	while (temp != NULL)
+	{
+		temp->count += 1;
+		temp->win += i;
+		temp = temp->father;
+	}
+	while (A->father != NULL)
+	{
+		A->ucb_count = (A->win / A->count) + sqrt(2 * log(A->father->count) / A->count);
+		A = A->father;
+	}
+	return 0;
+}
+
+int random_go(vector<chesser> A, int pos)//pos表示是哪一方下棋了
+{
+	cout << "kai shi sui ji sheng cheng" << endl;
+	int flag = check_win(A);
+	if (flag)
+	{
+		return flag;
+	}
+	//print_chess(A);
+	int random_d = random_dice();
+	if (pos == 1)
+	{
+		random_d += 6;
+	}
+	int target = find_nearest(random_d, A);
+	cout << target << endl;
+	cout << A.size() << endl;
+	cout << random_d << endl;
+	cout << A[target].chess_id << endl;
+	int res(0);
+	res = check_win(A);
+	while (res)
+	{
+		if (check_board(A[target].lpos, A[target].hpos, 1, pos))
+		{
+			if (pos)
+			{
+				A[target].hpos--;
+				A[target].lpos--;
+			}
+			else
+			{
+				A[target].hpos++;
+				A[target].lpos++;
+			}
+			int i3(0);
+			for (; i3 < A.size(); i3++)
+			{
+				if (A[i3].hpos == A[target].hpos&&A[i3].lpos == A[target].lpos&&target != i3)//判断是否有吃掉对手
+				{
+					A.erase(A.begin() + i3);
+					break;
+				}
+			}
+		}
+		else
+		{
+			if (check_board(A[target].lpos, A[target].hpos, 0, pos))
+			{
+				if (pos)
+				{
+					A[target].lpos--;
+				}
+				else
+				{
+					A[target].lpos++;
+				}
+				int i3(0);
+				for (; i3 < A.size(); i3++)
+				{
+					if (A[i3].hpos == A[target].hpos&&A[i3].lpos == A[target].lpos&&target != i3)//判断是否有吃掉对手
+					{
+						A.erase(A.begin() + i3);
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (check_board(A[target].lpos, A[target].hpos, 2, pos))
+				{
+					if (pos)
+					{
+						A[target].hpos--;
+					}
+					else
+					{
+						A[target].hpos++;
+					}
+					int i3(0);
+					for (; i3 < A.size(); i3++)
+					{
+						if (A[i3].hpos == A[target].hpos&&A[i3].lpos == A[target].lpos&&target != i3)//判断是否有吃掉对手
+						{
+							A.erase(A.begin() + i3);
+							break;
+						}
+					}
+				}
+				for (int i(0); i < 500; i++)
+				{
+					cout << "random_go   error!!!!" << endl;
+				}
+			}
+		}
+		res = check_win(A);
+		pos = !pos;
+	}
+	return res;
+}
+
+Node* expand_node(Node *head)//传入父级参数的指针
+{
+	if (check_win(head->cur_status) != 0)
+		return NULL;
+	cout << "正在拓展新节点" << endl;
+	int cur_go = head->child.size();//已经拓展的节点
+	if (cur_go >= head->enable)
+	{
+		cout << "拓展失败" << endl;
+		return NULL;
+	}
+	int target = head->pro_go[cur_go * 2];
+	int target_op = head->pro_go[cur_go * 2 + 1];
+	Node *sur_node = new Node;
+	sur_node->count = 0;
+	sur_node->father = head;
+	sur_node->win = 0;
+	int father_pos = head->pos;
+	if (head->pos == 1)
+	{
+		sur_node->pos = 0;
+	}
+	else
+	{
+		sur_node->pos = 1;
+	}
+	for (int i(0); i < head->cur_status.size(); i++)
+	{
+		sur_node->cur_status.push_back(head->cur_status[i]);
+
+	}
+	cout << "拷贝成功" << endl;
+	sur_node->ucb_count = 0.0;
+	cout << "target   op" << target_op << endl;
+	for (int i(0); i < head->pro_go.size() / 2; i++)
+	{
+		cout << "target   " << head->pro_go[i * 2] << endl;
+		cout << "op  " << head->pro_go[i * 2+1] << endl;
+	}
+	if (target_op == 1)
+	{
+		if (check_board(sur_node->cur_status[target].lpos, sur_node->cur_status[target].hpos, 1, father_pos))
+		{
+			if (father_pos)
+			{
+				sur_node->cur_status[target].hpos--;
+				sur_node->cur_status[target].lpos--;
+			}
+			else
+			{
+				sur_node->cur_status[target].hpos++;
+				sur_node->cur_status[target].lpos++;
+			}
+			int i3(0);
+			for (; i3 < sur_node->cur_status.size(); i3++)
+			{
+				if (sur_node->cur_status[i3].hpos == sur_node->cur_status[target].hpos&&sur_node->cur_status[i3].lpos == sur_node->cur_status[target].lpos&&target != i3)//判断是否有吃掉对手
+				{
+					sur_node->cur_status.erase(sur_node->cur_status.begin() + i3);
+					break;
+				}
+			}
+			sur_node->op = 1;
+			sur_node->op_target = target;
+			gen_op(sur_node->pro_go, sur_node->cur_status, sur_node->pos);
+			sur_node->enable = sur_node->pro_go.size() / 2;
+			head->child.push_back(sur_node);
+			return sur_node;
+		}
+		else
+		{
+			cout << "对角线走拓展失败" << endl;
+
+			return NULL;
+		}
+	}
+	else
+	{
+		if (target_op == 0)
+		{
+			if (check_board(sur_node->cur_status[target].lpos, sur_node->cur_status[target].hpos, 0, father_pos))
+			{
+				if (father_pos)
+				{
+					sur_node->cur_status[target].lpos--;
+				}
+				else
+				{
+					sur_node->cur_status[target].lpos++;
+				}
+				int i3(0);
+				for (; i3 < sur_node->cur_status.size(); i3++)
+				{
+					if (sur_node->cur_status[i3].hpos == sur_node->cur_status[target].hpos&&sur_node->cur_status[i3].lpos == sur_node->cur_status[target].lpos&&target != i3)//判断是否有吃掉对手
+					{
+						sur_node->cur_status.erase(sur_node->cur_status.begin() + i3);
+						break;
+					}
+				}
+				sur_node->op = 0;
+				sur_node->op_target = target;
+				gen_op(sur_node->pro_go, sur_node->cur_status, sur_node->pos);
+				sur_node->enable = sur_node->pro_go.size() / 2;
+				head->child.push_back(sur_node);
+				return sur_node;
+			}
+			else
+			{
+				cout << "横线走拓展失败" << endl;
+				return NULL;
+			}
+		}
+		else
+		{
+			if (check_board(sur_node->cur_status[target].lpos, sur_node->cur_status[target].hpos, 2, father_pos))
+			{
+				if (father_pos)
+				{
+					sur_node->cur_status[target].hpos--;
+				}
+				else
+				{
+					sur_node->cur_status[target].hpos++;
+				}
+				int i3(0);
+				for (; i3 < sur_node->cur_status.size(); i3++)
+				{
+					if (sur_node->cur_status[i3].hpos == sur_node->cur_status[target].hpos&&sur_node->cur_status[i3].lpos == sur_node->cur_status[target].lpos&&target != i3)//判断是否有吃掉对手
+					{
+						sur_node->cur_status.erase(sur_node->cur_status.begin() + i3);
+						break;
+					}
+				}
+				sur_node->op = 2;
+				sur_node->op_target = target;
+				gen_op(sur_node->pro_go, sur_node->cur_status, sur_node->pos);
+				sur_node->enable = sur_node->pro_go.size() / 2;
+				head->child.push_back(sur_node);
+				return sur_node;
+			}
+			else
+			{
+				cout << "竖向走拓展失败" << endl;
+				return NULL;
+			}
+		}
+	}
+	return sur_node;
+}
+
+int DeleteTree(Node *head)
+{
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->child.size() == 0)
+		{
+			delete head->child[i];
+			head->child[i] = NULL;
+		}
+		else
+		{
+			DeleteTree(head->child[i]);
+		}
+	}
+	head->child.clear();
+	return 1;
+}
+
+Node * intial_root(vector<chesser>&A)
+{
+	cout << "初始化节点" << endl;
+	Node *myhead = new Node;
+	myhead->count = 0;//初始的情况下都是还有进行访问的
+	for (int i(0); i < A.size(); i++)
+	{
+		myhead->cur_status.push_back(A[i]);
+	}
+	myhead->father = NULL;
+	myhead->pos = mypos;
+	myhead->ucb_count = 0.0;
+	myhead->win = 0;
+	myhead->enable = 0;
+	return myhead;
+}
+
+Node* find_bestchild(Node *head)
+{
+	int pos(0);//最优节点的位置
+	int temp(-100000);
+	if (head->child.size() == 0)
+	{
+		cout << "没有子节点" << endl;
+		return NULL;
+	}
+	if (check_win(head->cur_status) != 0)
+	{
+		return NULL;
+	}
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->ucb_count > temp)
+		{
+			temp = head->child[i]->ucb_count;
+			pos = i;
+		}
+	}
+	if (head->child[pos]->child.size() < (head->child[pos]->enable))
+	{
+		cout << "child.size   " << head->child[pos]->child.size() << "enable   " << (head->child[pos]->enable);
+		cout << "看看棋盘" << endl;;
+		//print_chess(head->child[pos]->cur_status);
+		cout << "没有完全展开" << endl;
+		return head->child[pos];
+	}
+	else
+	{
+		cout << "child.size   " << head->child[pos]->child.size() << "enable   " << (head->child[pos]->enable);
+		cout << "看看棋盘" << endl;;
+		//print_chess(head->child[pos]->cur_status);
+		cout << "当前节点已经完全展开，进入深层" << endl;
+		return find_bestchild(head->child[pos]);
+	}
+}
+
+int UCT_running(vector<chesser>A,int cur_target,vector<int>&total_op)
+{
+	ofstream outfile("time.txt", ios::app);
+	if (!outfile)
+	{
+		cout << "文件打开失败" << endl;
+		return 1;
+	}
+
+	
+	Node *head=intial_root(A);
+	
+	double intial_time(0.0);
+	clock_t intial;
+	intial = clock();
+	intial_time = double(intial - single_start) / CLOCKS_PER_SEC;
+	outfile <<" intial_time   "<< intial_time << endl;
+	for (int i(0); i < 3; i++)
+	{
+		if (check_board(A[cur_target].lpos, A[cur_target].hpos, i, mypos))
+		{
+			head->pro_go.push_back(cur_target);
+			head->pro_go.push_back(i);
+			head->enable++;
+		}
+	}
+	cout << "初始化小节点" << endl;
+	for (int i(0); i < 3; i++)
+	{
+		if (expand_node(head) != NULL)
+		{
+			cout << "拓展成功" << endl;
+
+		}
+	}
+	clock_t expend;
+	expend = clock();
+	double expend_time(0.0);
+	expend_time = double(expend - intial) / CLOCKS_PER_SEC;
+	outfile << "expend_time    " << expend_time << endl;
+
+
+	if (head->child.size() == 0)
+	{
+		cout << "hello world" << endl;
+		Sleep(200000000);
+	}
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->win << "   " << head->child[i]->count <<"    "<< head->child[i]->ucb_count << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << endl;
+	
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << "开始随机" << endl;
+		int myflag = 0;
+		if (random_go(head->child[i]->cur_status, head->child[i]->pos) == 1)
+		{
+			if (mypos == 0)
+			{
+				myflag = 1;
+			}
+		}
+		else
+		{
+			if (mypos == 1)
+			{
+				myflag = 1;
+			}
+		}
+		update_node(head->child[i], myflag);
+	}
+	clock_t random_start = clock();
+	double random_time(0.0);
+	random_time = double(random_start - expend) / CLOCKS_PER_SEC;;
+	outfile << "random  time" << random_time << endl;
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->win << "   " << head->child[i]->count << "    " << head->child[i]->ucb_count << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << endl;
+	int num(0); 
+	double single_runningtime(0.0);
+	while ( running_time< 4.0)
+	{
+		cout << "开始拓展计算子节点" << endl;
+		Node *next_node = find_bestchild(head);
+		if (next_node == NULL)
+		{
+			break;
+		}
+		Node *haha = expand_node(next_node);
+		if (haha == NULL)
+			break;
+		int myflag = 0;
+		if (random_go(haha->cur_status, haha->pos) == 1)
+		{
+			if (mypos == 0)
+			{
+				myflag = 1;
+			}
+		}
+		else
+		{
+			if (mypos == 1)
+			{
+				myflag = 1;
+			}
+		}
+		update_node(haha, myflag);
+		num++;
+		single_end = clock();
+		
+		running_time=double(single_end-single_start)/ CLOCKS_PER_SEC;
+		single_runningtime = running_time - single_runningtime;
+		cout << "running  time           " << running_time << endl;
+		cout << "single running  time           " << running_time << endl;
+		ofstream outfiles("runing_time.txt", ios::app);
+		if (!outfiles)
+		{
+			cout << "文件打开失败" << endl;
+			return 1;
+		}
+		outfiles << "running  time           " <<  running_time  << "count  time "<<num << endl;
+	}
+	single_runningtime = running_time;
+	running_time = 0;
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->count << "    " << head->child[i]->ucb_count << "    " << head->child[i]->win << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << "      " << head->win << endl;
+	int op_pos(0);
+	double op_val(-10000.0);
+	int final_target(0);
+	int final_op(0);
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->ucb_count > op_val)
+		{
+			op_val = head->child[i]->ucb_count;
+			op_pos = i;
+			final_target = head->child[i]->op_target;
+			final_op = head->child[i]->op;
+		}
+	}
+	total_op.push_back(final_target);
+	total_op.push_back(final_op);
+	cleantree(head);
+	return 1;
+
+}
+
+
+
+bool comp(const chesser&a, const chesser&b)
+{
+	return a.chess_id < b.chess_id;
+}
+
+vector<string> command_split(const string &s, const string &seperator)
+{
+	vector<string> result;
+	typedef string::size_type string_size;
+	string_size i = 0;
+	while (i != s.size())
+	{
+		//找到字符串中首个不等于分隔符的字母；
+		int flag = 0;
+		while (i != s.size() && flag == 0)
+		{
+			flag = 1;
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[i] == seperator[x]) {
+					++i;
+					flag = 0;
+					break;
+				}
+		}
+
+		//找到又一个分隔符，将两个分隔符之间的字符串取出；
+		flag = 0;
+		string_size j = i;
+		while (j != s.size() && flag == 0) {
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[j] == seperator[x]) {
+					flag = 1;
+					break;
+				}
+			if (flag == 0)
+				++j;
+		}
+		if (i != j) {
+			result.push_back(s.substr(i, j - i));
+			i = j;
+		}
+	}
+	return result;
+}
+
+Einstein::Einstein()
+{
+	this->clientsocket.connectServer();
+	clientsocket.sendMsg(ID);
+}
+
+Einstein::~Einstein()
+{
+	this->clientsocket.close();
+}
+
+int count_pos(chesser &A)
+{
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			if (mychessboard[i][j] == A.chess_id)
+			{
+				A.hpos = i;
+				A.lpos = j;
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int count_dis(int i, vector<chesser>&A)
+{
+	int dis(0);
+	if (A[i].chess_id > 6)
+	{
+		if (A[i].hpos > A[i].lpos)
+		{
+			dis = A[i].hpos;
+		}
+		else
+		{
+			dis = A[i].lpos;
+		}
+		return dis;
+	}
+	else
+	{
+		if (A[i].hpos < A[i].lpos)
+		{
+			dis = A[i].hpos;
+		}
+		else
+		{
+			dis = A[i].lpos;
+		}
+		return 4 - dis;
+	}
+}
+
+int count_num(vector<chesser>&A)
+{
+	bluechess_num = 0;
+	redchess_num = 0;
+	for (int i(0); i < A.size(); i++)
+	{
+		if (A[i].chess_id > 6)
+		{
+			bluechess_num++;
+		}
+		else
+		{
+			redchess_num++;
+		}
+	}
+	return 0;
+}
+
+
+int intial_chessboard()
+{
+	All_chess.clear();
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			if (mychessboard[i][j] != 0)
+			{
+				chesser temp1;
+				temp1.chess_id = mychessboard[i][j];
+				temp1.hpos = i;
+				temp1.lpos = j;
+				All_chess.push_back(temp1);
+			}
+		}
+	}
+	return 0;
+
+}
+
+int record_pre()
+{
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			prechessboard[i][j] = mychessboard[i][j];
+		}
+	}
+	return 0;
+}
+
+int count_dif()
+{
+	int num(0);
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			if (prechessboard[i][j] != mychessboard[i][j])
+			{
+				num++;
+			}
+		}
+	}
+	return num;
+}
+
+
+
+int find_nearest(int mydice,vector<chesser>&A)
+ {
+	sort(A.begin(), A.end(), comp);
+	int pos(A.size() - 1);
+	for (int i(0); i < A.size(); i++)
+	{
+		if (A[i].chess_id > 6)
+		{
+			pos = i;
+			break;
+		}
+	}
+
+	if (mydice > 6)
+	{
+		vector<int>smaller;
+		vector<int>larger;
+		int target(0);
+		for (int i(pos); i < A.size(); i++)
+		{
+			if (A[i].chess_id >= mydice)
+			{
+				larger.push_back(i);
+			}
+			else
+			{
+				smaller.push_back(i);
+			}
+		}
+		
+		if (smaller.size() == 0)
+		{
+			target = larger[0];
+			return target;
+		}
+		if (larger.size() == 0)
+		{
+			target = smaller[smaller.size() - 1];
+			return target;
+		}
+		int dis_cal(0);
+		if (A[larger[0]].chess_id == mydice)
+		{
+			return larger[0];
+		}
+		dis_cal = count_dis(smaller[smaller.size() - 1], A);
+		if (dis_cal > count_dis(larger[0], A))
+		{
+			return larger[0];
+		}
+		else
+			return smaller[smaller.size() - 1];
+
+	}
+	else
+	{
+		vector<int>smaller;
+		vector<int>larger;
+		int target(0);
+		for (int i(0); i < pos; i++)
+		{
+			if (A[i].chess_id >= mydice)
+			{
+				larger.push_back(i);
+			}
+			else
+			{
+				smaller.push_back(i);
+			}
+		}
+		
+		if (smaller.size() == 0)
+		{
+			target = larger[0];
+			return target;
+		}
+		if (larger.size() == 0)
+		{
+			target = smaller[smaller.size() - 1];
+			return target;
+		}
+		if (A[larger[0]].chess_id == mydice)
+		{
+			return larger[0];
+		}
+		int dis_cal(0);
+		dis_cal = count_dis(smaller[smaller.size() - 1], A);
+		if (dis_cal > count_dis(larger[0], A))
+		{
+			return larger[0];
+		}
+		else
+			return smaller[smaller.size() - 1];
+	}
+
+}
+
+int check_board(int col, int line, int op, int side)//col是列数line是行数，0是红方
+{
+	if (side == 0)
+	{
+		if (op == 0 && col + 1 > 4)
+		{
+			return 0;
+		}
+		if (op == 1)
+		{
+			if (col + 1 > 4 || line + 1 > 4)
+			{
+				return 0;
+			}
+		}
+		if (op == 2 && line + 1 > 4)
+		{
+			return 0;
+		}
+		return 1;
+	}
+	if (side == 1)
+	{
+		if (op == 0 && col - 1 < 0)
+		{
+			return 0;
+		}
+		if (op == 1)
+		{
+			if (col - 1 < 0 || line - 1 < 0)
+			{
+				return 0;
+			}
+		}
+		if (op == 2 && line - 1 < 0)
+		{
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int check_win(vector<chesser> B)//返回0是没有获胜，返回2是蓝方胜利，返回1是红方胜利
+{
+	count_num(B);
+	for (int i(0); i < B.size(); i++)
+	{
+		if (B[i].hpos == 0 && B[i].lpos == 0 && B[i].chess_id > 6)
+		{
+			return 2;
+		}
+		if (B[i].hpos == 4 && B[i].lpos == 4 && B[i].chess_id <= 6)
+		{
+			return 1;
+		}
+	}
+	if (bluechess_num == 0)
+		return 2;
+	if (redchess_num == 0)
+		return 1;
+	return 0;
+}
+
+int print_chessboard()
+{
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			cout << setw(3) << mychessboard[i][j] << "  ";
+		}
+		cout << endl;
+	}
+	return 1;
+}
+
+int gen_op(vector<int> &A, vector<chesser>B, int pos)
+{
+	A.clear();
+	count_num(B);
+	if (pos == 1)//假如我是蓝方，做出决策
+	{
+		for (int j(0); j < bluechess_num - 1; j++)
+		{
+			for (int i(0); i < 3; i++)
+			{
+				if (check_board(B[redchess_num + j + 1].lpos, B[redchess_num + j + 1].hpos, i, 1))
+				{
+					A.push_back(redchess_num + j + 1);
+					A.push_back(i);
+				}
+			}
+		}
+	}
+	if (pos == 0)//假如我是红方，做出决策
+	{
+		for (int j(0); j < redchess_num; j++)
+		{
+			for (int i(0); i < 3; i++)
+			{
+				if (check_board(B[j].lpos, B[j].hpos, i, 0))
+				{
+					A.push_back(j);
+					A.push_back(i);
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int print_chess(vector<chesser> A)
+{
+	int temp4[5][5] = { 0 };
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			temp4[i][j] = 0;
+		}
+	}
+	for (int i(0); i < A.size(); i++)
+	{
+		if (A[i].hpos > 4 || A[i].lpos > 4 || A[i].hpos < 0 || A[i].lpos < 0)
+		{
+			for (int i(0); i < 500; i++)
+			{
+				cout << "errror!!!!!!!!" << endl;
+			}
+		}
+	}
+	for (int i(0); i < A.size(); i++)
+	{
+		temp4[A[i].hpos][A[i].lpos] = A[i].chess_id;
+	}
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			cout << setw(5) << temp4[i][j] << "  ";
+		}
+		cout << endl;
+	}
+	return 0;
+}
+
+int Einstein::handle()
+{
+	//adj_fac();
+	single_start = clock();
+	int dif_num(0);
+	clientsocket.recvMsg();
+	string s = clientsocket.getRecvMsg();
+	if (s.size() == 0)
+	{
+		return 0;
+	}
+	if (s == "close")
+		return 0;
+	parse(s);
+	if (dice > 6)
+	{
+		mypos = 1;
+	}
+	else
+		mypos = 0;
+	intial_chessboard();
+	
+	if (myround == 0)
+	{
+		record_pre();
+	}
+	dif_num = count_dif();
+	if (dif_num > 4)
+	{
+		totalround++;
+		string result;
+		if (temp_flag == 1)
+		{
+			if (mypos == 1)
+			{
+				cout << "对手胜利 " << endl;
+				result += "对手胜利 ";
+				loseround++;
+			}
+			else
+			{
+				cout << "我胜利" << endl;
+				result += "我胜利 ";
+				winround++;
+			}
+			myend = clock();
+			runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+			stringstream la;
+			la << runtime;
+			string hrhr;
+			la >> hrhr;
+			result += hrhr;
+			logger.push_back(result);
+			cout << "using time： " << runtime / 1000 << endl;
+		}
+		else
+		{
+			if (temp_flag == 2)
+			{
+				if (mypos == 0)
+				{
+					cout << "对手胜利 " << endl;
+					result += "对手胜利 ";
+					loseround++;
+				}
+				else
+				{
+					cout << "我胜利 " << endl;
+					result += "我胜利 ";
+					winround++;
+				}
+				myend = clock();
+				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				stringstream la;
+				la << runtime;
+				string hrhr;
+				la >> hrhr;
+				result += hrhr;
+				cout << "using time： " << runtime / 1000 << endl;
+				logger.push_back(result);
+			}
+			else
+			{
+				cout << "对手胜利 " << endl;
+				result += "对手胜利 ";
+				loseround++;
+				myend = clock();
+				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				stringstream la;
+				la << runtime;
+				string hrhr;
+				la >> hrhr;
+				result += hrhr;
+				cout << "using time： " << runtime / 1000 << endl;
+				logger.push_back(result);
+			}
+			mystart = clock();
+			myround = 0;
+		}
+	}
+	myround++;
+	record_pre();
+	int i(0);
+	i = find_nearest(dice,All_chess);
+	vector<int>final_op;
+	UCT_running(All_chess, i, final_op);
+	int profit_pos =final_op[1];
+	string op;
+	stringstream sa;
+	sa << All_chess[final_op[0]].chess_id;
+	sa >> op;
+	op += '|';
+	if (profit_pos == 0)
+	{
+		if (mypos == 1)
+		{
+			op += "left";
+		}
+		else
+		{
+			op += "right";
+		}
+	}
+	if (profit_pos == 1)
+	{
+		if (mypos == 1)
+		{
+			op += "leftup";
+		}
+		else
+		{
+			op += "rightdown";
+		}
+	}
+	if (profit_pos == 2)
+	{
+		if (mypos == 1)
+		{
+			op += "up";
+		}
+		else
+		{
+			op += "down";
+		}
+	}
+	for (int i(0); i < 20; i++)
+	{
+		cout << endl;
+	}
+	cout << "cal_op success      " << op << endl;
+	const char *hehe = op.c_str();
+	clientsocket.sendMsg(hehe);
+	string log_infor = s + "   operation" + op;
+	logging(log_infor);
+	temp_flag = check_win(All_chess);
+	return 1;
+}
+
+int Einstein::parse(std::string A)
+{
+	A.erase(A.begin());
+	int flag_pos(0);
+	for (int i(0); i < A.size(); i++)
+	{
+		if (A[i] == '|')
+		{
+			flag_pos = i;
+			break;
+		}
+	}
+	std::string mydice;
+	for (int i(flag_pos + 1); i < A.size(); i++)
+	{
+		mydice.push_back(A[i]);
+	}
+	stringstream ss;
+	ss << mydice;
+	ss >> dice;
+	vector<string> temp3;
+	for (int i(A.size() - 1); i >= flag_pos; i--)
+	{
+		A.pop_back();
+	}
+	A.pop_back();
+	temp3 = command_split(A, " ");
+	for (int i(0); i < temp3.size(); i++)
+	{
+		for (int j(0); j < temp3[i].size();)
+		{
+			if (temp3[i][j] == '[' || temp3[i][j] == ']' || temp3[i][j] == ',' || temp3[i][j] == ' ')
+			{
+				temp3[i].erase(temp3[i].begin() + j);
+			}
+			else
+				j++;
+		}
+	}
+	for (int i(0); i < 25; i++)
+	{
+		stringstream sa;
+		sa << temp3[i];
+		sa >> chessboard[i];
+	}
+	int num(0);
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			mychessboard[i][j] = chessboard[num];
+			num++;
+		}
+	}
+	return 0;
+}
+
+int Einstein::logging(std::string s)
+{
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string time_infor;
+	time_infor = myyears + "-" + mymonths + "-" + mydays + "-" + myhours + "-" + mymins + "-" + myseconds + ":";
+	logger.push_back(time_infor);
+	logger.push_back(s);
+	cout << time_infor << endl;
+	cout << s << endl;
+	return 1;
+}
+
+int Einstein::writelog()
+{
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string myID = "181860077";
+	string finalpath;
+	finalpath = myyears + "-" + mymonths + "-" + mydays + "-" + myID + ".log";
+	ofstream outfile(finalpath, ios::app);
+	if (!outfile)
+	{
+		cout << "文件打开失败" << endl;
+		return 1;
+	}
+	list<string>::iterator w;
+	for (w = logger.begin(); w != logger.end(); ++w)
+	{
+		outfile << *w << endl;
+	}
+	return 0;
+}
