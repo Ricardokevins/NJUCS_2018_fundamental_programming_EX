@@ -1,0 +1,1773 @@
+#include "Einstein.h"
+#include<sstream>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<iomanip>
+#include<fstream>
+#include<stdlib.h>
+#include<Windows.h>
+using namespace std;
+
+
+
+int myround = 0;
+int status(0);
+int totalround(0);
+int timesround(0);
+int winround(0);
+int loseround(0);
+int temp_flag(0);
+
+int gen_op(vector<int> &A, int C[][5], int pos);
+
+
+int mychessboard[5][5];
+int prechessboard[5][5];
+
+int mypos;//表示我是蓝方还是红方，1是蓝方，0是红方
+double runtime(0.0);
+clock_t mystart;
+clock_t myend;
+clock_t single_start;
+clock_t single_end;
+double running_time(0.0);
+
+class Node {
+public:
+	int count;//访问次数
+	int enable;
+	int win;//胜利的次数
+	vector<Node*>child;//保存子节点
+	Node *father;//保存父节点
+	double ucb_count;//保存ucb值
+	int cur_chess[5][5];// 保存当前的棋局
+	int pos;//表示应该是谁下棋了0是·
+	vector<int>pro_go;//表示可能的下法0就是红方下
+	int op_target;
+	int op;//表示的是怎么从父节点过来的
+	Node();
+};
+Node::Node() 
+{
+	child.reserve(1024000);
+	pro_go.reserve(1024000);
+}
+
+int check_board(int col, int line, int op, int side);
+
+int print_chess(int A[][5]);
+
+int check_win(int A[][5]);
+
+int get_random(int mystart,int myend)
+{
+	srand((int)time(0));
+	return (rand() % (myend - mystart + 1)) + mystart;
+}
+
+int  cleantree(Node *root)
+{
+	for (int i = 0; i < root->child.size(); i++)
+	{
+		cleantree(root->child[i]);
+	}
+	delete root;
+	return 1;
+}
+
+int update_node(Node * A, int i)
+{
+	Node*temp = A;
+	cout << " 更新节点" << endl;
+	while (temp != NULL)
+	{
+		temp->count += 1;
+		temp->win += i;
+		temp = temp->father;
+	}
+	while (A->father != NULL)
+	{
+		A->ucb_count = (A->win / A->count) + sqrt(double(2 * double(log(A->father->count)) /double( A->count)));
+		A = A->father;
+	}
+	return 0;
+}
+
+int random_go(int W[][5], int pos)//pos表示是哪一方下棋了
+{
+	int A[5][5];
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			A[i][j] = W[i][j];
+		}
+	}
+	cout << "   开始随机模拟   " << endl;
+	int flag = check_win(A);
+	if (flag)
+	{
+		return flag;
+	}
+	int random_d = get_random(1,6);
+	if (pos == 1)
+	{
+		random_d += 6;
+	}
+	while (!flag)
+	{
+		print_chess(A);
+		random_d = get_random(1, 6);
+		if (pos == 1)
+		{
+			random_d += 6;
+		}
+		if (pos ==1 )//蓝方模拟
+		{
+			int op_target(0);
+			int ti(-1);
+			int tj(-1);
+			int findlarger(1000);
+			int li(-1);
+			int lj(-1);//标志一下找到的棋子的位置
+			int findsmaller(0);
+			int si(-1);
+			int sj(-1);
+			int find_flag(0);
+			for (int i(0); i < 5; i++)
+			{
+				for (int j(0); j < 5; j++)
+				{
+					if (A[i][j] > 6)
+					{
+						if (A[i][j] == random_d && A[i][j] > 6)
+						{
+							op_target = A[i][j];
+							ti = i;
+							tj = j;
+							find_flag = 1;
+							break;
+						}
+						else
+						{
+							if (A[i][j] > findsmaller&&A[i][j] < random_d)
+							{
+								findsmaller = A[i][j];
+								si = i;
+								sj = j;
+							}
+							else
+							{
+								if (A[i][j] < findlarger&&A[i][j] > random_d)
+								{
+									findlarger = A[i][j];
+									li = i;
+									lj = j;
+								}
+							}
+						}
+					}
+				}
+			}
+			if (find_flag == 1)
+			{
+				int op = get_random(1, 3);
+				if (ti != 0 && tj != 0)
+				{
+					if (op == 2)
+					{
+						A[ti - 1][tj - 1] = A[ti][tj];
+						A[ti][tj] = 0;
+					}
+					if (op == 1)
+					{
+						A[ti][tj - 1] = A[ti][tj];
+						A[ti][tj] = 0;
+					}
+					if (op == 3)
+					{
+						A[ti-1][tj] = A[ti][tj];
+						A[ti][tj] = 0;
+					}
+				}
+				else
+				{
+					if (ti != 0 && tj == 0)//到达左届
+					{
+						A[ti - 1][tj] = A[ti][tj];
+						A[ti][tj] = 0;
+					}
+					else
+					{
+						A[ti][tj-1] = A[ti][tj];
+						A[ti][tj] = 0;
+					}
+				}				
+			}
+			else//没有找到直接的
+			{
+				int ls = get_random(1, 2);//1表示小，2表示用大的
+				if (ls == 1&&si!=-1&&sj!=-1)
+				{
+					int op1 = get_random(1, 3);
+					if (si != 0 && sj != 0)
+					{
+						if (op1 == 2)
+						{
+							A[ si - 1][sj - 1] = A[si][sj];
+							A[si][sj] = 0;
+						}
+						if (op1 == 1)
+						{
+							A[si][sj - 1] = A[si][sj];
+							A[si][sj] = 0;
+						}
+						if (op1 == 3)
+						{
+							A[si - 1][sj] = A[si][sj];
+							A[si][sj] = 0;
+						}
+					}
+					else
+					{
+						if (si != 0 && sj == 0)//到达左届
+						{
+							A[si - 1][sj] = A[si][sj];
+							A[si][sj] = 0;
+						}
+						else
+						{
+							A[si][sj - 1] = A[si][sj];
+							A[si][sj] = 0;
+						}
+					}
+				}
+				else
+				{
+					int op2 = get_random(1, 3);
+					if (ti != 0 && tj != 0)
+					{
+						if (op2 == 2)
+						{
+							A[ti - 1][tj - 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						if (op2 == 1)
+						{
+							A[ti][tj - 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						if (op2 == 3)
+						{
+							A[ti - 1][tj] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+					}
+					else
+					{
+						if (ti != 0 && tj == 0)//到达上届
+						{
+							A[ti - 1][tj] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						else
+						{
+							A[ti][tj - 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			if (pos == 0)
+			{
+				int op_target(0);
+				int ti(0);
+				int tj(0);
+				int findlarger(1000);
+				int li(-1);
+				int lj(-1);//标志一下找到的棋子的位置
+				int findsmaller(0);
+				int si(-1);
+				int sj(-1);
+				int find_flag(0);
+				for (int i(0); i < 5; i++)
+				{
+					for (int j(0); j < 5; j++)
+					{
+						if (A[i][j] < 7 )
+						{
+							if (A[i][j] == random_d && A[i][j] > 0)
+							{
+								op_target = A[i][j];
+								ti = i;
+								tj = j;
+								find_flag = 1;
+								break;
+							}
+							else
+							{
+								if (A[i][j] > findsmaller&&A[i][j] < random_d)
+								{
+									findsmaller = A[i][j];
+									si = i;
+									sj = j;
+								}
+								else
+								{
+									if (A[i][j] < findlarger&&A[i][j] > random_d)
+									{
+										findlarger = A[i][j];
+										li = i;
+										lj = j;
+									}
+								}
+							}
+						}
+					}
+				}
+				if (find_flag == 1)
+				{
+					int op = get_random(1, 3);
+					if (ti != 4 && tj != 4)
+					{
+						if (op == 2)
+						{
+							A[ti + 1][tj + 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						if (op == 1)
+						{
+							A[ti][tj + 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						if (op == 3)
+						{
+							A[ti + 1][tj] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+					}
+					else
+					{
+						if (ti != 4 && tj == 4)//到达右届
+						{
+							A[ti + 1][tj] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+						else
+						{
+							A[ti][tj + 1] = A[ti][tj];
+							A[ti][tj] = 0;
+						}
+					}
+				}
+				else//没有找到直接的
+				{
+					int ls = get_random(1, 2);//1表示小，2表示用大的
+					if (ls == 1&&si!=-1&&sj!=-1)
+					{
+						int op1 = get_random(1, 3);
+						if (si != 4 && sj != 4)
+						{
+							if (op1 == 2)
+							{
+								A[si + 1][sj + 1] = A[si][sj];
+								A[si][sj] = 0;
+							}
+							if (op1 == 1)
+							{
+								A[si][sj + 1] = A[si][sj];
+								A[si][sj] = 0;
+							}
+							if (op1 == 3)
+							{
+								A[si + 1][sj] = A[si][sj];
+								A[si][sj] = 0;
+							}
+						}
+						else
+						{
+							if (si != 4 && sj == 4)//到达右界
+							{
+								A[si + 1][sj] = A[si][sj];
+								A[si][sj] = 0;
+							}
+							else
+							{
+								A[si][sj + 1] = A[si][sj];
+								A[si][sj] = 0;
+							}
+						}
+					}
+					else
+					{
+						int op2 = get_random(1, 3);
+						if (ti != 4 && tj != 4)
+						{
+							if (op2 == 2)
+							{
+								A[ti + 1][tj + 1] = A[ti][tj];
+								A[ti][tj] = 0;
+							}
+							if (op2 == 1)
+							{
+								A[ti][tj + 1] = A[ti][tj];
+								A[ti][tj] = 0;
+							}
+							if (op2 == 3)
+							{
+								A[ti + 1][tj] = A[ti][tj];
+								A[ti][tj] = 0;
+							}
+						}
+						else
+						{
+							if (ti != 4 && tj == 4)//到达右界
+							{
+								A[ti + 1][tj] = A[ti][tj];
+								A[ti][tj] = 0;
+							}
+							else
+							{
+								A[ti][tj + 1] = A[ti][tj];
+								A[ti][tj] = 0;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				cout << "fatal error!!!!" << endl;
+				return -1;
+			}
+		}
+		flag = check_win(A);
+		pos = !pos;
+	}
+	cout << "模拟结束" << endl;
+	return flag;
+}
+
+Node* expand_node(Node *head)//传入父级参数的指针
+{
+	if (check_win(head->cur_chess) != 0)
+	{
+		print_chess(head->cur_chess);
+		return NULL;
+	}
+	cout << "正在拓展新节点" << endl;
+	int cur_go = head->child.size();//已经拓展的节点
+	if (cur_go >= head->enable)
+	{
+		cout << "拓展失败" << endl;
+		return NULL;
+	}
+	cout << head->pro_go.size()<<endl;
+	cout << cur_go << endl;
+	int target = head->pro_go[cur_go * 2];
+	int target_op = head->pro_go[cur_go * 2 + 1];
+	Node *sur_node = new Node;
+	cout << sizeof(*sur_node) << endl;
+	sur_node->count = 0;
+	sur_node->father = head;
+	sur_node->win = 0;
+	cout << "子节点的初始" << endl;
+	int father_pos = head->pos;
+	sur_node->op_target = head->pro_go[cur_go * 2];
+	sur_node->op = head->pro_go[cur_go * 2 + 1];
+	cout << "子节点的初始化完" << endl;
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			sur_node->cur_chess[i][j] = head->cur_chess[i][j];
+		}
+	}
+	if (head->pos == 1)
+	{
+		sur_node->pos = 0;
+	}
+	else
+	{
+		sur_node->pos = 1;
+	}
+	
+	cout << "拷贝成功" << endl;
+	sur_node->ucb_count = 0.0;
+	sur_node->enable = 0;
+	cout << target_op << "      " << target << endl;
+	for (int i(0); i < head->pro_go.size() / 2; i++)
+	{
+		cout << "target   " << head->pro_go[i * 2] << endl;
+		cout << "op  " << head->pro_go[i * 2+1] << endl;
+	}
+	if (target_op == 1)
+	{
+		if (father_pos == 1)//如果父节点是蓝方，那么这一步的棋局就是由蓝方走了一步生成的
+		{
+			cout << "蓝方走1" << endl;
+			print_chess(sur_node->cur_chess);
+			for (int i(0); i < 5; i++)
+			{
+				for (int j(0); j < 5; j++)
+				{
+					if (sur_node->cur_chess[i][j] == target)
+					{
+						sur_node->cur_chess[i - 1][j - 1] = sur_node->cur_chess[i][j];
+						sur_node->cur_chess[i][j] = 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			cout << "红方走1" << endl;
+			print_chess(sur_node->cur_chess);
+			for (int i(0); i < 5; i++)
+			{
+				for (int j(0); j < 5; j++)
+				{
+					if (sur_node->cur_chess[i][j] == target)
+					{
+						sur_node->cur_chess[i + 1][j + 1] = sur_node->cur_chess[i][j];
+						sur_node->cur_chess[i][j] = 0;
+						break;
+					}
+				}
+			}
+			cout << "红方走wan le 1" << endl;
+		}
+	}
+	else
+	{
+		if (target_op == 0)
+		{
+			if (father_pos == 1)//如果父节点是蓝方，那么这一步的棋局就是由蓝方走了一步生成的
+			{
+				cout << "蓝方走0" << endl;
+				print_chess(sur_node->cur_chess);
+				for (int i(0); i < 5; i++)
+				{
+					for (int j(0); j < 5; j++)
+					{
+						if (sur_node->cur_chess[i][j] == target)
+						{
+							sur_node->cur_chess[i][j - 1] = sur_node->cur_chess[i][j];
+							sur_node->cur_chess[i][j] = 0;
+						}
+					}
+				}
+			}
+			else
+			{
+				cout << "红方走0" << endl;
+				print_chess(sur_node->cur_chess);
+				for (int i(0); i < 5; i++)
+				{
+					for (int j(0); j < 5; j++)
+					{
+						if (sur_node->cur_chess[i][j] == target)
+						{
+							sur_node->cur_chess[i][j + 1] = sur_node->cur_chess[i][j];
+							sur_node->cur_chess[i][j] = 0;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			if (father_pos == 1)//如果父节点是蓝方，那么这一步的棋局就是由蓝方走了一步生成的
+			{
+				cout << "蓝方走2" << endl;
+				print_chess(sur_node->cur_chess);
+				for (int i(0); i < 5; i++)
+				{
+					for (int j(0); j < 5; j++)
+					{
+						if (sur_node->cur_chess[i][j] == target)
+						{
+							sur_node->cur_chess[i-1][j] = sur_node->cur_chess[i][j];
+							sur_node->cur_chess[i][j] = 0;
+						}
+					}
+				}
+			}
+			else
+			{
+				cout << "红方走2" << endl;
+				print_chess(sur_node->cur_chess);
+				for (int i(0); i < 5; i++)
+				{
+					for (int j(0); j < 5; j++)
+					{
+						if (sur_node->cur_chess[i][j] == target)
+						{
+							sur_node->cur_chess[i+1][j] = sur_node->cur_chess[i][j];
+							sur_node->cur_chess[i][j] = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (sur_node == NULL)
+	{
+		Sleep(20000000);
+	}
+	cout << "kai shi sheng cheng zou fa" << endl;
+	if (sur_node == NULL)
+	{
+		Sleep(200000000);
+	}
+	vector<int> Sd;
+	gen_op(Sd, sur_node->cur_chess, sur_node->pos);
+	
+	for (int i(0); i < Sd.size(); i++)
+	{
+		cout << Sd[i] << endl;
+		cout <<"大小"<< Sd.size() << endl;
+		sur_node->pro_go.push_back(Sd[i]);
+	}
+	cout << "生成走法完成" << endl;
+	sur_node->enable = sur_node->pro_go.size() / 2;
+	cout << sur_node->enable << endl;
+	cout << "jisuan走法完成" << endl;
+	cout << sizeof(*sur_node);
+	head->child.push_back(sur_node);
+	return sur_node;
+}
+
+int DeleteTree(Node *head)
+{
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->child.size() == 0)
+		{
+			delete head->child[i];
+			head->child[i] = NULL;
+		}
+		else
+		{
+			DeleteTree(head->child[i]);
+		}
+	}
+	head->child.clear();
+	return 1;
+}
+
+Node * intial_root(int A[][5])
+{
+	cout << "初始化根节点" << endl;
+	Node *myhead = new Node;
+	myhead->count = 0;//初始的情况下都是还有进行访问的
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			myhead->cur_chess[i][j] = A[i][j];
+		}
+	}
+	myhead->father = NULL;
+	myhead->pos = mypos;
+	myhead->ucb_count = 0.0;
+	myhead->win = 0;
+	myhead->enable = 0;
+	return myhead;
+}
+
+Node* find_bestchild(Node *head)
+{
+	cout << "正在寻找最优路径" << endl;
+	int pos(0);//最优节点的位置
+	int temp(-100000);
+	if (head->child.size() == 0)
+	{
+		cout << "没有子节点" << endl;
+		return NULL;
+	}
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->ucb_count > temp)
+		{
+			temp = head->child[i]->ucb_count;
+			pos = i;
+		}
+	}
+	return head->child[pos];
+}
+
+Node*get_tail(Node*head)
+{
+	while (check_win(head->cur_chess) == 0 && head!= NULL)
+	{
+		if (head->child.size() < head->enable)
+		{
+			return expand_node(head);
+		}
+		else
+		{
+			head = find_bestchild(head);
+		}
+	}
+	return head;
+}
+
+int UCT_running(int A[][5],int cur_target,vector<int>&total_op)//cur_target是传入的骰子数
+{
+	ofstream outfile("time.txt", ios::app);
+	if (!outfile)
+	{
+		cout << "文件打开失败" << endl;
+		return 1;
+	}
+	Node *head=intial_root(A);	
+	double intial_time(0.0);
+	clock_t intial;
+	intial = clock();
+	intial_time = double(intial - single_start) / CLOCKS_PER_SEC;
+	outfile <<" intial_time   "<< intial_time << endl;
+	//还有大量的待修复的BUG，记得改
+
+	if (head->pos == 1)//蓝方模拟
+	{
+		int op_target(-1);
+		int ti(-1);
+		int tj(-1);
+		int findlarger(1000);
+		int li(-1);
+		int lj(-1);//标志一下找到的棋子的位置
+		int findsmaller(0);
+		int si(-1);
+		int sj(-1);
+		int find_flag(0);
+		for (int i(0); i < 5; i++)
+		{
+			for (int j(0); j < 5; j++)
+			{
+				if (A[i][j] > 6)
+				{
+					if (A[i][j] == cur_target && A[i][j] > 6)
+					{
+						op_target = A[i][j];
+						ti = i;
+						tj = j;
+						find_flag = 1;
+						break;
+					}
+					else
+					{
+						if (A[i][j] > findsmaller&&A[i][j] < cur_target)
+						{
+							findsmaller = A[i][j];
+							si = i;
+							sj = j;
+						}
+						else
+						{
+							if (A[i][j] < findlarger&&A[i][j] >cur_target)
+							{
+								findlarger = A[i][j];
+								li = i;
+								lj = j;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (find_flag == 1)
+		{
+			for (int op(0); op < 3; op++)
+			{
+				if (ti != 0 && tj != 0)
+				{
+					if (op == 1)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(1);
+						head->enable++;
+					}
+					if (op == 0)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(0);
+						head->enable++;
+					}
+					if (op == 2)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(2);
+						head->enable++;
+					}
+				}
+				else
+				{
+					if (ti != 0 && tj == 0)//到达左届
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(2);
+						head->enable++;
+					}
+					else
+					{
+						if (ti == 0 && tj != 0)
+						{
+							head->pro_go.push_back(A[ti][tj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+					}
+				}
+			}
+		}
+		else//没有找到直接的
+		{
+			if (si != -1 && sj != -1)//找到小的
+			{
+				for (int op(0); op < 3; op++)
+				{
+					if (si != 0 && sj != 0)//三个方向都可以走
+					{
+						if (op == 1)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(1);
+							head->enable++;
+						}
+						if (op == 0)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+						if (op == 2)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+					}
+					else
+					{
+						if (si != 0 && sj == 0)//到达左届
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+						else
+						{
+							if (si == 0 && sj != 0)
+							{
+								head->pro_go.push_back(A[si][sj]);
+								head->pro_go.push_back(0);
+								head->enable++;
+							}
+						}
+					}
+				}
+			}
+			if (li != -1 && lj != -1)//找到小的
+			{
+				for (int op(0); op < 3; op++)
+				{
+					if (li != 0 && lj != 0)//三个方向都可以走
+					{
+						if (op == 1)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(1);
+							head->enable++;
+						}
+						if (op == 0)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+						if (op == 2)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+					}
+					else
+					{
+						if (li != 0 && lj == 0)//到达左届
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+						else
+						{
+							if (li == 0 && lj != 0)
+							{
+								head->pro_go.push_back(A[li][lj]);
+								head->pro_go.push_back(0);
+								head->enable++;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	print_chess(head->cur_chess);
+	cout << cur_target << endl;
+	if (head->pos == 0)//蓝方模拟
+	{
+		int op_target(-1);
+		int ti(-1);
+		int tj(-1);
+		int findlarger(1000);
+		int li(-1);
+		int lj(-1);//标志一下找到的棋子的位置
+		int findsmaller(0);
+		int si(-1);
+		int sj(-1);
+		int find_flag(0);
+		for (int i(0); i < 5; i++)
+		{
+			for (int j(0); j < 5; j++)
+			{
+				if (A[i][j] < 7 )
+				{
+					if (A[i][j] == cur_target && A[i][j] > 0)
+					{
+						op_target = A[i][j];
+						ti = i;
+						tj = j;
+						find_flag = 1;
+						break;
+					}
+					else
+					{
+						if (A[i][j] > findsmaller&&A[i][j] < cur_target)
+						{
+							findsmaller = A[i][j];
+							si = i;
+							sj = j;
+						}
+						else
+						{
+							if (A[i][j] < findlarger&&A[i][j] >cur_target)
+							{
+								findlarger = A[i][j];
+								li = i;
+								lj = j;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (find_flag == 1)
+		{
+			for (int op(0); op < 3; op++)
+			{
+				if (ti != 4 && tj != 4)
+				{
+					if (op == 1)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(1);
+						head->enable++;
+					}
+					if (op == 0)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(0);
+						head->enable++;
+					}
+					if (op == 2)
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(2);
+						head->enable++;
+					}
+				}
+				else
+				{
+					if (ti != 4 && tj == 4)//到达左届
+					{
+						head->pro_go.push_back(A[ti][tj]);
+						head->pro_go.push_back(2);
+						head->enable++;
+					}
+					else
+					{
+						if (ti == 4 && tj != 4)
+						{
+							head->pro_go.push_back(A[ti][tj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+					}
+				}
+			}
+		}
+		else//没有找到直接的
+		{
+			if (si != -1 && sj != -1)//找到小的
+			{
+				for (int op(0); op < 3; op++)
+				{
+					if (si !=4  && sj != 4)//三个方向都可以走
+					{
+						if (op == 1)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(1);
+							head->enable++;
+						}
+						if (op == 0)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+						if (op == 2)
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+					}
+					else
+					{
+						if (si != 4 && sj == 4)//到达左届
+						{
+							head->pro_go.push_back(A[si][sj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+						else
+						{
+							if (si == 4 && sj != 4)
+							{
+								head->pro_go.push_back(A[si][sj]);
+								head->pro_go.push_back(0);
+								head->enable++;
+							}
+						}
+					}
+				}
+			}
+			if (li != -1 && lj != -1)//找到小的
+			{
+				for (int op(0); op < 3; op++)
+				{
+					if (li != 4 && lj != 4)//三个方向都可以走
+					{
+						if (op == 1)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(1);
+							head->enable++;
+						}
+						if (op == 0)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(0);
+							head->enable++;
+						}
+						if (op == 2)
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+					}
+					else
+					{
+						if (li != 4 && lj == 4)//到达左届
+						{
+							head->pro_go.push_back(A[li][lj]);
+							head->pro_go.push_back(2);
+							head->enable++;
+						}
+						else
+						{
+							if (li == 4 && lj != 4)
+							{
+								head->pro_go.push_back(A[li][lj]);
+								head->pro_go.push_back(0);
+								head->enable++;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	cout << head->enable << endl;
+	cout << "初始化小节点" << endl;
+	cout << "看一下根节点的可能走法           " << endl;
+	for (int i(0); i < head->enable; i++)
+	{
+		cout << head->pro_go[i * 2] << "             " << head->pro_go[i * 2 + 1] << endl;
+	}
+	for (int i(0); i < head->enable; i++)
+	{
+		if (expand_node(head) != NULL)
+		{
+			cout << "拓展成功" << endl;
+		}
+	}
+	for (int i(0); i < head->child.size(); i++)
+	{
+		int myflag = 0;
+		if (random_go(head->child[i]->cur_chess, head->child[i]->pos) == 1)
+		{
+			if (mypos == 0)
+			{
+				myflag = 1;
+			}
+		}
+		else
+		{
+			if (mypos == 1)
+			{
+				myflag = 1;
+			}
+		}
+		update_node(head->child[i], myflag);
+	}
+	clock_t expend;
+	expend = clock();
+	double expend_time(0.0);
+	expend_time = double(expend - intial) / CLOCKS_PER_SEC;
+	outfile << "expend_time    " << expend_time << endl;
+
+
+	if (head->child.size() == 0)
+	{
+		cout << "hello world" << endl;
+		Sleep(200000000);
+	}
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->win << "   " << head->child[i]->count <<"    "<< head->child[i]->ucb_count << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << endl;
+	
+	clock_t random_start = clock();
+	double random_time(0.0);
+	random_time = double(random_start - expend) / CLOCKS_PER_SEC;;
+	outfile << "random  time" << random_time << endl;
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->win << "   " << head->child[i]->count << "    " << head->child[i]->ucb_count << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << endl;
+	int num(0); 
+	double single_runningtime(0.0);
+	int count_time(0);
+	while ( count_time<100)// running_time< 4.0
+	{
+		cout << "开始拓展计算子节点" << endl;
+		Node *next_node = find_bestchild(head);
+		if (next_node == NULL)
+		{
+			break;
+		}
+		cout << "找到了" << endl;
+		Node *haha = expand_node(next_node);
+		cout << "拿去拓展了" << endl;
+		if (haha == NULL)
+		{
+			cout << "怎么是空的？？？？" << endl;
+			break;
+		}
+		int myflag = 0;
+		cout << "开始随机下咯" << endl;
+		print_chess(haha->cur_chess);
+
+		if (random_go(haha->cur_chess, haha->pos) == 1)
+		{
+			if (mypos == 0)
+			{
+				myflag = 1;
+			}
+		}
+		else
+		{
+			if (mypos == 1)
+			{
+				myflag = 1;
+			}
+		}
+		cout << "模拟了" << endl;
+		update_node(haha, myflag);
+		num++;
+		single_end = clock();
+		running_time=double(single_end-single_start)/ CLOCKS_PER_SEC;
+		single_runningtime = running_time - single_runningtime;
+		cout << "running  time           " << running_time << endl;
+		cout << "single running  time           " << running_time << endl;
+		ofstream outfiles("runing_time.txt", ios::app);
+		if (!outfiles)
+		{
+			cout << "文件打开失败" << endl;
+			return 1;
+		}
+		outfiles << "running  time           " <<  running_time  << "count  time "<<num << endl;
+		count_time++;
+	}
+	single_runningtime = running_time;
+	running_time = 0;
+	for (int i(0); i < head->child.size(); i++)
+	{
+		cout << head->child[i]->count << "    " << head->child[i]->ucb_count << "    " << head->child[i]->win << endl;
+	}
+	cout << head->count << "   " << head->ucb_count << "      " << head->win << endl;
+	int op_pos(0);
+	double op_val(-10000.0);
+	int final_target(0);
+	int final_op(0);
+	for (int i(0); i < head->child.size(); i++)
+	{
+		if (head->child[i]->ucb_count > op_val)
+		{
+			op_val = head->child[i]->ucb_count;
+			op_pos = i;
+			final_target = head->child[i]->op_target;
+			final_op = head->child[i]->op;
+		}
+	}
+	cout << "调好了" << endl;
+	total_op.push_back(final_target);
+	total_op.push_back(final_op);
+	cleantree(head);
+	cout << "成功删除" << endl;
+	return 1;
+
+}
+
+vector<string> command_split(const string &s, const string &seperator)
+{
+	vector<string> result;
+	typedef string::size_type string_size;
+	string_size i = 0;
+	while (i != s.size())
+	{
+		//找到字符串中首个不等于分隔符的字母；
+		int flag = 0;
+		while (i != s.size() && flag == 0)
+		{
+			flag = 1;
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[i] == seperator[x]) {
+					++i;
+					flag = 0;
+					break;
+				}
+		}
+
+		//找到又一个分隔符，将两个分隔符之间的字符串取出；
+		flag = 0;
+		string_size j = i;
+		while (j != s.size() && flag == 0) {
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[j] == seperator[x]) {
+					flag = 1;
+					break;
+				}
+			if (flag == 0)
+				++j;
+		}
+		if (i != j) {
+			result.push_back(s.substr(i, j - i));
+			i = j;
+		}
+	}
+	return result;
+}
+
+Einstein::Einstein()
+{
+	this->clientsocket.connectServer();
+	clientsocket.sendMsg(ID);
+}
+
+Einstein::~Einstein()
+{
+	this->clientsocket.close();
+}
+
+int record_pre()
+{
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			prechessboard[i][j] = mychessboard[i][j];
+		}
+	}
+	return 0;
+}
+
+int count_dif()
+{
+	int num(0);
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			if (prechessboard[i][j] != mychessboard[i][j])
+			{
+				num++;
+			}
+		}
+	}
+	return num;
+}
+
+
+int check_board(int col, int line, int op, int side)//col是列数line是行数，0是红方
+{
+	if (side == 0)
+	{
+		if (op == 0 && col + 1 > 4)
+		{
+			return 0;
+		}
+		if (op == 1)
+		{
+			if (col + 1 > 4 || line + 1 > 4)
+			{
+				return 0;
+			}
+		}
+		if (op == 2 && line + 1 > 4)
+		{
+			return 0;
+		}
+		return 1;
+	}
+	if (side == 1)
+	{
+		if (op == 0 && col - 1 < 0)
+		{
+			return 0;
+		}
+		if (op == 1)
+		{
+			if (col - 1 < 0 || line - 1 < 0)
+			{
+				return 0;
+			}
+		}
+		if (op == 2 && line - 1 < 0)
+		{
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int check_win(int A[][5])//返回0是没有获胜，返回2是蓝方胜利，返回1是红方胜利
+{
+	if (A[0][0] > 6)
+		return 2;
+	if (A[4][4] < 7&&A[4][4]>0)
+		return 1;
+	int bluenum(0);
+	int rednum(0);
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			if (A[i][j] > 6)
+				bluenum++;
+			else
+			{
+				if (A[i][j] > 0)
+					rednum++;
+			}
+		}
+	}
+	if (bluenum == 0)
+		return 1;
+	if (rednum == 0)
+		return 2;
+	return 0;
+}
+
+int gen_op(vector<int>&A, int C[][5], int pos)
+{
+	if (pos == 1)//蓝方决策
+	{
+		for (int i(0); i < 5; i++)
+		{
+			for (int j(0); j < 5; j++)
+			{
+				if (C[i][j] > 6&&C[i][j]<13)
+				{
+					if (i != 0 && j != 0)
+					{
+						A.push_back(C[i][j]);
+						A.push_back(1);
+						A.push_back(C[i][j]);
+						A.push_back(0);
+						A.push_back(C[i][j]);
+						A.push_back(2);
+					}
+					if (i == 0&&j!=0)
+					{
+						A.push_back(C[i][j]);
+						A.push_back(0);
+					}
+					if (i != 0 && j == 0)
+					{
+						A.push_back(C[i][j]);
+						A.push_back(2);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int i(0); i < 5; i++)
+		{
+			for (int j(0); j < 5; j++)
+			{
+				if (C[i][j] > 0&&C[i][j]<7)
+				{
+					if (i != 4 && j != 4)
+					{
+						A.push_back(C[i][j]);
+						A.push_back(1);
+						A.push_back(C[i][j]);
+						A.push_back(0);
+						A.push_back(C[i][j]);
+						A.push_back(2);
+					}
+					if (i == 4&& j != 4)
+					{
+						A.push_back(C[i][j]);
+						A.push_back(0);
+					}
+					if (i != 4 && j == 4)
+					{
+
+						A.push_back(C[i][j]);
+						A.push_back(2);
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int print_chess(int A[][5])
+{
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			cout << A[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	return 0;
+}
+
+int Einstein::handle()
+{
+	single_start = clock();
+	int dif_num(0);
+	clientsocket.recvMsg();
+	string s = clientsocket.getRecvMsg();
+	if (s.size() == 0)
+	{
+		return 0;
+	}
+	if (s == "close")
+		return 0;
+	parse(s);
+	if (dice > 6)
+	{
+		mypos = 1;
+	}
+	else
+		mypos = 0;
+	if (myround == 0)
+	{
+		record_pre();
+	}
+	dif_num = count_dif();
+	if (dif_num > 4)
+	{
+		totalround++;
+		string result;
+		if (temp_flag == 1)
+		{
+			if (mypos == 1)
+			{
+				cout << "对手胜利 " << endl;
+				result += "对手胜利 ";
+				loseround++;
+			}
+			else
+			{
+				cout << "我胜利" << endl;
+				result += "我胜利 ";
+				winround++;
+			}
+			myend = clock();
+			runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+			stringstream la;
+			la << runtime;
+			string hrhr;
+			la >> hrhr;
+			result += hrhr;
+			logger.push_back(result);
+			cout << "using time： " << runtime / 1000 << endl;
+		}
+		else
+		{
+			if (temp_flag == 2)
+			{
+				if (mypos == 0)
+				{
+					cout << "对手胜利 " << endl;
+					result += "对手胜利 ";
+					loseround++;
+				}
+				else
+				{
+					cout << "我胜利 " << endl;
+					result += "我胜利 ";
+					winround++;
+				}
+				myend = clock();
+				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				stringstream la;
+				la << runtime;
+				string hrhr;
+				la >> hrhr;
+				result += hrhr;
+				cout << "using time： " << runtime / 1000 << endl;
+				logger.push_back(result);
+			}
+			else
+			{
+				cout << "对手胜利 " << endl;
+				result += "对手胜利 ";
+				loseround++;
+				myend = clock();
+				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				stringstream la;
+				la << runtime;
+				string hrhr;
+				la >> hrhr;
+				result += hrhr;
+				cout << "using time： " << runtime / 1000 << endl;
+				logger.push_back(result);
+			}
+			mystart = clock();
+			myround = 0;
+		}
+	}
+	myround++;
+	record_pre();
+	int i(0);
+	vector<int>final_op;
+	UCT_running(mychessboard, dice, final_op);
+	int profit_pos =final_op[1];
+	string op;
+	stringstream sa;
+	sa <<final_op[0];
+	sa >> op;
+	op += '|';
+	if (profit_pos == 0)
+	{
+		if (mypos == 1)
+		{
+			op += "left";
+		}
+		else
+		{
+			op += "right";
+		}
+	}
+	if (profit_pos == 1)
+	{
+		if (mypos == 1)
+		{
+			op += "leftup";
+		}
+		else
+		{
+			op += "rightdown";
+		}
+	}
+	if (profit_pos == 2)
+	{
+		if (mypos == 1)
+		{
+			op += "up";
+		}
+		else
+		{
+			op += "down";
+		}
+	}
+	const char *hehe = op.c_str();
+	clientsocket.sendMsg(hehe);
+	string log_infor = s + "   operation" + op;
+	logging(log_infor);
+	temp_flag = check_win(mychessboard);
+	return 1;
+}
+
+int Einstein::parse(std::string A)
+{
+	A.erase(A.begin());
+	int flag_pos(0);
+	for (int i(0); i < A.size(); i++)
+	{
+		if (A[i] == '|')
+		{
+			flag_pos = i;
+			break;
+		}
+	}
+	std::string mydice;
+	for (int i(flag_pos + 1); i < A.size(); i++)
+	{
+		mydice.push_back(A[i]);
+	}
+	stringstream ss;
+	ss << mydice;
+	ss >> dice;
+	vector<string> temp3;
+	for (int i(A.size() - 1); i >= flag_pos; i--)
+	{
+		A.pop_back();
+	}
+	A.pop_back();
+	temp3 = command_split(A, " ");
+	for (int i(0); i < temp3.size(); i++)
+	{
+		for (int j(0); j < temp3[i].size();)
+		{
+			if (temp3[i][j] == '[' || temp3[i][j] == ']' || temp3[i][j] == ',' || temp3[i][j] == ' ')
+			{
+				temp3[i].erase(temp3[i].begin() + j);
+			}
+			else
+				j++;
+		}
+	}
+	for (int i(0); i < 25; i++)
+	{
+		stringstream sa;
+		sa << temp3[i];
+		sa >> chessboard[i];
+	}
+	int num(0);
+	for (int i(0); i < 5; i++)
+	{
+		for (int j(0); j < 5; j++)
+		{
+			mychessboard[i][j] = chessboard[num];
+			num++;
+		}
+	}
+	return 0;
+}
+
+int Einstein::logging(std::string s)
+{
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string time_infor;
+	time_infor = myyears + "-" + mymonths + "-" + mydays + "-" + myhours + "-" + mymins + "-" + myseconds + ":";
+	logger.push_back(time_infor);
+	logger.push_back(s);
+	cout << time_infor << endl;
+	cout << s << endl;
+	return 1;
+}
+
+int Einstein::writelog()
+{
+	time_t t = time(NULL);
+	tm *tp = localtime(&t);
+	stringstream myyear;
+	string myyears;
+	stringstream mymonth;
+	string mymonths;
+	stringstream myday;
+	string mydays;
+	stringstream myhour;
+	string myhours;
+	stringstream mymin;
+	string mymins;
+	stringstream mysecond;
+	string myseconds;
+	myyear << tp->tm_year + 1900;
+	myyear >> myyears;
+	mymonth << tp->tm_mon + 1;
+	mymonth >> mymonths;
+	myday << tp->tm_mday;
+	myday >> mydays;
+	myhour << tp->tm_hour;
+	myhour >> myhours;
+	mymin << tp->tm_min;
+	mymin >> mymins;
+	mysecond << tp->tm_sec;
+	mysecond >> myseconds;
+	string myID = "181860077";
+	string finalpath;
+	finalpath = myyears + "-" + mymonths + "-" + mydays + "-" + myID + ".log";
+	ofstream outfile(finalpath, ios::app);
+	if (!outfile)
+	{
+		cout << "文件打开失败" << endl;
+		return 1;
+	}
+	list<string>::iterator w;
+	for (w = logger.begin(); w != logger.end(); ++w)
+	{
+		outfile << *w << endl;
+	}
+	return 0;
+}
