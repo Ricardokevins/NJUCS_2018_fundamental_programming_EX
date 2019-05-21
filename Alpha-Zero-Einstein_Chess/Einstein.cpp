@@ -20,10 +20,11 @@ double runtime(0.0);
 clock_t mystart;
 clock_t myend;
 
-int at_fac(52);
-int de_fac(48);
-int shallow_depth(0);//ÉèÖÃ¾ö²ßÊ÷µÄµİ¹éÉî¶È
-int stage1(6);//ÉèÖÃ²»Í¬µÄ±éÀúÉî¶ÈµÄ±ê×¼
+double at_fac(70.42);
+double de_fac(28.17);
+double thr_fac(1.4028);
+int shallow_depth(0);//è®¾ç½®å†³ç­–æ ‘çš„é€’å½’æ·±åº¦
+int stage1(6);//è®¾ç½®ä¸åŒçš„éå†æ·±åº¦çš„æ ‡å‡†
 int deep_depth(0);
 int stage2(10);
 int super_depth(0);
@@ -38,27 +39,39 @@ struct chesser {
 	int hpos;
 	int lpos;
 	int chess_id;
-	double at_val;
-	double def_val;
 	double dis_val;
-	double thr_val;
 	double pro_val;
 	double self_val;
 };
 
-struct Node {
-	int val;
-	int op_target;//±£´æµÄÊÇ²Ù×÷µÄ¶ÔÏó£¬½áºÏÆğÀ´¾ÍÊÇ±íÊ¾ÔõÃ´µ½´ïÕâ¸ö¾ÖÃæµÄ
-	int op;//±£´æµÄÊÇÄÄÒ»¸ö²Ù×÷
-	Node *next;
-};
+
+
+int adj_fac()//è‡ªåŠ¨è°ƒæ•´å‚æ•°å­¦ä¹ çš„å‡½æ•°
+{
+	if (totalround / 100 > timesround)
+	{
+		ofstream outfile("fac.txt", ios::app);
+		if (!outfile)
+		{
+			cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
+			return 1;
+		}
+		outfile << thr_fac << " "  << winround << endl;
+		thr_fac++;
+		timesround++;
+		winround = 0;
+		loseround = 0;
+	}
+	return 0;
+
+}
 
 vector<chesser> All_chess;
 int mychessboard[5][5];
 int prechessboard[5][5];
 int bluechess_num;
 int redchess_num;
-int mypos;//±íÊ¾ÎÒÊÇÀ¶·½»¹ÊÇºì·½£¬1ÊÇÀ¶·½£¬0ÊÇºì·½
+int mypos;//è¡¨ç¤ºæˆ‘æ˜¯è“æ–¹è¿˜æ˜¯çº¢æ–¹ï¼Œ1æ˜¯è“æ–¹ï¼Œ0æ˜¯çº¢æ–¹
 int print_chess(vector<chesser>&A);
 
 double mymax(int player, int depth, vector<chesser>&A);
@@ -76,7 +89,7 @@ vector<string> command_split(const string &s, const string &seperator)
 	string_size i = 0;
 	while (i != s.size())
 	{
-		//ÕÒµ½×Ö·û´®ÖĞÊ×¸ö²»µÈÓÚ·Ö¸ô·ûµÄ×ÖÄ¸£»
+		//æ‰¾åˆ°å­—ç¬¦ä¸²ä¸­é¦–ä¸ªä¸ç­‰äºåˆ†éš”ç¬¦çš„å­—æ¯ï¼›
 		int flag = 0;
 		while (i != s.size() && flag == 0)
 		{
@@ -89,7 +102,7 @@ vector<string> command_split(const string &s, const string &seperator)
 				}
 		}
 
-		//ÕÒµ½ÓÖÒ»¸ö·Ö¸ô·û£¬½«Á½¸ö·Ö¸ô·ûÖ®¼äµÄ×Ö·û´®È¡³ö£»
+		//æ‰¾åˆ°åˆä¸€ä¸ªåˆ†éš”ç¬¦ï¼Œå°†ä¸¤ä¸ªåˆ†éš”ç¬¦ä¹‹é—´çš„å­—ç¬¦ä¸²å–å‡ºï¼›
 		flag = 0;
 		string_size j = i;
 		while (j != s.size() && flag == 0) {
@@ -192,34 +205,40 @@ double count_self(int i, vector<chesser>&A)
 	{
 		if (A[i].hpos == 4 && A[i].lpos == 4)
 		{
-			return 0;
+			A[i].self_val = 0;
+			return A[i].self_val;
 		}
 
 		if ((A[i].hpos == 0 || A[i].lpos == 0 || A[i].hpos == 4 || A[i].lpos == 4) && (A[i].hpos != A[i].lpos))
 		{
-			return (5 * pow(2, (2 - count_dis(i, A))));
+			A[i].self_val= (5 * pow(2, (2 - count_dis(i, A))));
+			return A[i].self_val;
 		}
 
 		else
 		{
-			return pow(2, (4 - count_dis(i, A)));
+			A[i].self_val = pow(2, (4 - count_dis(i, A)));
+			return A[i].self_val;
 		}
 	}
 	else
 	{
 		if (A[i].hpos == 0 && A[i].lpos == 0)
 		{
-			return 0;
+			A[i].self_val = 0;
+			return A[i].self_val;
 		}
 
 		if ((A[i].hpos == 0 || A[i].lpos == 0 || A[i].hpos == 4 || A[i].lpos == 4) && (A[i].hpos != A[i].lpos))
 		{
-			return (5 * pow(2, (2 - count_dis(i, A))));
+			A[i].self_val = (5 * pow(2, (2 - count_dis(i, A))));
+			return A[i].self_val;
 		}
 
 		else
 		{
-			return pow(2, (4 - count_dis(i, A)));
+			A[i].self_val = pow(2, (4 - count_dis(i, A)));
+			return A[i].self_val;
 		}
 
 	}
@@ -230,26 +249,26 @@ double count_pro(int i, vector<chesser>&A)
 {
 	int  count(0);
 	count_num(A);
-	if (A[i].chess_id > 6)//Èç¹ûÊÇÀ¶·½µÄÆå×Ó£¬ÄÇÃ´¾ÍÒª¿¼ÂÇ6ºÍ×î´óµÄ½çÏŞ
+	if (A[i].chess_id > 6)//å¦‚æœæ˜¯è“æ–¹çš„æ£‹å­ï¼Œé‚£ä¹ˆå°±è¦è€ƒè™‘6å’Œæœ€å¤§çš„ç•Œé™
 	{
 		if (i != A.size() - 1)
 		{
-			count += A[i + 1].chess_id - 1 - A[i].chess_id;//ÏòºóÕÒ£¬Èç¹ûÖ»ÊÇÏàÁÚµÄ×ÔÈ»¾ÍÊÇ0
+			count += A[i + 1].chess_id - 1 - A[i].chess_id;//å‘åæ‰¾ï¼Œå¦‚æœåªæ˜¯ç›¸é‚»çš„è‡ªç„¶å°±æ˜¯0
 		}
-		if (i > 0 && A[i - 1].chess_id > 6)//Ò²²»ÊÇµÚÒ»¸öÆå×Ó,Ê¹ÓÃÂß¼­¶ÌÂ·±ÜÃâÒ»Ğ©ÎÊÌâ
+		if (i > 0 && A[i - 1].chess_id > 6)//ä¹Ÿä¸æ˜¯ç¬¬ä¸€ä¸ªæ£‹å­,ä½¿ç”¨é€»è¾‘çŸ­è·¯é¿å…ä¸€äº›é—®é¢˜
 		{
-			count += A[i].chess_id - A[i - 1].chess_id - 1;//ÕâÃ´Ò»¼õ¾ÍÖªµÀÖĞ¼äÓĞ¶àÉÙµÄÆå×Ó±»³ÔÁË£¬¿ÉÒÔ¸üºÃµÄ¼ÆËãÆÚÍû
+			count += A[i].chess_id - A[i - 1].chess_id - 1;//è¿™ä¹ˆä¸€å‡å°±çŸ¥é“ä¸­é—´æœ‰å¤šå°‘çš„æ£‹å­è¢«åƒäº†ï¼Œå¯ä»¥æ›´å¥½çš„è®¡ç®—æœŸæœ›
 		}
 	}
 	else
 	{
 		if (i != 0)
 		{
-			count += A[i].chess_id - 1 - A[i - 1].chess_id;//ÏòÇ°ÕÒ£¬Èç¹ûÖ»ÊÇÏàÁÚµÄ×ÔÈ»¾ÍÊÇ0
+			count += A[i].chess_id - 1 - A[i - 1].chess_id;//å‘å‰æ‰¾ï¼Œå¦‚æœåªæ˜¯ç›¸é‚»çš„è‡ªç„¶å°±æ˜¯0
 		}
-		if (i < A.size() - 1 && A[i + 1].chess_id < 6)//Ò²²»ÊÇµÚÒ»¸öÆå×Ó,Ê¹ÓÃÂß¼­¶ÌÂ·±ÜÃâÒ»Ğ©ÎÊÌâ
+		if (i < A.size() - 1 && A[i + 1].chess_id < 6)//ä¹Ÿä¸æ˜¯ç¬¬ä¸€ä¸ªæ£‹å­,ä½¿ç”¨é€»è¾‘çŸ­è·¯é¿å…ä¸€äº›é—®é¢˜
 		{
-			count += A[i + 1].chess_id - A[i].chess_id - 1;//ÕâÃ´Ò»¼õ¾ÍÖªµÀÖĞ¼äÓĞ¶àÉÙµÄÆå×Ó±»³ÔÁË£¬¿ÉÒÔ¸üºÃµÄ¼ÆËãÆÚÍû
+			count += A[i + 1].chess_id - A[i].chess_id - 1;//è¿™ä¹ˆä¸€å‡å°±çŸ¥é“ä¸­é—´æœ‰å¤šå°‘çš„æ£‹å­è¢«åƒäº†ï¼Œå¯ä»¥æ›´å¥½çš„è®¡ç®—æœŸæœ›
 		}
 	}
 	A[i].pro_val = (1.0 / 6.0)*(count + 1);
@@ -320,6 +339,7 @@ double count_total_val(vector<chesser>&A)
 	double value(0.0);
 	double attack_total(0.0);
 	double defend_total(0.0);
+	double thread_total(0.0);
 	for (int i(0); i < All_chess.size(); i++)
 	{
 
@@ -327,26 +347,82 @@ double count_total_val(vector<chesser>&A)
 		{
 			if (mypos == 1)
 			{
-				attack_total += count_attack(i, A);
+				attack_total += count_attack(i, A)*count_pro(i, A);
 			}
 			else
 			{
-				defend_total += count_defend(i, A);
+				defend_total += count_defend(i, A)*count_pro(i, A);
 			}
 		}
 		else
 		{
 			if (mypos == 0)
 			{
-				attack_total += count_attack(i, A);
+				attack_total += count_attack(i, A)*count_pro(i, A);
 			}
 			else
 			{
-				defend_total += count_defend(i, A);
+				defend_total += count_defend(i, A)*count_pro(i, A);
 			}
 		}
 	}
-	value = at_fac * attack_total + de_fac * defend_total;
+	for (int i(0); i < A.size(); i++)
+	{
+		if (mypos == 1)//æˆ‘æ˜¯è“æ–¹
+		{
+			if (A[i].chess_id < 7)//ç»Ÿè®¡çº¢æ–¹æ£‹å­å¨èƒä¹‹å’Œ
+			{
+				double myvalue(0.0);
+				for (int j(0); j < A.size(); j++)
+				{
+					if (A[j].chess_id > 6)
+					{
+						if (A[j].hpos == A[i].hpos + 1 && A[j].lpos == A[i].lpos&& A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+						if (A[j].lpos == A[i].lpos + 1 && A[j].hpos == A[i].hpos && A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+						if (A[j].lpos == A[i].lpos + 1 && A[j].hpos == A[i].hpos+1 && A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+					}
+				}
+				thread_total += myvalue * count_pro(i, A);
+			}
+		}
+		if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
+		{
+			if (A[i].chess_id > 6)//ç»Ÿè®¡è“æ–¹æ£‹å­å¨èƒä¹‹å’Œ
+			{
+				double myvalue(0.0);
+				for (int j(0); j < A.size(); j++)
+				{
+					if (A[j].chess_id > 6)
+					{
+						if (A[j].hpos == A[i].hpos -1 && A[j].lpos == A[i].lpos&& A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+						if (A[j].lpos == A[i].lpos -1 && A[j].hpos == A[i].hpos && A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+						if (A[j].lpos == A[i].lpos -1 && A[j].hpos == A[i].hpos - 1 && A[j].self_val > myvalue)
+						{
+							myvalue = A[j].self_val;
+						}
+					}
+				}
+				thread_total += myvalue * count_pro(i, A);
+			}
+		}
+		
+	}
+	value = at_fac * attack_total + de_fac * defend_total - thr_fac*thread_total;
 
 	return value;
 }
@@ -444,7 +520,7 @@ int find_nearest(int mydice)
 
 }
 
-int check_board(int col, int line, int op, int side)//colÊÇÁĞÊılineÊÇĞĞÊı
+int check_board(int col, int line, int op, int side)//colæ˜¯åˆ—æ•°lineæ˜¯è¡Œæ•°
 {
 	if (side == 0)
 	{
@@ -487,7 +563,7 @@ int check_board(int col, int line, int op, int side)//colÊÇÁĞÊılineÊÇĞĞÊı
 	return 0;
 }
 
-int check_win(vector<chesser>& B)//·µ»Ø0ÊÇÃ»ÓĞ»ñÊ¤£¬·µ»Ø2ÊÇÀ¶·½Ê¤Àû£¬·µ»Ø1ÊÇºì·½Ê¤Àû
+int check_win(vector<chesser>& B)//è¿”å›0æ˜¯æ²¡æœ‰è·èƒœï¼Œè¿”å›2æ˜¯è“æ–¹èƒœåˆ©ï¼Œè¿”å›1æ˜¯çº¢æ–¹èƒœåˆ©
 {
 	count_num(B);
 	for (int i(0); i < B.size(); i++)
@@ -524,7 +600,7 @@ int print_chessboard()
 int gen_op(vector<int> &A, vector<chesser>&B, int pos)
 {
 	count_num(B);
-	if (pos == 1)//¼ÙÈçÎÒÊÇÀ¶·½£¬×ö³ö¾ö²ß
+	if (pos == 1)//å‡å¦‚æˆ‘æ˜¯è“æ–¹ï¼Œåšå‡ºå†³ç­–
 	{
 		for (int j(0); j < bluechess_num - 1; j++)
 		{
@@ -538,7 +614,7 @@ int gen_op(vector<int> &A, vector<chesser>&B, int pos)
 			}
 		}
 	}
-	if (pos == 0)//¼ÙÈçÎÒÊÇºì·½£¬×ö³ö¾ö²ß
+	if (pos == 0)//å‡å¦‚æˆ‘æ˜¯çº¢æ–¹ï¼Œåšå‡ºå†³ç­–
 	{
 		for (int j(0); j < redchess_num; j++)
 		{
@@ -555,7 +631,7 @@ int gen_op(vector<int> &A, vector<chesser>&B, int pos)
 	return 0;
 }
 
-double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
+double mymin(int player, int depth, vector<chesser>&A)//æˆ‘æ–¹èµ°
 {
 	if (depth == 0 || check_win(A))
 	{
@@ -579,7 +655,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 		if (op == 0)
 		{
 
-			if (mypos == 0)//ÎÒÊÇºì·½
+			if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 			{
 				A[op_target].lpos += 1;
 				int i1(0);
@@ -589,7 +665,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 				pro = count_pro(op_target, A);
 				for (; i1 < A.size(); i1++)
 				{
-					if (A[i1].hpos == A[op_target].hpos&&A[i1].lpos == A[op_target].lpos&&op_target != i1)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+					if (A[i1].hpos == A[op_target].hpos&&A[i1].lpos == A[op_target].lpos&&op_target != i1)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 					{
 						I = A[i1];
 						A.erase(A.begin() + i1);
@@ -621,7 +697,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 
 				for (; i < A.size(); i++)
 				{
-					if (A[i].hpos == A[op_target].hpos&&A[i].lpos == A[op_target].lpos&&op_target != i)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+					if (A[i].hpos == A[op_target].hpos&&A[i].lpos == A[op_target].lpos&&op_target != i)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 					{
 						I = A[i];
 						eat = 1;
@@ -647,9 +723,9 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 		{
 			if (op == 1)
 			{
-				if (player == 0)//ÊÇÎÒÏÂÆå
+				if (player == 0)//æ˜¯æˆ‘ä¸‹æ£‹
 				{
-					if (mypos == 0)//ÎÒÊÇºì·½
+					if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 					{
 						double pro(0.0);
 						pro = count_pro(op_target, A);
@@ -660,7 +736,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 						int i3(0);
 						for (; i3 < A.size(); i3++)
 						{
-							if (A[i3].hpos == A[op_target].hpos&&A[i3].lpos == A[op_target].lpos&&op_target != i3)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i3].hpos == A[op_target].hpos&&A[i3].lpos == A[op_target].lpos&&op_target != i3)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i3];
 								A.erase(A.begin() + i3);
@@ -693,7 +769,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 						pro = count_pro(op_target, A);
 						for (; i4 < A.size(); i4++)
 						{
-							if (A[i4].hpos == A[op_target].hpos&&A[i4].lpos == A[op_target].lpos&&op_target != i4)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i4].hpos == A[op_target].hpos&&A[i4].lpos == A[op_target].lpos&&op_target != i4)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i4];
 								A.erase(A.begin() + i4);
@@ -719,9 +795,9 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 			}
 			else
 			{
-				if (player == 0)//ÊÇÎÒÏÂÆå
+				if (player == 0)//æ˜¯æˆ‘ä¸‹æ£‹
 				{
-					if (mypos == 0)//ÎÒÊÇºì·½
+					if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 					{
 						int i7(0);
 						chesser I;
@@ -731,7 +807,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 						pro = count_pro(op_target, A);
 						for (; i7 < A.size(); i7++)
 						{
-							if (A[i7].hpos == A[op_target].hpos&&A[i7].lpos == A[op_target].lpos&&op_target != i7)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i7].hpos == A[op_target].hpos&&A[i7].lpos == A[op_target].lpos&&op_target != i7)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i7];
 								A.erase(A.begin() + i7);
@@ -762,7 +838,7 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 						pro = count_pro(op_target, A);
 						for (; i8 < A.size(); i8++)
 						{
-							if (A[i8].hpos == A[op_target].hpos&&A[i8].lpos == A[op_target].lpos&&op_target != i8)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i8].hpos == A[op_target].hpos&&A[i8].lpos == A[op_target].lpos&&op_target != i8)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i8];
 								eat = 1;
@@ -788,18 +864,18 @@ double mymin(int player, int depth, vector<chesser>&A)//ÎÒ·½×ß
 		}
 	}
 
-		ofstream outfile("profit_cal.txt", ios::app);
-		if (!outfile)
-		{
-			cout << "ÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
-			return 1;
-		}
-		outfile << depth << "   " << temp_min << endl;
-		return temp_min;
-	
+	ofstream outfile("profit_cal.txt", ios::app);
+	if (!outfile)
+	{
+		cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
+		return 1;
+	}
+	outfile << depth << "   " << temp_min << endl;
+	return temp_min;
+
 }
 
-double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
+double mymax(int player, int depth, vector<chesser>&A)//player=0ä»£è¡¨æ˜¯æˆ‘ç€æ‰‹ä¸‹æ£‹
 {
 	if (depth == 0 || check_win(A))
 	{
@@ -821,6 +897,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 	int mysize = All_op.size();
 	for (int j(0); j < (mysize / 2); j++)
 	{
+
 		int op_target(0);
 		int op(0);
 		op_target = All_op[j * 2];
@@ -831,7 +908,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 		{
 
 			{
-				if (mypos == 0)//ÎÒÊÇºì·½£¬ÄÇÃ´¶ÔÊÖ¾ÍÊÇÀ¶·½
+				if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹ï¼Œé‚£ä¹ˆå¯¹æ‰‹å°±æ˜¯è“æ–¹
 				{
 					chesser I;
 					int eat(0);
@@ -840,7 +917,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 
 					for (; i2 < A.size(); i2++)
 					{
-						if (A[i2].hpos == A[op_target].hpos&&A[i2].lpos == A[op_target].lpos&&op_target != i2)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (A[i2].hpos == A[op_target].hpos&&A[i2].lpos == A[op_target].lpos&&op_target != i2)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = A[i2];
 							A.erase(A.begin() + i2);
@@ -869,7 +946,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 					int i15(0);
 					for (; i15 < A.size(); i15++)
 					{
-						if (A[i15].hpos == A[op_target].hpos&&A[i15].lpos == A[op_target].lpos&&op_target != i15)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (A[i15].hpos == A[op_target].hpos&&A[i15].lpos == A[op_target].lpos&&op_target != i15)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = A[i15];
 							A.erase(A.begin() + i15);
@@ -898,7 +975,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 			{
 
 				{
-					if (mypos == 0)//ÎÒÊÇºì·½£¬ÄÇÃ´¶ÔÊÖ¾ÍÊÇÀ¶·½
+					if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹ï¼Œé‚£ä¹ˆå¯¹æ‰‹å°±æ˜¯è“æ–¹
 					{
 						int i5(0);
 						chesser I;
@@ -907,7 +984,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 						A[op_target].hpos -= 1;
 						for (; i5 < A.size(); i5++)
 						{
-							if (A[i5].hpos == A[op_target].hpos&&A[i5].lpos == A[op_target].lpos&&op_target != i5)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i5].hpos == A[op_target].hpos&&A[i5].lpos == A[op_target].lpos&&op_target != i5)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i5];
 								eat = 1;
@@ -938,7 +1015,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 						A[op_target].hpos += 1;
 						for (; i6 < A.size(); i6++)
 						{
-							if (A[i6].hpos == A[op_target].hpos&&A[i6].lpos == A[op_target].lpos&&op_target != i6)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i6].hpos == A[op_target].hpos&&A[i6].lpos == A[op_target].lpos&&op_target != i6)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i6];
 								A.erase(A.begin() + i6);
@@ -966,7 +1043,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 			{
 
 				{
-					if (mypos == 0)//ÎÒÊÇºì·½£¬ÄÇÃ´¶ÔÊÖ¾ÍÊÇÀ¶·½
+					if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹ï¼Œé‚£ä¹ˆå¯¹æ‰‹å°±æ˜¯è“æ–¹
 					{
 						int i9(0);
 						int eat(0);
@@ -974,7 +1051,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 						A[op_target].hpos -= 1;
 						for (; i9 < A.size(); i9++)
 						{
-							if (A[i9].hpos == A[op_target].hpos&&A[i9].lpos == A[op_target].lpos&&op_target != i9)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i9].hpos == A[op_target].hpos&&A[i9].lpos == A[op_target].lpos&&op_target != i9)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								I = A[i9];
 								eat = 1;
@@ -1003,7 +1080,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 						A[op_target].hpos += 1;
 						for (; i10 < A.size(); i10++)
 						{
-							if (A[i10].hpos == A[op_target].hpos&&A[i10].lpos == A[op_target].lpos&&op_target != i10)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+							if (A[i10].hpos == A[op_target].hpos&&A[i10].lpos == A[op_target].lpos&&op_target != i10)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 							{
 								eat = 1;
 								I = A[i10];
@@ -1032,7 +1109,7 @@ double mymax(int player, int depth, vector<chesser>&A)//player=0´ú±íÊÇÎÒ×ÅÊÖÏÂÆå
 	ofstream outfile("profit_cal.txt", ios::app);
 	if (!outfile)
 	{
-		cout << "ÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		return 1;
 	}
 	outfile << depth << "   " << temp_max << endl;
@@ -1069,8 +1146,8 @@ int print_chess(vector<chesser> &A)
 
 int Einstein::handle()
 {
-	
 	int dif_num(0);
+
 	clientsocket.recvMsg();
 	string s = clientsocket.getRecvMsg();
 	if (s.size() == 0)
@@ -1079,31 +1156,32 @@ int Einstein::handle()
 	}
 	if (s == "close")
 	{
+
 		totalround++;
 		string result;
 		if (temp_flag == 1)
 		{
 			if (mypos == 1)
 			{
-				cout << "¶ÔÊÖÊ¤Àû " << endl;
-				result += "¶ÔÊÖÊ¤Àû ";
+				cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+				result += "å¯¹æ‰‹èƒœåˆ© ";
 				loseround++;
 			}
 			else
 			{
-				cout << "ÎÒÊ¤Àû" << endl;
-				result += "ÎÒÊ¤Àû ";
+				cout << "æˆ‘èƒœåˆ©" << endl;
+				result += "æˆ‘èƒœåˆ© ";
 				winround++;
 			}
 			myend = clock();
-			runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+			runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 			stringstream la;
 			la << runtime;
 			string hrhr;
 			la >> hrhr;
 			result += hrhr;
 			logger.push_back(result);
-			cout << "using time£º " << runtime << endl;
+			cout << "using timeï¼š " << runtime << endl;
 		}
 		else
 		{
@@ -1111,44 +1189,45 @@ int Einstein::handle()
 			{
 				if (mypos == 0)
 				{
-					cout << "¶ÔÊÖÊ¤Àû " << endl;
-					result += "¶ÔÊÖÊ¤Àû ";
+					cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+					result += "å¯¹æ‰‹èƒœåˆ© ";
 					loseround++;
 				}
 				else
 				{
-					cout << "ÎÒÊ¤Àû " << endl;
-					result += "ÎÒÊ¤Àû ";
+					cout << "æˆ‘èƒœåˆ© " << endl;
+					result += "æˆ‘èƒœåˆ© ";
 					winround++;
 				}
 				myend = clock();
-				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 				stringstream la;
 				la << runtime;
 				string hrhr;
 				la >> hrhr;
 				result += hrhr;
-				cout << "using time£º " << runtime << endl;
+				cout << "using timeï¼š " << runtime << endl;
 				logger.push_back(result);
 			}
 			else
 			{
-				cout << "¶ÔÊÖÊ¤Àû " << endl;
-				result += "¶ÔÊÖÊ¤Àû ";
+				cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+				result += "å¯¹æ‰‹èƒœåˆ© ";
 				loseround++;
 				myend = clock();
-				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 				stringstream la;
 				la << runtime;
 				string hrhr;
 				la >> hrhr;
 				result += hrhr;
-				cout << "using time£º " << runtime<< endl;
+				cout << "using timeï¼š " << runtime << endl;
 				logger.push_back(result);
 			}
-			mystart = clock();
-			myround = 0;
+			
 		}
+		mystart = clock();
+		myround = 0;
 		return 0;
 	}
 	parse(s);
@@ -1159,11 +1238,6 @@ int Einstein::handle()
 	else
 		mypos = 0;
 	intial_chessboard();
-	sort(All_chess.begin(), All_chess.end(), comp);
-	for (int i(0); i < All_chess.size(); i++)
-	{
-		count_pro(i, All_chess);
-	}
 	if (myround == 0)
 	{
 		record_pre();
@@ -1177,81 +1251,80 @@ int Einstein::handle()
 		{
 			if (mypos == 1)
 			{
-				cout << "¶ÔÊÖÊ¤Àû " << endl;
-				result += "¶ÔÊÖÊ¤Àû ";
+				cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+				result += "å¯¹æ‰‹èƒœåˆ© ";
 				loseround++;
 			}
 			else
 			{
-				cout << "ÎÒÊ¤Àû" << endl;
-				result += "ÎÒÊ¤Àû ";
+				cout << "æˆ‘èƒœåˆ©" << endl;
+				result += "æˆ‘èƒœåˆ© ";
 				winround++;
 			}
 			myend = clock();
-			runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+			runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 			stringstream la;
 			la << runtime;
 			string hrhr;
 			la >> hrhr;
 			result += hrhr;
 			logger.push_back(result);
-			cout << "using time£º " << runtime / 1000 << endl;
+			cout << "using timeï¼š " << runtime << endl;
 		}
-		else 
+		else
 		{
 			if (temp_flag == 2)
 			{
 				if (mypos == 0)
 				{
-					cout << "¶ÔÊÖÊ¤Àû " << endl;
-					result += "¶ÔÊÖÊ¤Àû ";
+					cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+					result += "å¯¹æ‰‹èƒœåˆ© ";
 					loseround++;
 				}
 				else
 				{
-					cout << "ÎÒÊ¤Àû " << endl;
-					result += "ÎÒÊ¤Àû ";
+					cout << "æˆ‘èƒœåˆ© " << endl;
+					result += "æˆ‘èƒœåˆ© ";
 					winround++;
 				}
 				myend = clock();
-				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 				stringstream la;
 				la << runtime;
 				string hrhr;
 				la >> hrhr;
 				result += hrhr;
-				cout << "using time£º " << runtime << endl;
+				cout << "using timeï¼š " << runtime << endl;
 				logger.push_back(result);
 			}
 			else
 			{
-				cout << "¶ÔÊÖÊ¤Àû " << endl;
-				result += "¶ÔÊÖÊ¤Àû ";
+				cout << "å¯¹æ‰‹èƒœåˆ© " << endl;
+				result += "å¯¹æ‰‹èƒœåˆ© ";
 				loseround++;
 				myend = clock();
-				runtime = (double)(myend - mystart) / CLOCKS_PER_SEC;
+				runtime = ((double)(myend - mystart) / CLOCKS_PER_SEC*100);
 				stringstream la;
 				la << runtime;
 				string hrhr;
 				la >> hrhr;
 				result += hrhr;
-				cout << "using time£º " << runtime  << endl;
+				cout << "using timeï¼š " << runtime << endl;
 				logger.push_back(result);
 			}
-			mystart = clock();
-			myround = 0;
+		
 		}
+		mystart = clock();
+		myround = 0;
 	}
 	myround++;
 	record_pre();
 	//tiaoshi
 	sort(All_chess.begin(), All_chess.end(), comp);
-	sort(All_chess.begin(), All_chess.end(), comp);
 	for (int i(0); i < All_chess.size(); i++)
 	{
 		count_pos(All_chess[i]);
 	}
-	sort(All_chess.begin(), All_chess.end(), comp);
 	int target = find_nearest(dice);
 	string temp2;
 	temp2 = to_string(All_chess[target].chess_id);
@@ -1261,7 +1334,7 @@ int Einstein::handle()
 	int profit_pos(0);
 	double temp_min(-1000.0);
 	int op_target = target;
-	
+
 	double ws1(0.0);
 	double ws2(0.0);
 	double ws3(0.0);
@@ -1272,7 +1345,7 @@ int Einstein::handle()
 			if (ws == 0)
 			{
 
-				if (mypos == 0)//ÎÒÊÇºì·½
+				if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 				{
 					All_chess[target].lpos += 1;
 					int i1(0);
@@ -1280,7 +1353,7 @@ int Einstein::handle()
 					int eat(0);
 					for (; i1 < All_chess.size(); i1++)
 					{
-						if (All_chess[i1].hpos == All_chess[target].hpos&&All_chess[i1].lpos == All_chess[op_target].lpos&&op_target != i1)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i1].hpos == All_chess[target].hpos&&All_chess[i1].lpos == All_chess[op_target].lpos&&op_target != i1)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i1];
 							All_chess.erase(All_chess.begin() + i1);
@@ -1326,7 +1399,7 @@ int Einstein::handle()
 					int i(0);
 					for (; i < All_chess.size(); i++)
 					{
-						if (All_chess[i].hpos == All_chess[op_target].hpos&&All_chess[i].lpos == All_chess[op_target].lpos&&op_target != i)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i].hpos == All_chess[op_target].hpos&&All_chess[i].lpos == All_chess[op_target].lpos&&op_target != i)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i];
 							eat = 1;
@@ -1369,7 +1442,7 @@ int Einstein::handle()
 			if (ws == 1)
 			{
 
-				if (mypos == 0)//ÎÒÊÇºì·½
+				if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 				{
 					chesser I;
 					int eat(0);
@@ -1378,7 +1451,7 @@ int Einstein::handle()
 					int i3(0);
 					for (; i3 < All_chess.size(); i3++)
 					{
-						if (All_chess[i3].hpos == All_chess[op_target].hpos&&All_chess[i3].lpos == All_chess[op_target].lpos&&op_target != i3)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i3].hpos == All_chess[op_target].hpos&&All_chess[i3].lpos == All_chess[op_target].lpos&&op_target != i3)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i3];
 							All_chess.erase(All_chess.begin() + i3);
@@ -1426,7 +1499,7 @@ int Einstein::handle()
 					chesser I;
 					for (; i4 < All_chess.size(); i4++)
 					{
-						if (All_chess[i4].hpos == All_chess[op_target].hpos&&All_chess[i4].lpos == All_chess[op_target].lpos&&op_target != i4)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i4].hpos == All_chess[op_target].hpos&&All_chess[i4].lpos == All_chess[op_target].lpos&&op_target != i4)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i4];
 							All_chess.erase(All_chess.begin() + i4);
@@ -1469,7 +1542,7 @@ int Einstein::handle()
 			}
 			if (ws == 2)
 			{
-				if (mypos == 0)//ÎÒÊÇºì·½
+				if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 				{
 					int i7(0);
 					chesser I;
@@ -1477,7 +1550,7 @@ int Einstein::handle()
 					All_chess[op_target].hpos += 1;
 					for (; i7 < All_chess.size(); i7++)
 					{
-						if (All_chess[i7].hpos == All_chess[op_target].hpos&&All_chess[i7].lpos == All_chess[op_target].lpos&&op_target != i7)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i7].hpos == All_chess[op_target].hpos&&All_chess[i7].lpos == All_chess[op_target].lpos&&op_target != i7)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i7];
 							All_chess.erase(All_chess.begin() + i7);
@@ -1523,7 +1596,7 @@ int Einstein::handle()
 					All_chess[op_target].hpos -= 1;
 					for (; i8 < All_chess.size(); i8++)
 					{
-						if (All_chess[i8].hpos == All_chess[op_target].hpos&&All_chess[i8].lpos == All_chess[op_target].lpos&&op_target != i8)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+						if (All_chess[i8].hpos == All_chess[op_target].hpos&&All_chess[i8].lpos == All_chess[op_target].lpos&&op_target != i8)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 						{
 							I = All_chess[i8];
 							eat = 1;
@@ -1565,7 +1638,7 @@ int Einstein::handle()
 			sort(All_chess.begin(), All_chess.end(), comp);
 		}
 	}
-	
+
 	if (profit_pos == 0)
 	{
 		if (mypos == 1)
@@ -1607,7 +1680,7 @@ int Einstein::handle()
 	if (profit_pos == 0)
 	{
 
-		if (mypos == 0)//ÎÒÊÇºì·½
+		if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 		{
 			All_chess[target].lpos += 1;
 			int i1(0);
@@ -1615,7 +1688,7 @@ int Einstein::handle()
 			int eat(0);
 			for (; i1 < All_chess.size(); i1++)
 			{
-				if (All_chess[i1].hpos == All_chess[target].hpos&&All_chess[i1].lpos == All_chess[op_target].lpos&&op_target != i1)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i1].hpos == All_chess[target].hpos&&All_chess[i1].lpos == All_chess[op_target].lpos&&op_target != i1)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i1];
 					All_chess.erase(All_chess.begin() + i1);
@@ -1623,7 +1696,7 @@ int Einstein::handle()
 					break;
 				}
 			}
-			
+
 		}
 		else
 		{
@@ -1633,7 +1706,7 @@ int Einstein::handle()
 			int i(0);
 			for (; i < All_chess.size(); i++)
 			{
-				if (All_chess[i].hpos == All_chess[op_target].hpos&&All_chess[i].lpos == All_chess[op_target].lpos&&op_target != i)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i].hpos == All_chess[op_target].hpos&&All_chess[i].lpos == All_chess[op_target].lpos&&op_target != i)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i];
 					eat = 1;
@@ -1643,10 +1716,10 @@ int Einstein::handle()
 			}
 		}
 	}
-	if (profit_pos== 1)
+	if (profit_pos == 1)
 	{
 
-		if (mypos == 0)//ÎÒÊÇºì·½
+		if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 		{
 			chesser I;
 			int eat(0);
@@ -1655,7 +1728,7 @@ int Einstein::handle()
 			int i3(0);
 			for (; i3 < All_chess.size(); i3++)
 			{
-				if (All_chess[i3].hpos == All_chess[op_target].hpos&&All_chess[i3].lpos == All_chess[op_target].lpos&&op_target != i3)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i3].hpos == All_chess[op_target].hpos&&All_chess[i3].lpos == All_chess[op_target].lpos&&op_target != i3)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i3];
 					All_chess.erase(All_chess.begin() + i3);
@@ -1673,7 +1746,7 @@ int Einstein::handle()
 			chesser I;
 			for (; i4 < All_chess.size(); i4++)
 			{
-				if (All_chess[i4].hpos == All_chess[op_target].hpos&&All_chess[i4].lpos == All_chess[op_target].lpos&&op_target != i4)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i4].hpos == All_chess[op_target].hpos&&All_chess[i4].lpos == All_chess[op_target].lpos&&op_target != i4)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i4];
 					All_chess.erase(All_chess.begin() + i4);
@@ -1686,7 +1759,7 @@ int Einstein::handle()
 	}
 	if (profit_pos == 2)
 	{
-		if (mypos == 0)//ÎÒÊÇºì·½
+		if (mypos == 0)//æˆ‘æ˜¯çº¢æ–¹
 		{
 			int i7(0);
 			chesser I;
@@ -1694,7 +1767,7 @@ int Einstein::handle()
 			All_chess[op_target].hpos += 1;
 			for (; i7 < All_chess.size(); i7++)
 			{
-				if (All_chess[i7].hpos == All_chess[op_target].hpos&&All_chess[i7].lpos == All_chess[op_target].lpos&&op_target != i7)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i7].hpos == All_chess[op_target].hpos&&All_chess[i7].lpos == All_chess[op_target].lpos&&op_target != i7)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i7];
 					All_chess.erase(All_chess.begin() + i7);
@@ -1711,7 +1784,7 @@ int Einstein::handle()
 			All_chess[op_target].hpos -= 1;
 			for (; i8 < All_chess.size(); i8++)
 			{
-				if (All_chess[i8].hpos == All_chess[op_target].hpos&&All_chess[i8].lpos == All_chess[op_target].lpos&&op_target != i8)//ÅĞ¶ÏÊÇ·ñÓĞ³Ôµô¶ÔÊÖ
+				if (All_chess[i8].hpos == All_chess[op_target].hpos&&All_chess[i8].lpos == All_chess[op_target].lpos&&op_target != i8)//åˆ¤æ–­æ˜¯å¦æœ‰åƒæ‰å¯¹æ‰‹
 				{
 					I = All_chess[i8];
 					eat = 1;
@@ -1719,10 +1792,10 @@ int Einstein::handle()
 					break;
 				}
 			}
-			
+
 		}
 	}
-	temp_flag=check_win(All_chess);
+	temp_flag = check_win(All_chess);
 	sort(All_chess.begin(), All_chess.end(), comp);
 	return 1;
 }
@@ -1855,7 +1928,7 @@ int Einstein::writelog()
 	ofstream outfile(finalpath, ios::app);
 	if (!outfile)
 	{
-		cout << "ÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "æ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		return 1;
 	}
 	list<string>::iterator w;
