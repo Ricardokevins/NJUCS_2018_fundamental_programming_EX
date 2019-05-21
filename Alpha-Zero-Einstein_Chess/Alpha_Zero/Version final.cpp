@@ -65,6 +65,7 @@ int adj_fac()//自动调整参数学习的函数
 	return 0;
 
 }
+
 vector<chesser> All_chess;
 int mychessboard[5][5];
 int prechessboard[5][5];
@@ -1146,6 +1147,7 @@ int print_chess(vector<chesser> &A)
 int Einstein::handle()
 {
 	int dif_num(0);
+
 	clientsocket.recvMsg();
 	string s = clientsocket.getRecvMsg();
 	if (s.size() == 0)
@@ -1154,6 +1156,7 @@ int Einstein::handle()
 	}
 	if (s == "close")
 	{
+
 		totalround++;
 		string result;
 		if (temp_flag == 1)
@@ -1178,7 +1181,7 @@ int Einstein::handle()
 			la >> hrhr;
 			result += hrhr;
 			logger.push_back(result);
-			cout << "using time： " << runtime << endl;
+			cout << "using time： " << runtime / 1000 << endl;
 		}
 		else
 		{
@@ -1224,6 +1227,7 @@ int Einstein::handle()
 			mystart = clock();
 			myround = 0;
 		}
+
 		return 0;
 	}
 	parse(s);
@@ -1234,11 +1238,6 @@ int Einstein::handle()
 	else
 		mypos = 0;
 	intial_chessboard();
-	sort(All_chess.begin(), All_chess.end(), comp);
-	for (int i(0); i < All_chess.size(); i++)
-	{
-		count_pro(i, All_chess);
-	}
 	if (myround == 0)
 	{
 		record_pre();
