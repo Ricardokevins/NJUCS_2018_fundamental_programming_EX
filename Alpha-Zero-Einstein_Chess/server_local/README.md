@@ -1,1 +1,1 @@
-it is the stage where the code run
+#### 这个是整个代码的对战平台，支持机器对战以及双人对战
