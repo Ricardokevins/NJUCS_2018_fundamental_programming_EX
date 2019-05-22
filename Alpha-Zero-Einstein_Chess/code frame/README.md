@@ -1,1 +1,1 @@
-it is the basic code that must be contained
+### 这里是助教给的基本的代码框架，包括有服务器的通信功能，需要结合对战程序的cpp文件进行执行
