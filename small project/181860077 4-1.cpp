@@ -1,5 +1,5 @@
 // Please use UTF-8 encoding so that the comments can be displayed correctly.
-// ±ê×¢TODOµÄÊÇÄãĞèÒªÍêÉÆµÄµØ·½
+// æ ‡æ³¨TODOçš„æ˜¯ä½ éœ€è¦å®Œå–„çš„åœ°æ–¹
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -26,7 +26,7 @@ public:
 
 	static vector<Card> get_new_deck();
 
-	// ÖØÔØ²Ù×÷·û£¬Ê¹µÃÅÆÃæ¿ÉÒÔ±È½Ï´óĞ¡
+	// é‡è½½æ“ä½œç¬¦ï¼Œä½¿å¾—ç‰Œé¢å¯ä»¥æ¯”è¾ƒå¤§å°
 	bool operator <(const Card &other) const;
 	bool operator >(const Card &other) const;
 };
@@ -34,37 +34,37 @@ public:
 
 class DDZPlayer {
 protected:
-	string name;  // Íæ¼ÒÃû
-	int position;  // ÄãµÄÎ»ÖÃ±àºÅ£¬0ÎªµØÖ÷£¬1ÎªµØÖ÷ÏÂ¼Ò£¬2ÎªµØÖ÷ÉÏ¼Ò
-	vector<Card> hand;  // ÊÖÅÆ
+	string name;  // ç©å®¶å
+	int position;  // ä½ çš„ä½ç½®ç¼–å·ï¼Œ0ä¸ºåœ°ä¸»ï¼Œ1ä¸ºåœ°ä¸»ä¸‹å®¶ï¼Œ2ä¸ºåœ°ä¸»ä¸Šå®¶
+	vector<Card> hand;  // æ‰‹ç‰Œ
 
-	int prePos;  //ÉÏÒ»¸ö³öÅÆµÄÈËÎ»ÖÃ±àºÅ£¬-1±íÊ¾»¹Ã»ÓĞÈË³ö¹ıÅÆ
-	vector<Card> prePlay;  // ÉÏÒ»¸ö³öÅÆµÄÈË³öÁËÊ²Ã´ÅÆ£¿
+	int prePos;  //ä¸Šä¸€ä¸ªå‡ºç‰Œçš„äººä½ç½®ç¼–å·ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡æœ‰äººå‡ºè¿‡ç‰Œ
+	vector<Card> prePlay;  // ä¸Šä¸€ä¸ªå‡ºç‰Œçš„äººå‡ºäº†ä»€ä¹ˆç‰Œï¼Ÿ
 
-	bool legal(vector<Card> cards);  // ÅĞ¶Ïµ±Ç°´ò³öcardsÊÇ·ñºÏ·¨
-	void substractFromHand(vector<Card> cards);  // ´Óµ±Ç°ÊÖÅÆÖĞÉ¾È¥cardsÖĞµÄÅÆ
+	bool legal(vector<Card> cards);  // åˆ¤æ–­å½“å‰æ‰“å‡ºcardsæ˜¯å¦åˆæ³•
+	void substractFromHand(vector<Card> cards);  // ä»å½“å‰æ‰‹ç‰Œä¸­åˆ å»cardsä¸­çš„ç‰Œ
 public:
-	DDZPlayer(string name);  // ¹¹Ôìº¯Êı£¬³õÊ¼»¯Íæ¼ÒÃû
+	DDZPlayer(string name);  // æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–ç©å®¶å
 	string getName();
-	virtual void draw(Card card);  // ½«cardsÖĞµÄÅÆ¼ÓÈëÊÖÅÆ
-	virtual void draw(vector<Card> cards);  // ½«cardsÖĞµÄÅÆ¼ÓÈëÊÖÅÆ
-	virtual void setPosition(int pos);  // ³õÊ¼»¯ÓÃ£¬¾ö¶¨µØÖ÷ºóÉèÖÃ
-	virtual void showHand();  // ´òÓ¡ÊÖÅÆ
-	virtual void observed(int pos, vector<Card> cards);  // ¹Û²âµ½Íæ¼Ò³öÅÆ
-	virtual vector<Card> play();  // ÂÖµ½×Ô¼ºÊ±¾ö¶¨³öÊ²Ã´ÅÆ
-	bool leftNoCard();  // ·µ»ØÊÇ·ñ´òÍêÁËÅÆ£¿
+	virtual void draw(Card card);  // å°†cardsä¸­çš„ç‰ŒåŠ å…¥æ‰‹ç‰Œ
+	virtual void draw(vector<Card> cards);  // å°†cardsä¸­çš„ç‰ŒåŠ å…¥æ‰‹ç‰Œ
+	virtual void setPosition(int pos);  // åˆå§‹åŒ–ç”¨ï¼Œå†³å®šåœ°ä¸»åè®¾ç½®
+	virtual void showHand();  // æ‰“å°æ‰‹ç‰Œ
+	virtual void observed(int pos, vector<Card> cards);  // è§‚æµ‹åˆ°ç©å®¶å‡ºç‰Œ
+	virtual vector<Card> play();  // è½®åˆ°è‡ªå·±æ—¶å†³å®šå‡ºä»€ä¹ˆç‰Œ
+	bool leftNoCard();  // è¿”å›æ˜¯å¦æ‰“å®Œäº†ç‰Œï¼Ÿ
 };
 
 
 class DDZGame {
 private:
-	static int my_random(int i);  // Ï´ÅÆÊ±ÓÃµ½µÄËæ»úº¯Êı
-	vector<DDZPlayer*> players;  // ±£´æÈı¸öÍæ¼ÒµÄÖ¸Õë
-	void showCards(vector<Card> cards);  // Êä³öÒ»×éÅÆ
+	static int my_random(int i);  // æ´—ç‰Œæ—¶ç”¨åˆ°çš„éšæœºå‡½æ•°
+	vector<DDZPlayer*> players;  // ä¿å­˜ä¸‰ä¸ªç©å®¶çš„æŒ‡é’ˆ
+	void showCards(vector<Card> cards);  // è¾“å‡ºä¸€ç»„ç‰Œ
 
 public:
-	DDZGame(DDZPlayer *p1, DDZPlayer *p2, DDZPlayer *p3);  // ¹¹Ôìº¯Êı
-	void run();  // Ö´ĞĞÓÎÏ·Á÷³Ì
+	DDZGame(DDZPlayer *p1, DDZPlayer *p2, DDZPlayer *p3);  // æ„é€ å‡½æ•°
+	void run();  // æ‰§è¡Œæ¸¸æˆæµç¨‹
 };
 
 
@@ -126,7 +126,7 @@ bool Card::operator >(const Card &other) const {
 }
 
 DDZPlayer::DDZPlayer(string name) : name(name) {
-	// Íæ¼ÒÀàµÄ¹¹Ôìº¯Êı
+	// ç©å®¶ç±»çš„æ„é€ å‡½æ•°
 	prePos = -1;
 }
 
@@ -136,13 +136,13 @@ string DDZPlayer::getName() {
 
 bool DDZPlayer::legal(vector<Card> cards) {
 
-	// Í¨¹ıÉÏ¼Ò´ò³öµÄÅÆprePlayºÍÊÖÅÆhandÅĞ¶Ïcards×÷Îª´ò³öÅÆÊÇ·ñºÏ·¨
-	// TODO£º£¨µÚ¶şÌâ£©Çë²¹È«Õâ¸öº¯Êı
+	// é€šè¿‡ä¸Šå®¶æ‰“å‡ºçš„ç‰ŒprePlayå’Œæ‰‹ç‰Œhandåˆ¤æ–­cardsä½œä¸ºæ‰“å‡ºç‰Œæ˜¯å¦åˆæ³•
+	// TODOï¼šï¼ˆç¬¬äºŒé¢˜ï¼‰è¯·è¡¥å…¨è¿™ä¸ªå‡½æ•°
 	return true;
 }
 
 void DDZPlayer::substractFromHand(vector<Card> cards) {
-	// Õâ¸öº¯Êı´ÓhandÖĞÉ¾³ıcards¡£¼ÙÉècardsÖĞµÄÅÆhand¿ÉÒÔÄÃµÃ³öÀ´£¨·ñÔò»á³ö´í£©¡£
+	// è¿™ä¸ªå‡½æ•°ä»handä¸­åˆ é™¤cardsã€‚å‡è®¾cardsä¸­çš„ç‰Œhandå¯ä»¥æ‹¿å¾—å‡ºæ¥ï¼ˆå¦åˆ™ä¼šå‡ºé”™ï¼‰ã€‚
 	sort(hand.begin(), hand.end(), greater<Card>());
 	sort(cards.begin(), cards.end(), greater<Card>());
 	vector<Card>::iterator i = hand.begin(), k = cards.begin();
@@ -154,7 +154,7 @@ void DDZPlayer::substractFromHand(vector<Card> cards) {
 }
 
 void DDZPlayer::showHand() {
-	// Êä³öÍæ¼ÒÃûºÍÊÖÅÆ¡£
+	// è¾“å‡ºç©å®¶åå’Œæ‰‹ç‰Œã€‚
 	cout << name << " holds: ";
 	for (vector<Card>::iterator i = hand.begin(); i != hand.end(); ++i) {
 		cout << *i << " ";
@@ -163,13 +163,13 @@ void DDZPlayer::showHand() {
 }
 
 void DDZPlayer::draw(Card card) {
-	// ½«card¼ÓÈëÊÖÅÆ
+	// å°†cardåŠ å…¥æ‰‹ç‰Œ
 	hand.push_back(card);
 	sort(hand.begin(), hand.end(), greater<Card>());
 }
 
 void DDZPlayer::draw(vector<Card> cards) {
-	// ½«cardsÖĞµÄÅÆ¼ÓÈëÊÖÅÆ
+	// å°†cardsä¸­çš„ç‰ŒåŠ å…¥æ‰‹ç‰Œ
 	hand.insert(hand.end(), cards.begin(), cards.end());
 	sort(hand.begin(), hand.end(), greater<Card>());
 }
@@ -179,19 +179,19 @@ void DDZPlayer::setPosition(int pos) {
 }
 
 void DDZPlayer::observed(int pos, vector<Card> cards) {
-	// ½«ÉÏÒ»¸ö³öÅÆµÄÈËºÍ³öÁËÊ²Ã´ÅÆ¼ÇÂ¼ÏÂÀ´¡£
-	// Èç¹ûÄãÏë¼ÇÂ¼¸ü¶àµÄĞÅÏ¢¹©ÄãµÄ²ßÂÔÊ¹ÓÃ£¬¿ÉÒÔ¸Ä¶¯Õâ¸öº¯Êı¡£
-	// ÀıÈç£¬¼ÇÂ¼ÒÑ¾­ÓĞÄÄĞ©ÅÆ±»´ò³ö£¨¼ÇÅÆÆ÷£©£¬ÒÔÍÆ²â³¡ÉÏÊÇ·ñ¿ÉÄÜ»¹´æÔÚÕ¨µ¯¡£
+	// å°†ä¸Šä¸€ä¸ªå‡ºç‰Œçš„äººå’Œå‡ºäº†ä»€ä¹ˆç‰Œè®°å½•ä¸‹æ¥ã€‚
+	// å¦‚æœä½ æƒ³è®°å½•æ›´å¤šçš„ä¿¡æ¯ä¾›ä½ çš„ç­–ç•¥ä½¿ç”¨ï¼Œå¯ä»¥æ”¹åŠ¨è¿™ä¸ªå‡½æ•°ã€‚
+	// ä¾‹å¦‚ï¼Œè®°å½•å·²ç»æœ‰å“ªäº›ç‰Œè¢«æ‰“å‡ºï¼ˆè®°ç‰Œå™¨ï¼‰ï¼Œä»¥æ¨æµ‹åœºä¸Šæ˜¯å¦å¯èƒ½è¿˜å­˜åœ¨ç‚¸å¼¹ã€‚
 	if (cards.size() == 0) return;
 	prePos = pos;
 	prePlay = cards;
 }
 
 vector<Card> DDZPlayer::play() {
-	// ÂÖµ½Äã³öÅÆ£¬·µ»Ø´ò³öµÄÅÆ¡£
-	// TODO£º£¨µÚÒ»Ìâ£©ÇëÍêÉÆÕâ¸öº¯Êı
-	// Èç¹ûÄãÊ¹ÓÃ²»Í¬µÄÊı¾İ½á¹¹½øĞĞ´¦Àí£¬Äã¿ÉÒÔÏÖ½«hand±äÁ¿×ª»»ÎªÄãÊ¹ÓÃµÄ½á¹¹£¬
-	// ´¦Àí¹ıºóÔÙ½«´ò³öµÄÅÆ×ª»»Îªvector<Card>£¬´æÈëcard±äÁ¿¡£
+	// è½®åˆ°ä½ å‡ºç‰Œï¼Œè¿”å›æ‰“å‡ºçš„ç‰Œã€‚
+	// TODOï¼šï¼ˆç¬¬ä¸€é¢˜ï¼‰è¯·å®Œå–„è¿™ä¸ªå‡½æ•°
+	// å¦‚æœä½ ä½¿ç”¨ä¸åŒçš„æ•°æ®ç»“æ„è¿›è¡Œå¤„ç†ï¼Œä½ å¯ä»¥ç°å°†handå˜é‡è½¬æ¢ä¸ºä½ ä½¿ç”¨çš„ç»“æ„ï¼Œ
+	// å¤„ç†è¿‡åå†å°†æ‰“å‡ºçš„ç‰Œè½¬æ¢ä¸ºvector<Card>ï¼Œå­˜å…¥cardå˜é‡ã€‚
 	int A[18] = { 0 };
 	transferA(hand, A);
 	int B[18] = { 0 };
@@ -203,7 +203,7 @@ vector<Card> DDZPlayer::play() {
 	}
 	else
 	{
-		// Î»ÓÚprePosµÄÍæ¼Ò´ò³öÁËprePlayµÄÅÆ£¬ÄãĞèÒª³öÊ²Ã´ÅÆ£¿
+		// ä½äºprePosçš„ç©å®¶æ‰“å‡ºäº†prePlayçš„ç‰Œï¼Œä½ éœ€è¦å‡ºä»€ä¹ˆç‰Œï¼Ÿ
 		int C[18] = { 0 };
 		transferA(prePlay, C);
 		int type = 0;
@@ -218,13 +218,13 @@ vector<Card> DDZPlayer::play() {
 			transferB(cards, outputcard);
 	}
 
-	// ÄãĞèÒª±£Ö¤´ò³öµÄÅÆÊÇºÏ·¨µÄ
-	// assertº¯ÊıÔÚ²ÎÊıÎªfalseµÄÊ±ºò»áÊ¹³ÌĞò±¨´íÍË³ö¡£
-	// ÕâÑù×öµÄºÃ´¦ÊÇ£¬Èç¹ûÄãÓĞÃ»×¢Òâµ½µÄ´íÎóµ¼ÖÂ³ÌĞòÔÚ´Ë±¨´íÍË³ö£¬
-	// Äã¾ÍÖªµÀÊÇÔÚ³öÅÆµÄºÏ·¨ĞÔÉÏ³öÁËÎÊÌâ£¬¶ø²»ÓÃÅÅ²é³ÌĞòµÄÆäËû²¿·Ö¡£
+	// ä½ éœ€è¦ä¿è¯æ‰“å‡ºçš„ç‰Œæ˜¯åˆæ³•çš„
+	// assertå‡½æ•°åœ¨å‚æ•°ä¸ºfalseçš„æ—¶å€™ä¼šä½¿ç¨‹åºæŠ¥é”™é€€å‡ºã€‚
+	// è¿™æ ·åšçš„å¥½å¤„æ˜¯ï¼Œå¦‚æœä½ æœ‰æ²¡æ³¨æ„åˆ°çš„é”™è¯¯å¯¼è‡´ç¨‹åºåœ¨æ­¤æŠ¥é”™é€€å‡ºï¼Œ
+	// ä½ å°±çŸ¥é“æ˜¯åœ¨å‡ºç‰Œçš„åˆæ³•æ€§ä¸Šå‡ºäº†é—®é¢˜ï¼Œè€Œä¸ç”¨æ’æŸ¥ç¨‹åºçš„å…¶ä»–éƒ¨åˆ†ã€‚
 	// assert(legal(cards));
 
-	// ½«´ò³öµÄÅÆ´ÓÊÖÅÆÖĞÉ¾È¥
+	// å°†æ‰“å‡ºçš„ç‰Œä»æ‰‹ç‰Œä¸­åˆ å»
 	substractFromHand(cards);
 	//myshowCards(cards);
 	//-myshowCards(hand);
@@ -232,7 +232,7 @@ vector<Card> DDZPlayer::play() {
 }
 
 bool DDZPlayer::leftNoCard() {
-	// ·µ»Øµ±Ç°ÊÖÅÆÎª¿Õ
+	// è¿”å›å½“å‰æ‰‹ç‰Œä¸ºç©º
 	return hand.empty();
 }
 
@@ -252,7 +252,7 @@ const string Card::CARD_SUITS[] = {
 };
 
 vector<Card> Card::get_new_deck() {
-	// Éú³ÉÒ»¸±ĞÂÅÆ
+	// ç”Ÿæˆä¸€å‰¯æ–°ç‰Œ
 	vector<Card> deck;
 	for (int i = 0; i < N_CARD_VALUES - 2; ++i) {
 		for (int j = 0; j < N_CARD_SUITS; ++j) {
@@ -270,7 +270,7 @@ int DDZGame::my_random(int i) {
 }
 
 DDZGame::DDZGame(DDZPlayer *p1, DDZPlayer *p2, DDZPlayer *p3) {
-	// ÅÆ¾ÖÀàµÄ¹¹Ôìº¯Êı£¬ĞèÒª½ÓÊÜÈı¸öÍæ¼Ò×÷Îª²ÎÊı
+	// ç‰Œå±€ç±»çš„æ„é€ å‡½æ•°ï¼Œéœ€è¦æ¥å—ä¸‰ä¸ªç©å®¶ä½œä¸ºå‚æ•°
 	players.push_back(p1);
 	players.push_back(p2);
 	players.push_back(p3);
@@ -286,49 +286,49 @@ void DDZGame::showCards(vector<Card> cards) {
 }
 
 void DDZGame::run() {
-	// ¶·µØÖ÷ÓÎÏ·µÄÖ÷ÒªÁ÷³Ì
+	// æ–—åœ°ä¸»æ¸¸æˆçš„ä¸»è¦æµç¨‹
 
-	// È¡Ò»¸±ĞÂÅÆ²¢Ï´ÅÆ
+	// å–ä¸€å‰¯æ–°ç‰Œå¹¶æ´—ç‰Œ
 	vector<Card> deck = Card::get_new_deck();
 	random_shuffle(deck.begin(), deck.end(), my_random);
 
-	// Ã¿¸öÍæ¼Ò³é17ÕÅÅÆ£¬ÁôÏÂÈıÕÅµ×ÅÆ
+	// æ¯ä¸ªç©å®¶æŠ½17å¼ ç‰Œï¼Œç•™ä¸‹ä¸‰å¼ åº•ç‰Œ
 	for (int i = 0; i < 54 - 3; ++i)
 		players[i % 3]->draw(deck[i]);
 
-	// Ëæ»úÑ¡È¡µØÖ÷£¬·¢¸øµØÖ÷×îºóÈıÕÅÅÆ
-	// * Äã¿ÉÒÔÊµÏÖ×Ô¼ºµÄ½ĞµØÖ÷Á÷³Ì£¬
-	// * ÄãĞèÒªÔÚDDZPlayerÀàÀïÃæ¼ÓÈëÏàÓ¦µÄ±äÁ¿£¨´æ´¢ÆäËûÍæ¼Ò½ĞµØÖ÷µÄÇé¿ö£©
-	// * ºÍº¯Êıbool DDZPlayer::bid()£¨·µ»Ø×Ô¼ºÊÇ·ñÒª½ĞµØÖ÷£©¡£
-	// * Çë²ÎÔÄplay()º¯ÊıºÍ½ĞµØÖ÷µÄ¹æÔòÉè¼ÆÕâ¸öÁ÷³Ì¡£
+	// éšæœºé€‰å–åœ°ä¸»ï¼Œå‘ç»™åœ°ä¸»æœ€åä¸‰å¼ ç‰Œ
+	// * ä½ å¯ä»¥å®ç°è‡ªå·±çš„å«åœ°ä¸»æµç¨‹ï¼Œ
+	// * ä½ éœ€è¦åœ¨DDZPlayerç±»é‡Œé¢åŠ å…¥ç›¸åº”çš„å˜é‡ï¼ˆå­˜å‚¨å…¶ä»–ç©å®¶å«åœ°ä¸»çš„æƒ…å†µï¼‰
+	// * å’Œå‡½æ•°bool DDZPlayer::bid()ï¼ˆè¿”å›è‡ªå·±æ˜¯å¦è¦å«åœ°ä¸»ï¼‰ã€‚
+	// * è¯·å‚é˜…play()å‡½æ•°å’Œå«åœ°ä¸»çš„è§„åˆ™è®¾è®¡è¿™ä¸ªæµç¨‹ã€‚
 	int landlordPos = my_random(3);
 	for (int i = 54 - 3; i < 54; ++i)
 		players[landlordPos]->draw(deck[i]);
 	for (int i = 0; i < 3; ++i)
-		players[i]->setPosition((i + 3 - landlordPos) % 3); // ¼ÆËãÓëµØÖ÷µÄÏà¶ÔÎ»ÖÃ
+		players[i]->setPosition((i + 3 - landlordPos) % 3); // è®¡ç®—ä¸åœ°ä¸»çš„ç›¸å¯¹ä½ç½®
 	cout << players[landlordPos]->getName() << " is the landlord." << endl;
 	int currentPlayer = landlordPos;
 
 	while (true) {
-		// µ±Ç°Íæ¼Ò´òÅÆ
+		// å½“å‰ç©å®¶æ‰“ç‰Œ
 		vector<Card> currentCards = players[currentPlayer]->play();
 		cout << players[currentPlayer]->getName() << " plays:";
 		showCards(currentCards);
-		// ÆäËûÍæ¼Ò¿´µ½ÁË´ò³öµÄÅÆ¡££¨²¢²»ÊÇÖ»ÓĞÏÂ¼Ò¿´µ½£¬ÉÏ¼ÒÒ²ÄÜ¿´µ½£©
+		// å…¶ä»–ç©å®¶çœ‹åˆ°äº†æ‰“å‡ºçš„ç‰Œã€‚ï¼ˆå¹¶ä¸æ˜¯åªæœ‰ä¸‹å®¶çœ‹åˆ°ï¼Œä¸Šå®¶ä¹Ÿèƒ½çœ‹åˆ°ï¼‰
 		for (int i = 0; i < 3; ++i) {
-			// Íæ¼Ò¿´µ½µÄÎ»ÖÃ±àºÅ¶¼ÊÇ´ÓµØÖ÷Îª0¿ªÊ¼µÄ
+			// ç©å®¶çœ‹åˆ°çš„ä½ç½®ç¼–å·éƒ½æ˜¯ä»åœ°ä¸»ä¸º0å¼€å§‹çš„
 			int relativePos = (currentPlayer + 3 - landlordPos) % 3;
 			players[i]->observed(relativePos, currentCards);
 		}
 
-		// Èç¹û¸Õ³öÍêÅÆµÄÍæ¼ÒÃ»ÓĞÅÆÁËÓÎÏ·½áÊø
+		// å¦‚æœåˆšå‡ºå®Œç‰Œçš„ç©å®¶æ²¡æœ‰ç‰Œäº†æ¸¸æˆç»“æŸ
 		if (players[currentPlayer]->leftNoCard()) {
 			bool landlordwins = (currentPlayer == landlordPos);
 			cout << (landlordwins ? "Landlord wins!" : "Farmers win!") << endl;
 			break;
 		}
 
-		// ¼ÆËãÏÂÒ»¸öÍæ¼ÒµÄÏÂ±ê
+		// è®¡ç®—ä¸‹ä¸€ä¸ªç©å®¶çš„ä¸‹æ ‡
 		currentPlayer = (currentPlayer + 1) % 3;
 	}
 }
@@ -344,8 +344,8 @@ vector<Card> DDZHumanPlayer::play() {
 		while (iss >> c) {
 			cards.push_back(Card(c));
 		}
-		// ÏÖÔÚcardsÊÇÒ»¸övector<Card>£¬´æ´¢ÁËÓÃ»§ÊäÈëµÄÅÆ
-		// ÄãĞèÒª¼ì²âÊäÈëµÄÅÆÊÇ³ÖÓĞµÄÅÆ£¬²¢ÇÒºÏ·¨¡£ÇëÍê³Élegalº¯Êı¡£
+		// ç°åœ¨cardsæ˜¯ä¸€ä¸ªvector<Card>ï¼Œå­˜å‚¨äº†ç”¨æˆ·è¾“å…¥çš„ç‰Œ
+		// ä½ éœ€è¦æ£€æµ‹è¾“å…¥çš„ç‰Œæ˜¯æŒæœ‰çš„ç‰Œï¼Œå¹¶ä¸”åˆæ³•ã€‚è¯·å®Œæˆlegalå‡½æ•°ã€‚
 		if (legal(cards)) {
 			break;
 		}
@@ -399,7 +399,7 @@ void transferB(vector<Card> &cards, int *mycard)
 	}
 }
 
-int findmax(int *B, int *num)//num¾ÍÊÇÕÅÊı£¬·µ»ØµÄÊÇÅÆµÄÖµ
+int findmax(int *B, int *num)//numå°±æ˜¯å¼ æ•°ï¼Œè¿”å›çš„æ˜¯ç‰Œçš„å€¼
 {
 	int pos(3);
 	for (int i(3); i < 18; i++)
@@ -413,13 +413,13 @@ int findmax(int *B, int *num)//num¾ÍÊÇÕÅÊı£¬·µ»ØµÄÊÇÅÆµÄÖµ
 	return pos;
 }
 
-void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£¬cardm±£´æµÄÊÇÅÆµÄÊıÖµ£¨×îĞ¡µÄ£©£¬qÊÇ´øµÄÕÅÊı£¨ÖÖÀà£¬Ò»ÕÅ»¹ÊÇÒ»¶ÔµÄ£©£¬pÊÇÁ¬ĞøµÄÕÅÊı¡£
+void jiexi(int *B, int *type, int *cardm, int* q, int *p)//typeä¿å­˜çš„æ˜¯ç‰Œçš„ç§ç±»ï¼Œcardmä¿å­˜çš„æ˜¯ç‰Œçš„æ•°å€¼ï¼ˆæœ€å°çš„ï¼‰ï¼Œqæ˜¯å¸¦çš„å¼ æ•°ï¼ˆç§ç±»ï¼Œä¸€å¼ è¿˜æ˜¯ä¸€å¯¹çš„ï¼‰ï¼Œpæ˜¯è¿ç»­çš„å¼ æ•°ã€‚
 {
 	int allnum(0);
-	//¼ÆËã¶Ô·½µÄ³öÅÆÊı
+	//è®¡ç®—å¯¹æ–¹çš„å‡ºç‰Œæ•°
 	int initmax1(0);
 	int initmax2 = findmax(B, &initmax1);
-	if (initmax1 == 1)//Ë³×ÓµÄ¿ÉÄÜĞÔ
+	if (initmax1 == 1)//é¡ºå­çš„å¯èƒ½æ€§
 	{
 		if (B[16] == 1 && B[17] == 1)
 		{
@@ -443,7 +443,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 		}
 
 	}
-	if (initmax1 == 2)//ÅÅ³ıÁ¬¶ÔµÄ¿ÉÄÜĞÔ
+	if (initmax1 == 2)//æ’é™¤è¿å¯¹çš„å¯èƒ½æ€§
 	{
 		int doublenum(0);
 		for (int i(3); i < 18; i++)
@@ -461,7 +461,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			return;
 		}
 	}
-	for (int i(3); i < 18; i++)//¼ÆËã×ÜµÄÅÆÊı
+	for (int i(3); i < 18; i++)//è®¡ç®—æ€»çš„ç‰Œæ•°
 	{
 		allnum += B[i];
 	}
@@ -509,7 +509,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı´ø¶ş
+		if (maxnumzhang == 3)//ä¸‰å¸¦äºŒ
 		{
 			*type = 3;
 			*cardm = maxnumzhi;
@@ -521,7 +521,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//·É»ú²»´ø
+		if (maxnumzhang == 3)//é£æœºä¸å¸¦
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -529,7 +529,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			*p = 2;
 			return;
 		}
-		if (maxnumzhang == 4)//ËÄ´ø¶ş
+		if (maxnumzhang == 4)//å››å¸¦äºŒ
 		{
 			*type = 5;
 			*cardm = maxnumzhi;
@@ -541,7 +541,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//·É»ú´øÒ»
+		if (maxnumzhang == 3)//é£æœºå¸¦ä¸€
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -549,7 +549,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 			*p = 2;
 			return;
 		}
-		if (maxnumzhang == 4)//ËÄ´ø¶ş¶Ô
+		if (maxnumzhang == 4)//å››å¸¦äºŒå¯¹
 		{
 			*type = 5;
 			*cardm = maxnumzhi;
@@ -561,7 +561,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú²»´ø
+		if (maxnumzhang == 3)//ä¸‰é£æœºä¸å¸¦
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -574,7 +574,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//¶ş·É»ú´øÁ½¶Ô
+		if (maxnumzhang == 3)//äºŒé£æœºå¸¦ä¸¤å¯¹
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -587,7 +587,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú´øÒ»
+		if (maxnumzhang == 3)//ä¸‰é£æœºå¸¦ä¸€
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -600,7 +600,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	{
 		int maxnumzhang = 0;
 		int maxnumzhi = findmax(B, &maxnumzhang);
-		if (maxnumzhang == 3)//Èı·É»ú´ø¶ş
+		if (maxnumzhang == 3)//ä¸‰é£æœºå¸¦äºŒ
 		{
 			*type = 6;
 			*cardm = maxnumzhi;
@@ -611,7 +611,7 @@ void jiexi(int *B, int *type, int *cardm, int* q, int *p)//type±£´æµÄÊÇÅÆµÄÖÖÀà£
 	}
 
 }
-void initialop2(int *A, int *B)//AÊÇµ±Ç°Íæ¼ÒÊÖÅÆ£¬BÊÇËû±¾´Î³öÅÆ
+void initialop2(int *A, int *B)//Aæ˜¯å½“å‰ç©å®¶æ‰‹ç‰Œï¼ŒBæ˜¯ä»–æœ¬æ¬¡å‡ºç‰Œ
 {
 	for (int i(3); i < max; i++)
 	{
@@ -631,7 +631,7 @@ void initialop2(int *A, int *B)//AÊÇµ±Ç°Íæ¼ÒÊÖÅÆ£¬BÊÇËû±¾´Î³öÅÆ
 	}
 	for (int i(3); i < 12; i++)
 	{
-		int flag = 0;//²é¿´ÊÇ·ñÓĞË³×ÓµÄ´æÔÚ
+		int flag = 0;//æŸ¥çœ‹æ˜¯å¦æœ‰é¡ºå­çš„å­˜åœ¨
 		for (int j(i); j < 16; j++)
 		{
 			if (A[j] == 0)
@@ -732,13 +732,13 @@ int doublecard(int *cardnum, int q, int *B)
 	}
 	return -1;
 }
-int triblecard(int *cardnum, int q, int p, int *B)//qÊÇÆğÊ¼µã£¬pÊÇ´øµÄÅÆµÄÖÖÀà
+int triblecard(int *cardnum, int q, int p, int *B)//qæ˜¯èµ·å§‹ç‚¹ï¼Œpæ˜¯å¸¦çš„ç‰Œçš„ç§ç±»
 {
 	for (int i(q + 1); i < max; i++)
 	{
 		if (cardnum[i] > 2)
 		{
-			cardnum[i] -= 3;//ÕÅÊı¼õÉÙ±ÜÃâ¿ÉÄÜµÄÅÆÖØ¸´³ö
+			cardnum[i] -= 3;//å¼ æ•°å‡å°‘é¿å…å¯èƒ½çš„ç‰Œé‡å¤å‡º
 			B[i] += 3;
 			if (p == 0)
 			{
@@ -762,7 +762,7 @@ int triblecard(int *cardnum, int q, int p, int *B)//qÊÇÆğÊ¼µã£¬pÊÇ´øµÄÅÆµÄÖÖÀà
 					}
 				}
 			}
-			cardnum[i] += 3;//×éºÏÊ§°Ü¾ÍÖØĞÂ»ØÈ¥¼ÆËã
+			cardnum[i] += 3;//ç»„åˆå¤±è´¥å°±é‡æ–°å›å»è®¡ç®—
 			return -1;
 		}
 
@@ -845,14 +845,14 @@ int forthcard(int *cardnum, int q, int p, int *B)
 	}
 	return -1;
 }
-int planecard(int *cardnum, int q, int p, int s, int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ¡µÄÆğµã£¬È»ºóºóÃæ±íÊ¾µÄÊÇ´øµÄÕÅÊı£¬×îºóÊÇ·É»úµÄÁ¬ĞøÊıÄ¿
+int planecard(int *cardnum, int q, int p, int s, int *B)//ä»ç„¶æ˜¯qä»£è¡¨çš„æ˜¯ä¸‰çš„æœ€å°çš„èµ·ç‚¹ï¼Œç„¶ååé¢è¡¨ç¤ºçš„æ˜¯å¸¦çš„å¼ æ•°ï¼Œæœ€åæ˜¯é£æœºçš„è¿ç»­æ•°ç›®
 {
 	if (s == 2)
 	{
 		for (int i(q + 1); i < max - 1; i++)
 		{
 			int k(0);
-			for (; k < 2; k++)//´Óµ±Ç°µÄÆğµã¿ªÊ¼ÏòºóÃæÕÒs¸öÊıÖµµÄÅÆÊÇ·ñÒ²ÊÇ·É»ú
+			for (; k < 2; k++)//ä»å½“å‰çš„èµ·ç‚¹å¼€å§‹å‘åé¢æ‰¾sä¸ªæ•°å€¼çš„ç‰Œæ˜¯å¦ä¹Ÿæ˜¯é£æœº
 			{
 				if (cardnum[i + k] < 3)
 					break;
@@ -918,7 +918,7 @@ int planecard(int *cardnum, int q, int p, int s, int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ
 		for (int i(q + 1); i < max - 1; i++)
 		{
 			int k(0);
-			for (; k < 3; k++)//´Óµ±Ç°µÄÆğµã¿ªÊ¼ÏòºóÃæÕÒs¸öÊıÖµµÄÅÆÊÇ·ñÒ²ÊÇ·É»ú
+			for (; k < 3; k++)//ä»å½“å‰çš„èµ·ç‚¹å¼€å§‹å‘åé¢æ‰¾sä¸ªæ•°å€¼çš„ç‰Œæ˜¯å¦ä¹Ÿæ˜¯é£æœº
 			{
 				if (cardnum[i + k] < 3)
 					break;
@@ -996,12 +996,12 @@ int planecard(int *cardnum, int q, int p, int s, int *B)//ÈÔÈ»ÊÇq´ú±íµÄÊÇÈıµÄ×îĞ
 	}
 	return -1;
 }
-int shunzi(int *cardnum, int q, int p, int *B)//ÈÔÈ»q×÷Îª¿ªÊ¼µãµÄÊıÖµ£¬pÊÇÁ¬ĞøµÄÊıÁ¿
+int shunzi(int *cardnum, int q, int p, int *B)//ä»ç„¶qä½œä¸ºå¼€å§‹ç‚¹çš„æ•°å€¼ï¼Œpæ˜¯è¿ç»­çš„æ•°é‡
 {
 	for (int i(q + 1); i < max - p + 1; i++)
 	{
 		int j = i;
-		for (; j < 16; j++)//Ë³×Ó×î´óµ½2ÎªÖ¹£¬¶ÔÓ¦µÄÊıÖµ¾ÍÊÇ15+1
+		for (; j < 16; j++)//é¡ºå­æœ€å¤§åˆ°2ä¸ºæ­¢ï¼Œå¯¹åº”çš„æ•°å€¼å°±æ˜¯15+1
 		{
 			if (cardnum[j] < 1)
 				break;
@@ -1023,7 +1023,7 @@ int doubleshunzi(int *cardnum, int q, int p, int *B)
 	for (int i(q + 1); i < max - p + 1; i++)
 	{
 		int j = i;
-		for (; j < 16; j++)//Ë³×Ó×î´óµ½2ÎªÖ¹£¬¶ÔÓ¦µÄÊıÖµ¾ÍÊÇ15+1
+		for (; j < 16; j++)//é¡ºå­æœ€å¤§åˆ°2ä¸ºæ­¢ï¼Œå¯¹åº”çš„æ•°å€¼å°±æ˜¯15+1
 		{
 			if (cardnum[j] < 2)
 				break;
@@ -1040,7 +1040,7 @@ int doubleshunzi(int *cardnum, int q, int p, int *B)
 	}
 	return -1;
 }
-int yingdui(int *B, int *D, int type, int cardm, int q, int p)//×÷Îª¶Ô¶ÔÊÖ³öÅÆµÄÓ¦¶Ô
+int yingdui(int *B, int *D, int type, int cardm, int q, int p)//ä½œä¸ºå¯¹å¯¹æ‰‹å‡ºç‰Œçš„åº”å¯¹
 {
 	if (type == 1)
 	{
