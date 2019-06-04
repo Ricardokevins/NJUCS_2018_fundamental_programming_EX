@@ -49,6 +49,7 @@ int mysystem::run()
 
 int mysystem::take_in(string a,int b)
 {
+	vector<myrelation>temp_relation;
 	if (a[0] <= 'z'&&a[0] >= 'a'&&a[0]!='/');
 	else
 	{
