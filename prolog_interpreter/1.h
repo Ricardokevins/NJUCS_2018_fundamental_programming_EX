@@ -83,4 +83,11 @@ public:
 	int repair(vector<string>&a);
 	int check_end(string a);
 	int check_start(string a);
+	int first_check(string a);
+	int second_check(string a);
+	int third_check(string a);
+	int delete_start(string &a);//这两个函数是为了删除提取到的不算是错误的空格。也就是分割得到之后的头部和尾部的空格
+	int delete_end(string &a);
+	vector<string> analyze_bracket(string &a);//这里的函数是对括号里的内容进行解析，获取参数列表
+	vector<string> command_split(const string &s, const string &seperator);
 };
