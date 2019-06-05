@@ -76,5 +76,11 @@ public:
 	int file_in(string path);
 	int run();
 	int take_in(string a,int b);//这里的a就是这一行的文字信息，b是行数
-
+	int detect_event(char a);
+	int find_anno(string &a);
+	int check_pair(string &a);
+	int judge_kind(string a);
+	int repair(vector<string>&a);
+	int check_end(string a);
+	int check_start(string a);
 };
