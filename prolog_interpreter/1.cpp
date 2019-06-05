@@ -118,6 +118,18 @@ int mysystem::run()
 	}
 	cout << "judge_kind test completed!" << endl;
 	cout << endl;
+
+	for (int i(0); i < cur_infor.size(); i++)
+	{
+		if (judge_kind(cur_infor[i]) == 1)
+		{
+			first_check(cur_infor[i]);
+		}
+	}
+	cout << "first_check test completed!" << endl;
+	cout << endl;
+	
+
 	return 0;
 }
 
@@ -346,4 +358,150 @@ int mysystem::check_start(string a)
 		return 1;
 	else
 		return 0;
+}
+
+int mysystem::delete_start(string &a)
+{
+	if (a.size() == 0)//传入空字符串的判断
+	{
+		return 0;
+	}
+	while (*a.begin() == ' ')
+	{
+		a.erase(a.begin());//去除字符串的头部的可能的空格
+	}
+	return 1;
+}
+
+int mysystem::delete_end(string &a)
+{
+	if (a.size() == 0)//传入空字符串的判断
+	{
+		return 0;
+	}
+	while (a[a.size()-1] == ' ')
+	{
+		a.pop_back();//去除字符串的头部的可能的空格
+	}
+	return 1;
+}
+
+int mysystem::first_check(string a)
+{
+	string myrelation;
+	int pos1(0);
+	int flag1(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ' ')
+			break;
+		if (a[i] == '(')//想要先找到这个开头的位置的名词
+		{
+			pos1 = i;
+			flag1 = i;
+			break;
+		}
+	}
+	if (flag1 == 0)
+		return -1;
+	myrelation = a.substr(0, pos1);
+	//test1
+	cout << myrelation << endl;
+	string sub_head;
+	int flag2(0);
+	int pos2(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ')')//想要先找到这个开头的位置的名词
+		{
+			pos2 = i;
+			flag2 = i;
+			break;
+		}
+	}
+	if (flag2 == 0)
+		return -1;
+	cout << pos1 << "           " << pos2 << endl;
+	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);
+	//test2
+	cout << sub_head << endl;//提取得到括号里面的子串
+
+	vector<string>ini_para1;
+	ini_para1 = analyze_bracket(sub_head);
+	if (ini_para1.size() == 0)
+	{
+		return -1;//说明没有提取到有用的参数的信息
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
+		{
+			return -1;
+		}
+	}
+	//test3
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		cout << ini_para1[i] << endl;
+	}
+	//截至到这里已经就完成了第一个括号的内容的提取
+	return 0;
+}
+
+vector<string> mysystem::command_split(const string &s, const string &seperator)
+{
+	vector<string> result;
+	typedef string::size_type string_size;
+	string_size i = 0;
+
+	while (i != s.size())
+	{
+		//找到字符串中首个不等于分隔符的字母；
+		int flag = 0;
+		while (i != s.size() && flag == 0)
+		{
+			flag = 1;
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[i] == seperator[x]) {
+					++i;
+					flag = 0;
+					break;
+				}
+		}
+
+		//找到又一个分隔符，将两个分隔符之间的字符串取出；
+		flag = 0;
+		string_size j = i;
+		while (j != s.size() && flag == 0) {
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[j] == seperator[x]) {
+					flag = 1;
+					break;
+				}
+			if (flag == 0)
+				++j;
+		}
+		if (i != j) {
+			result.push_back(s.substr(i, j - i));
+			i = j;
+		}
+	}
+	return result;
+}
+
+vector<string>mysystem::analyze_bracket(string& a)//对括号内的字符串进行切割，然后去掉每一个组分的头尾的空格
+{
+	vector<string>ini_para1;
+	ini_para1 = command_split(a, ",");
+	if (ini_para1.size() == 0)
+	{
+		return ini_para1;//说明没有提取到有用的参数的信息
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		delete_end(ini_para1[i]);
+		delete_start(ini_para1[i]);
+	}
+	return ini_para1;
+
 }
