@@ -1,4 +1,5 @@
-#include"alldefined.h"
+
+#include"1.h"
 
 int main()
 {
@@ -45,7 +46,7 @@ int mysystem::run()
 		string tmp;
 		rewind(stdin);
 		getline(cin, tmp);
-		if (tmp == "halt")
+		if (tmp == "halt.")
 			break;
 		rewind(stdin);
 		delete_start(tmp);
@@ -1022,3 +1023,6 @@ int mysystem::file_out()
 
 	return 0;
 }
+
+
+
