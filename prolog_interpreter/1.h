@@ -1,3 +1,4 @@
+
 #pragma once
 #include<iostream>
 #include<sstream>
@@ -97,3 +98,5 @@ public:
 	int youkuohao;
 	int juhao;
 };
+
+  
