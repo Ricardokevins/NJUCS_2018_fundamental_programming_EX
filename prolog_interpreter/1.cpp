@@ -41,17 +41,21 @@ int mysystem::run()
 		cout << "~~~~~?  ";
 		string tmp;
 		rewind(stdin);
-		cin >> tmp;
+		getline(cin, tmp);
 		if (tmp == "halt")
 			return 0;
 		rewind(stdin);
+		delete_start(tmp);
+		delete_end(tmp);
 		if (check_pair(tmp))
 		{
-			return 0;
+			cout << "至少括号没有配对" << endl;
+			continue;
 		}
 		if (!check_end(tmp))
 		{
-			return 0;
+			cout << "至少没有末尾的结束符" << endl;
+			continue;
 		}
 		string k = "consult";
 		if (tmp.size() > 7)
@@ -74,7 +78,7 @@ int mysystem::run()
 				if (f[0] != '(')
 				{
 					cout << "没有检测到括号，检查输入" << endl;
-					return -1;
+					continue;
 				}
 				f.pop_back();
 				f.erase(f.begin());
@@ -83,7 +87,6 @@ int mysystem::run()
 				{
 					cout << cur_infor[i] << endl;
 				}
-				cur_infor.pop_back();
 				cout << "file_in test completed" << endl;
 				cout << endl;
 
@@ -103,7 +106,7 @@ int mysystem::run()
 				{
 					cout << cur_infor[i] << endl;
 				}
-				cout << "delete test completed!" << endl;
+				cout << "delete_zhushi test completed!" << endl;
 				cout << endl;
 
 				for (int i(0); i < cur_infor.size(); i++)
@@ -210,21 +213,111 @@ int mysystem::run()
 				{
 					test_multi_relation(cur_double[i]);
 				}
+				continue;
+			}
+		}
+		
+		if (judge_kind(tmp) == 1)
+		{
+			if (first_check(tmp) != -1)
+			{
+				cout << "这个功能还没有做。抱歉。。。" << endl;
+
+				continue;
 			}
 			continue;
 		}
-		if (check_pair(tmp) != 0)
-		{
-			cout << "error !!!!" << endl;
-			return 0;
-		}
-		if (judge_kind(tmp) == 1)
-		{
-			first_check(tmp);
-		}
 		if (judge_kind(tmp) != 1)
 		{
-			third_check(tmp);
+			if (third_check(tmp) != -1)//说明是成功的使用了这个语句生成了一个relation的对象
+			{
+
+				myrelation ask = cur_relation[cur_relation.size() - 1];//那么我就提取出这个对象
+				cur_relation.pop_back();//下面就是要基于问题的查询的功能的实现了
+				int flag13(0);//这里设置的标志位是为了标志现在的这个语句是查询型的还是确认型，也就是说是否含有变量
+				vector<int> va;//设置一个变量保存语句中可能有的变量的名字
+				vector<int> answer;//这里是设置了如果有变量的时候就要匹配然后输出对应的答案
+				for(int i(0);i<ask.rela_data.size();i++)
+				{
+					if (judge_word(cur_token[ask.rela_data[i]].origin) == 2)
+					{
+						flag13 = 1;
+						break;
+					}
+				}
+				if (flag13 == 1)//这里也就是检查到了大写的字母，也就是变量
+				{
+					for (int i(0); i < cur_relation.size(); i++)
+					{
+						if (cur_relation[i].name == ask.name)
+						{
+							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案，也就是除了变量之外的所有的信息都是匹配的
+							for (int j(0); j < ask.rela_data.size(); j++)
+							{
+								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2)
+								{
+									va.push_back(j);
+									continue;//如果是变量的话那就不需要进行匹配
+								}
+								if (ask.rela_data[j] != cur_relation[i].rela_data[j])
+								{
+									flag14 = 0;
+									break;//检测到了不一致，那么就直接结束
+								}
+							}
+							if (flag14 == 1)//说明这里是成功的匹配上了
+							{
+								for (int l(0); l < va.size(); l++)
+								{
+									answer.push_back(cur_relation[i].rela_data[va[l]]);
+								}
+								for (int g(0); g < va.size(); g++)
+								{
+									cout << cur_token[ask.rela_data[va[g]]].origin << " = " ;
+									cout<< cur_token[answer[g]].origin << endl;
+								}
+								goto L1;
+							}
+
+						}
+					}
+					for (int i(0); i < cur_relation.size(); i++)
+					{
+						test_relation(cur_relation[i]);
+					}
+					cout << "没有相关问题的匹配项" << endl;
+L1:					continue;
+
+				}
+				else
+				{
+					for (int i(0); i < cur_relation.size(); i++)
+					{
+						if (cur_relation[i].name == ask.name)
+						{
+							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案，也就是除了变量之外的所有的信息都是匹配的
+							for (int j(0); j < ask.rela_data.size(); j++)
+							{
+								if (ask.rela_data[j] != cur_relation[i].rela_data[j])
+								{
+									cout << "find the dif with" << ask.rela_data[j] << cur_relation[i].rela_data[j] << endl;
+									flag14 = 0;
+									break;//检测到了不一致，那么就直接结束
+								}
+							}
+							if (flag14 == 1)//说明这里是成功的匹配上了
+							{
+								cout << "true" << endl;
+								goto L2;
+							}
+						}
+					}
+					cout << "没有相关问题的匹配项" << endl;
+L2:					continue;
+				}
+			}
+			
+
 		}
 	}
 }
@@ -911,4 +1004,16 @@ int mysystem::test_relation(myrelation a)
 	}
 	cout << endl << endl;
 	return 0;
+}
+
+int mysystem::judge_word(string a)
+{
+	if (a.size() == 0)
+		return 0;
+	if (a[0] <= 'z'&&a[0] >= 'a')//小写的字母
+		return 1;
+	if (a[0] <= 'Z'&&a[0] >= 'A')//大写的字母
+		return 2;
+	cout << "这个单词是不合法的" << endl;
+	return -1;//出现了错误的字符
 }
