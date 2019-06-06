@@ -33,6 +33,12 @@ int mysystem::file_in(string path)
 
 int mysystem::run()
 {
+	zuokuohao = 0;
+	youkuohao = 0;
+	fuhe = 0;
+	juhao = 0;
+	douhao = 0;
+	int read_wrong(0);
 	while (1)
 	{
 		cout << "-?  ";
@@ -40,7 +46,7 @@ int mysystem::run()
 		rewind(stdin);
 		getline(cin, tmp);
 		if (tmp == "halt")
-			return 0;
+			break;
 		rewind(stdin);
 		delete_start(tmp);
 		delete_end(tmp);
@@ -57,6 +63,7 @@ int mysystem::run()
 		string k = "consult";
 		if (tmp.size() > 7)
 		{
+		
 			int flag11(1);
 			for (int i(0); i < 7; i ++ )
 			{
@@ -83,12 +90,28 @@ int mysystem::run()
 				file_in(f);
 				
 				delete_empty(cur_infor);
-
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					for (int k(0); k < cur_infor[i].size(); k++)
+					{
+						if (cur_infor[i][k] == ',')
+							douhao++;
+						if (cur_infor[i][k] == '.')
+							juhao++;
+						if (cur_infor[i][k] == ':'&&k < cur_infor[i].size() - 1 && cur_infor[i][k+1] == '-')
+							fuhe++;
+						if (cur_infor[i][k] == '(')
+							zuokuohao++;
+						if (cur_infor[i][k] == ')')
+							youkuohao++;
+					}
+				}
 				for (int i(0); i < cur_infor.size(); i++)
 				{
 					if (find_anno(cur_infor[i]) == -1)
 					{
 						cout << "左右注释符号没有匹配在" << i << "行" << endl;
+						read_wrong++;
 					}
 				}
 		
@@ -97,6 +120,7 @@ int mysystem::run()
 					if (check_pair(cur_infor[i]) != 0)
 					{
 						cout << "error 括号不匹配 在" <<i<<"行"<< endl;
+						read_wrong++;
 					}
 				}
 				
@@ -107,6 +131,7 @@ int mysystem::run()
 					if (check_end(cur_infor[i]) == 0)
 					{
 						cout << "error 结尾没有结束符在"<<i + count_delete <<"行" << endl;
+						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 					}
 					else
@@ -121,6 +146,7 @@ int mysystem::run()
 					if (check_start(cur_infor[i]) == 0)
 					{
 						cout << "error 开头字符不合法在" << i + count_delete << "行" << endl;
+						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 					}
 					else
@@ -175,7 +201,7 @@ int mysystem::run()
 							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案，也就是除了变量之外的所有的信息都是匹配的
 							for (int j(0); j < ask.rela_data.size(); j++)
 							{
-								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2)
+								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2&& judge_word(cur_token[cur_relation[i].rela_data[j]].origin)!=2)
 								{
 									va.push_back(j);
 									continue;//如果是变量的话那就不需要进行匹配
@@ -222,7 +248,7 @@ L1:					continue;
 							{
 								if (ask.rela_data[j] != cur_relation[i].rela_data[j])
 								{
-									cout << "find the dif with" << ask.rela_data[j] << cur_relation[i].rela_data[j] << endl;
+
 									flag14 = 0;
 									break;//检测到了不一致，那么就直接结束
 								}
@@ -241,6 +267,9 @@ L2:					continue;
 			cout << "指令不合法，没看懂" << endl;
 		}
 	}
+	if (read_wrong == 0)
+		file_out();
+	return 0;
 }
 
 int mysystem::take_in(string a,int b)
@@ -452,7 +481,10 @@ int mysystem::check_end(string a)
 		return 1;
 	}
 	if (a[a.size() - 1] == '.')
+	{
+
 		return 1;
+	}
 	else
 		return 0;
 }
@@ -505,6 +537,7 @@ int mysystem::delete_end(string &a)
 
 int mysystem::first_check(string a)
 {
+
 	if (a[a.size() - 1] == '.')
 	{
 		a.pop_back();
@@ -638,6 +671,7 @@ int mysystem::first_check(string a)
 	//cout << "infor                       "<<infor << endl;//这里是已经把复合关系的后面的具体的信息数据都拿到了
 	vector<string> ini_para2;//这里是预计对后面的具体的信息进行进一步的分解
 	ini_para2 = command_split(infor, ")");
+
 	for (int i(0); i < ini_para2.size(); i++)
 	{
 		int flag9(0);
@@ -935,4 +969,45 @@ int mysystem::judge_word(string a)
 		return 2;
 	cout << "这个单词是不合法的" << endl;
 	return -1;//出现了错误的字符
+}
+
+int mysystem::file_out()
+{
+	ofstream outfile("token.txt");
+	if (!outfile)
+	{
+		cout << "创建文件失败" << endl;
+	}
+	outfile << "atom " << endl;
+	for (int i(0); i < cur_token.size(); i++)
+	{
+		if (judge_word(cur_token[i].origin) == 1)
+		{
+			outfile << cur_token[i].origin << endl;
+		}
+	}
+	for (int i(0); i < cur_relation.size(); i++)
+	{
+		outfile << cur_relation[i].name<<endl;
+	}
+	for (int i(0); i < cur_double.size(); i++)
+	{
+		outfile << cur_double[i].name<<endl;
+	}
+	outfile << "varible   " << endl;
+	for (int i(0); i < cur_token.size(); i++)
+	{
+		if (judge_word(cur_token[i].origin) == 2)
+		{
+			outfile << cur_token[i].origin << endl;
+		}
+	}
+	outfile << "symbol   " << endl;
+	outfile << ":-" << fuhe << endl;
+	outfile << "," << douhao << endl;
+	outfile << "." << juhao << endl;
+	outfile << "(" << zuokuohao << endl;
+	outfile << ")" << youkuohao << endl;
+
+	return 0;
 }
