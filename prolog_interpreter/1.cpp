@@ -139,7 +139,7 @@ int mysystem::run()
 	
 	for (int i(0); i < cur_infor.size(); i++)
 	{
-		if (judge_kind(cur_infor[i]) == 3)
+		if (judge_kind(cur_infor[i]) != 1)
 		{
 			third_check(cur_infor[i]);
 		}
@@ -158,6 +158,18 @@ int mysystem::run()
 
 	*/
 
+
+	cout << "final test start!!!   " << endl;
+	for (int i(0); i < cur_relation.size(); i++)
+	{
+		myrelation a = cur_relation[i];
+ 		test_relation(a);
+	}
+
+	for (int i(0); i < cur_double.size(); i++)
+	{
+		test_multi_relation(cur_double[i]);
+	}
 	return 0;
 }
 
@@ -424,7 +436,10 @@ int mysystem::delete_end(string &a)
 
 int mysystem::first_check(string a)
 {
-	a.pop_back();
+	if (a[a.size() - 1] == '.')
+	{
+		a.pop_back();
+	}
 	string mrelation;
 	int pos1(0);
 	int flag1(0);
@@ -485,6 +500,49 @@ int mysystem::first_check(string a)
 	}
 	cout << endl << endl;
 	*/
+	double_rela temp6;
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		int flag3 = 0;
+		flag3 = check_word(ini_para1[i]);
+		if (flag3 == -1)
+		{
+			cout << "error 单词带有不合法的字符" << ini_para1[i] << endl;
+			return -1;
+		}
+		if (flag3 == 0)
+		{
+			cout << "error 单词的字符是空的" << ini_para1[i] << endl;
+			return -1;
+		}
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		int small_flag(0);
+		for (int j(0); j < cur_token.size(); j++)
+		{
+			if (ini_para1[i] == cur_token[j].origin)
+			{
+				cur_token[i].num++;
+				small_flag = 1;
+				temp6.rela_data.push_back(j);
+				break;
+			}
+		}
+		if (!small_flag)
+		{
+			mytoken temp2;
+			temp2.num = 1;
+			temp2.order = cur_token.size();
+			temp2.origin = ini_para1[i];
+			cur_token.push_back(temp2);
+			temp6.rela_data.push_back(temp2.order);
+		}
+	}
+
+
+
+
 
 	//截至到这里已经就完成了第一个括号的内容的提取
 	int pos3(0);
@@ -510,24 +568,68 @@ int mysystem::first_check(string a)
 	infor = a.substr(pos3+2, a.size()-2-pos3);
 	//cout << "infor                       "<<infor << endl;//这里是已经把复合关系的后面的具体的信息数据都拿到了
 	vector<string> ini_para2;//这里是预计对后面的具体的信息进行进一步的分解
-	ini_para2 = command_split(infor, ",");
+	ini_para2 = command_split(infor, ")");
 	for (int i(0); i < ini_para2.size(); i++)
+	{
+		int flag9(0);
+		for (int k(0); k < ini_para2[i].size(); )
+		{
+			if (ini_para2[i][k] == ' ')
+			{
+				ini_para2[i].erase(ini_para2[i].begin());
+			}
+			else
+			{
+				if (ini_para2[i][k] == ',')
+				{
+					ini_para2[i].erase(ini_para2[i].begin());
+					flag9++;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		if (flag9 > 1)
+		{
+			cout << "error   因为出现了不止一个逗号" << endl;
+			return -1;
+		} 
+		ini_para2[i].push_back(')');
+		cout << ini_para2[i] << endl;
+	}
+	int count(0);
+	for (int i(0); i < ini_para2.size(); i++)//使用逗号进行分割，结果应该是若干个已经定义好的内容
 	{
 		delete_end(ini_para2[i]);
 		delete_start(ini_para2[i]);
-		if (check_word(ini_para2[i]) <= 0)
+		if (third_check(ini_para2[i]) != -1)
 		{
-			cout << "error with          "<<ini_para2[i]<< endl;//检查出现了错误
-			continue;
+			count++;
+		}
+		else
+		{
+			cout << "创建失败！！！！    " << endl;
+			return -1;
 		}
 	}
-
+	
+	temp6.name = mrelation;
+	for (int k(0); k < count; k++)
+	{
+		temp6.double_rela_data.push_back(cur_relation[cur_relation.size() - count + k]);
+	}
+	cur_double.push_back(temp6);
 	return 0;
 }
 
 int mysystem::third_check(string a)
 {
-	a.pop_back();
+	if (a[a.size() - 1] == '.')
+	{
+		a.pop_back();
+	}
 	string mrelation;
 	int pos1(0);
 	int flag1(0);
@@ -538,7 +640,7 @@ int mysystem::third_check(string a)
 		if (a[i] == '(')//想要先找到这个开头的位置的名词
 		{
 			pos1 = i;
-			flag1 = i;
+			flag1 = 1;
 			break;
 		}
 	}
@@ -555,7 +657,7 @@ int mysystem::third_check(string a)
 		if (a[i] == ')')//想要先找到这个开头的位置的名词
 		{
 			pos2 = i;
-			flag2 = i;
+			flag2 = 1;
 			break;
 		}
 	}
@@ -619,12 +721,7 @@ int mysystem::third_check(string a)
 		}
 	}
 	cur_relation.push_back(temp5);
-	cout <<"关系名 "<<temp5.name << endl;
-	for (int j(0); j < temp5.rela_data.size(); j++)
-	{
-		cout << cur_token[temp5.rela_data[j]].origin << "--" << endl;
-	}
-	cout << endl << endl;
+
 	return 0;
 }
 
@@ -731,4 +828,31 @@ int mysystem::delete_empty(vector<string>&a)
 		i++;
 	}
 	return 1;
+}
+
+int mysystem::test_multi_relation(double_rela a)
+{
+	cout << "复合关系的名字"<<a.name << endl;
+	cout << "自己的参数列表是" << endl;
+	for (int i(0); i < a.rela_data.size(); i++)
+	{
+		cout << cur_token[a.rela_data[i]].origin << "--" << endl;
+	}
+	cout << "复合组分是" << endl;
+	for (int i(0); i < a.double_rela_data.size(); i++)
+	{
+		test_relation(a.double_rela_data[i]);
+	}
+	return 0;
+}
+
+int mysystem::test_relation(myrelation a)
+{
+	cout << "关系名 " << a.name << endl;
+	for (int j(0); j < a.rela_data.size(); j++)
+	{
+		cout << cur_token[a.rela_data[j]].origin << "--" << endl;
+	}
+	cout << endl << endl;
+	return 0;
 }
