@@ -6,8 +6,6 @@ int main()
 	cur_system.run();
 	//暂时信息
 	cout << "running end" << endl;
-	int a(0);
-	cin >> a;
 	return 0;
 }
 
@@ -30,7 +28,6 @@ int mysystem::file_in(string path)
 	{
 		cur_infor.push_back(temp1234);
 	}
-	cout << "执行结束" << endl;
 	return 0;
 }
 
@@ -38,7 +35,7 @@ int mysystem::run()
 {
 	while (1)
 	{
-		cout << "~~~~~?  ";
+		cout << "-?  ";
 		string tmp;
 		rewind(stdin);
 		getline(cin, tmp);
@@ -72,6 +69,7 @@ int mysystem::run()
 			if (flag11 != 0)
 			{
 				int flag12(0);
+				int count_delete(0);
 				string f = tmp.substr(7,tmp.size()-7);
 				f.pop_back();
 				delete_start(f);
@@ -83,94 +81,55 @@ int mysystem::run()
 				f.pop_back();
 				f.erase(f.begin());
 				file_in(f);
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "file_in test completed" << endl;
-				cout << endl;
-
+				
 				delete_empty(cur_infor);
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "delete test completed" << endl;
-				cout << endl;
 
 				for (int i(0); i < cur_infor.size(); i++)
 				{
-					find_anno(cur_infor[i]);
+					if (find_anno(cur_infor[i]) == -1)
+					{
+						cout << "左右注释符号没有匹配在" << i << "行" << endl;
+					}
 				}
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "delete_zhushi test completed!" << endl;
-				cout << endl;
-
+		
 				for (int i(0); i < cur_infor.size(); i++)
 				{
 					if (check_pair(cur_infor[i]) != 0)
-						cout << "error !!!!" << endl;
+					{
+						cout << "error 括号不匹配 在" <<i<<"行"<< endl;
+					}
 				}
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "check_pair test completed!" << endl;
-				cout << endl;
-
+				
 				repair(cur_infor);
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "repair test completed!" << endl;
-				cout << endl;
 
 				for (int i(0); i < cur_infor.size();)
 				{
 					if (check_end(cur_infor[i]) == 0)
 					{
-						cout << "error !!!!" << endl;
+						cout << "error 结尾没有结束符在"<<i + count_delete <<"行" << endl;
 						cur_infor.erase(cur_infor.begin() + i);
 					}
 					else
+					{
 						i++;
+						count_delete++;
+					}
 				}
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "check_end test completed!" << endl;
-				cout << endl;
-
-
+		
 				for (int i(0); i < cur_infor.size();)
 				{
 					if (check_start(cur_infor[i]) == 0)
 					{
-						cout << "error !!!!" << endl;
+						cout << "error 开头字符不合法在" << i + count_delete << "行" << endl;
 						cur_infor.erase(cur_infor.begin() + i);
 					}
 					else
+					{
 						i++;
+						count_delete++;
+					}
 				}
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << cur_infor[i] << endl;
-				}
-				cout << "check_start test completed!" << endl;
-				cout << endl;
-
-				for (int i(0); i < cur_infor.size(); i++)
-				{
-					cout << judge_kind(cur_infor[i]) << endl;
-				}
-				cout << "judge_kind test completed!" << endl;
-				cout << endl;
-
+			
 				for (int i(0); i < cur_infor.size(); i++)
 				{
 					if (judge_kind(cur_infor[i]) == 1)
@@ -178,9 +137,6 @@ int mysystem::run()
 						first_check(cur_infor[i]);
 					}
 				}
-				cout << "first_check test completed!" << endl;
-				cout << endl;
-
 				for (int i(0); i < cur_infor.size(); i++)
 				{
 					if (judge_kind(cur_infor[i]) != 1)
@@ -188,50 +144,14 @@ int mysystem::run()
 						third_check(cur_infor[i]);
 					}
 				}
-				cout << "third_check test completed!" << endl;
-				cout << endl;
-				/*
-				for (int i(0); i < cur_relation.size(); i++)
-				{
-					cout << cur_relation[i].name <<endl;
-					for (int j(0); j < cur_relation[i].rela_data.size(); j++)
-					{
-						cout << cur_token[cur_relation[i].rela_data[j]].origin << "--" << endl;
-					}
-				}
-				*/
-
-
-				cout << "final test start!!!   " << endl;
-				for (int i(0); i < cur_relation.size(); i++)
-				{
-					myrelation a = cur_relation[i];
-					test_relation(a);
-				}
-
-				for (int i(0); i < cur_double.size(); i++)
-				{
-					test_multi_relation(cur_double[i]);
-				}
 				continue;
 			}
 		}
-		
-		if (judge_kind(tmp) == 1)
-		{
-			if (first_check(tmp) != -1)
-			{
-				cout << "这个功能还没有做。抱歉。。。" << endl;
 
-				continue;
-			}
-			continue;
-		}
 		if (judge_kind(tmp) != 1)
 		{
 			if (third_check(tmp) != -1)//说明是成功的使用了这个语句生成了一个relation的对象
 			{
-
 				myrelation ask = cur_relation[cur_relation.size() - 1];//那么我就提取出这个对象
 				cur_relation.pop_back();//下面就是要基于问题的查询的功能的实现了
 				int flag13(0);//这里设置的标志位是为了标志现在的这个语句是查询型的还是确认型，也就是说是否含有变量
@@ -245,6 +165,7 @@ int mysystem::run()
 						break;
 					}
 				}
+				int flag16;
 				if (flag13 == 1)//这里也就是检查到了大写的字母，也就是变量
 				{
 					for (int i(0); i < cur_relation.size(); i++)
@@ -267,6 +188,7 @@ int mysystem::run()
 							}
 							if (flag14 == 1)//说明这里是成功的匹配上了
 							{
+								flag16 = 1;
 								for (int l(0); l < va.size(); l++)
 								{
 									answer.push_back(cur_relation[i].rela_data[va[l]]);
@@ -275,17 +197,17 @@ int mysystem::run()
 								{
 									cout << cur_token[ask.rela_data[va[g]]].origin << " = " ;
 									cout<< cur_token[answer[g]].origin << endl;
+									answer.clear();
+									va.clear();
 								}
-								goto L1;
 							}
 
 						}
 					}
-					for (int i(0); i < cur_relation.size(); i++)
+					if (!flag16)
 					{
-						test_relation(cur_relation[i]);
+						cout << "没有匹配的相关项" << endl;
 					}
-					cout << "没有相关问题的匹配项" << endl;
 L1:					continue;
 
 				}
@@ -295,7 +217,7 @@ L1:					continue;
 					{
 						if (cur_relation[i].name == ask.name)
 						{
-							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案，也就是除了变量之外的所有的信息都是匹配的
+							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案
 							for (int j(0); j < ask.rela_data.size(); j++)
 							{
 								if (ask.rela_data[j] != cur_relation[i].rela_data[j])
@@ -316,8 +238,7 @@ L1:					continue;
 L2:					continue;
 				}
 			}
-			
-
+			cout << "指令不合法，没看懂" << endl;
 		}
 	}
 }
@@ -399,7 +320,6 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 	int left_1(0);
 	int left_2(0);
 	int pos(0);
-	cout << "now    " << a << endl;
 	for (int i(0); i < a.size(); i++)
 	{
 		if (a[i] == '/'&&left_1==0)
@@ -422,10 +342,10 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 			}
 		}
 	}
-	cout << "after    " << a << endl;
 	if (left_1 == 1)
+	{
 		return -1;
-
+	}
 	return 0;
 }
 
@@ -607,7 +527,7 @@ int mysystem::first_check(string a)
 		return -1;
 	mrelation = a.substr(0, pos1);
 	//test1
-	cout << mrelation << endl;
+
 	string sub_head;
 	int flag2(0);
 	int pos2(0);
@@ -746,7 +666,6 @@ int mysystem::first_check(string a)
 			return -1;
 		} 
 		ini_para2[i].push_back(')');
-		cout << ini_para2[i] << endl;
 	}
 	int count(0);
 	for (int i(0); i < ini_para2.size(); i++)//使用逗号进行分割，结果应该是若干个已经定义好的内容
