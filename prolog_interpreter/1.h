@@ -86,10 +86,9 @@ public:
 	int delete_end(string &a);
 	int check_word(string &a);
 	int delete_empty(vector<string>&a);
-
+	int judge_word(string a);//这个函数的设计目的就是为了判断这个词是一个实际意义的词还是一个等待确定的变量
 	int test_relation(myrelation a);
 	int test_multi_relation(double_rela a);
 	vector<string> analyze_bracket(string &a);//这里的函数是对括号里的内容进行解析，获取参数列表
 	vector<string> command_split(const string &s, const string &seperator);
 };
-    
