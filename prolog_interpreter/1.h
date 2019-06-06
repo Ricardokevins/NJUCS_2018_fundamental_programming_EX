@@ -80,8 +80,7 @@ public:
 	int check_end(string a);
 	int check_start(string a);
 	int first_check(string a);
-	int second_check(string a);
-	int third_check(string a);
+	int third_check(string a,int q);
 	int delete_start(string &a);//这两个函数是为了删除提取到的不算是错误的空格。也就是分割得到之后的头部和尾部的空格
 	int delete_end(string &a);
 	int check_word(string &a);
