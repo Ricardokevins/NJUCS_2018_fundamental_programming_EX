@@ -191,7 +191,7 @@ int mysystem::run()
 						break;
 					}
 				}
-				int flag16;
+				int flag16(0);
 				if (flag13 == 1)//这里也就是检查到了大写的字母，也就是变量
 				{
 					for (int i(0); i < cur_relation.size(); i++)
@@ -199,6 +199,11 @@ int mysystem::run()
 						if (cur_relation[i].name == ask.name)
 						{
 							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案，也就是除了变量之外的所有的信息都是匹配的
+							if (ask.rela_data.size() != cur_relation[i].rela_data.size())
+							{
+								flag14 = 0;
+								continue;
+							}
 							for (int j(0); j < ask.rela_data.size(); j++)
 							{
 								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2&& judge_word(cur_token[cur_relation[i].rela_data[j]].origin)!=2)
@@ -243,7 +248,13 @@ L1:					continue;
 					{
 						if (cur_relation[i].name == ask.name)
 						{
+
 							int flag14(1);//这个标志位的设置是为了标志说是否已经找到了对应的答案
+							if (ask.rela_data.size() != cur_relation[i].rela_data.size())
+							{
+								flag14 = 0;
+								continue;
+							}
 							for (int j(0); j < ask.rela_data.size(); j++)
 							{
 								if (ask.rela_data[j] != cur_relation[i].rela_data[j])
