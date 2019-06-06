@@ -92,3 +92,4 @@ public:
 	vector<string> analyze_bracket(string &a);//这里的函数是对括号里的内容进行解析，获取参数列表
 	vector<string> command_split(const string &s, const string &seperator);
 };
+    
