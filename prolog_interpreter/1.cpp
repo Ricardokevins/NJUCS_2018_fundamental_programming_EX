@@ -176,6 +176,8 @@ int mysystem::run()
 					}
 					i++;
 				}
+				if (read_wrong == 0)
+					file_out();
 				continue;
 			}
 		}
@@ -284,8 +286,7 @@ int mysystem::run()
 			cout << "指令不合法，没看懂" << endl;
 		}
 	}
-	if (read_wrong == 0)
-		file_out();
+	
 	return 0;
 }
 
@@ -1081,5 +1082,7 @@ int mysystem::file_out()
 
 	return 0;
 }
+
+
 
 
