@@ -13,6 +13,9 @@ int main()
 int mysystem::file_in(string path)
 {
 	ifstream myoperate;
+	path.push_back('.');
+	path.push_back('p');
+	path.push_back('l');
 	const char *I;
 	I = path.c_str();
 	myoperate.open(I);
@@ -64,9 +67,9 @@ int mysystem::run()
 		string k = "consult";
 		if (tmp.size() > 7)
 		{
-		
+
 			int flag11(1);
-			for (int i(0); i < 7; i ++ )
+			for (int i(0); i < 7; i++)
 			{
 				if (k[i] != tmp[i])
 				{
@@ -78,7 +81,7 @@ int mysystem::run()
 			{
 				int flag12(0);
 				int count_delete(0);
-				string f = tmp.substr(7,tmp.size()-7);
+				string f = tmp.substr(7, tmp.size() - 7);
 				f.pop_back();
 				delete_start(f);
 				if (f[0] != '(')
@@ -89,7 +92,7 @@ int mysystem::run()
 				f.pop_back();
 				f.erase(f.begin());
 				file_in(f);
-				
+
 				delete_empty(cur_infor);
 				for (int i(0); i < cur_infor.size(); i++)
 				{
@@ -99,7 +102,7 @@ int mysystem::run()
 							douhao++;
 						if (cur_infor[i][k] == '.')
 							juhao++;
-						if (cur_infor[i][k] == ':'&&k < cur_infor[i].size() - 1 && cur_infor[i][k+1] == '-')
+						if (cur_infor[i][k] == ':'&&k < cur_infor[i].size() - 1 && cur_infor[i][k + 1] == '-')
 							fuhe++;
 						if (cur_infor[i][k] == '(')
 							zuokuohao++;
@@ -107,69 +110,71 @@ int mysystem::run()
 							youkuohao++;
 					}
 				}
-				for (int i(0); i < cur_infor.size(); i++)
+				for (int i(0); i < cur_infor.size();)
 				{
 					if (find_anno(cur_infor[i]) == -1)
 					{
-						cout << "左右注释符号没有匹配在" << i << "行" << endl;
+						cout << "词法错误 左右注释符号没有匹配在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
+						cur_infor.erase(cur_infor.begin() + i);
+						count_delete++;
+						continue;
 					}
-				}
-		
-				for (int i(0); i < cur_infor.size(); i++)
-				{
+					if (cur_infor[i].size() == 0)
+					{
+						delete_empty(cur_infor);
+						count_delete++;
+					}
 					if (check_pair(cur_infor[i]) != 0)
 					{
-						cout << "error 括号不匹配 在" <<i<<"行"<< endl;
+						cout << "语法错误 括号不匹配 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
+						cur_infor.erase(cur_infor.begin() + i);
+						count_delete++;
+						continue;
 					}
-				}
-				
-				repair(cur_infor);
-
-				for (int i(0); i < cur_infor.size();)
-				{
 					if (check_end(cur_infor[i]) == 0)
 					{
-						cout << "error 结尾没有结束符在"<<i + count_delete <<"行" << endl;
+						cout << "语法错误 结尾没有结束符 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
-					}
-					else
-					{
-						i++;
 						count_delete++;
+						continue;
 					}
-				}
-		
-				for (int i(0); i < cur_infor.size();)
-				{
 					if (check_start(cur_infor[i]) == 0)
 					{
-						cout << "error 开头字符不合法在" << i + count_delete << "行" << endl;
+						cout << "词法错误 字符不合法 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
-					}
-					else
-					{
-						i++;
 						count_delete++;
+						continue;
 					}
-				}
-			
-				for (int i(0); i < cur_infor.size(); i++)
-				{
 					if (judge_kind(cur_infor[i]) == 1)
 					{
-						first_check(cur_infor[i]);
+						if (first_check(cur_infor[i]) <= 0)
+						{
+							read_wrong++;
+							cur_infor.erase(cur_infor.begin() + i);
+
+							cout << " 在" << i + count_delete + 1 << "行" << endl;
+							count_delete++;
+							continue;
+						}
+
 					}
-				}
-				for (int i(0); i < cur_infor.size(); i++)
-				{
 					if (judge_kind(cur_infor[i]) != 1)
 					{
-						third_check(cur_infor[i]);
+						if (third_check(cur_infor[i],0) <= 0)
+						{
+							read_wrong++;
+							cur_infor.erase(cur_infor.begin() + i);
+							cout << " 在" << i + count_delete + 1 << "行" << endl;
+							count_delete++;
+							continue;
+						}
+
 					}
+					i++;
 				}
 				continue;
 			}
@@ -177,14 +182,14 @@ int mysystem::run()
 
 		if (judge_kind(tmp) != 1)
 		{
-			if (third_check(tmp) != -1)//说明是成功的使用了这个语句生成了一个relation的对象
+			if (third_check(tmp,1) > 0)//说明是成功的使用了这个语句生成了一个relation的对象
 			{
 				myrelation ask = cur_relation[cur_relation.size() - 1];//那么我就提取出这个对象
 				cur_relation.pop_back();//下面就是要基于问题的查询的功能的实现了
 				int flag13(0);//这里设置的标志位是为了标志现在的这个语句是查询型的还是确认型，也就是说是否含有变量
 				vector<int> va;//设置一个变量保存语句中可能有的变量的名字
 				vector<int> answer;//这里是设置了如果有变量的时候就要匹配然后输出对应的答案
-				for(int i(0);i<ask.rela_data.size();i++)
+				for (int i(0); i < ask.rela_data.size(); i++)
 				{
 					if (judge_word(cur_token[ask.rela_data[i]].origin) == 2)
 					{
@@ -207,7 +212,7 @@ int mysystem::run()
 							}
 							for (int j(0); j < ask.rela_data.size(); j++)
 							{
-								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2&& judge_word(cur_token[cur_relation[i].rela_data[j]].origin)!=2)
+								if (judge_word(cur_token[ask.rela_data[j]].origin) == 2 && judge_word(cur_token[cur_relation[i].rela_data[j]].origin) != 2)
 								{
 									va.push_back(j);
 									continue;//如果是变量的话那就不需要进行匹配
@@ -227,8 +232,8 @@ int mysystem::run()
 								}
 								for (int g(0); g < va.size(); g++)
 								{
-									cout << cur_token[ask.rela_data[va[g]]].origin << " = " ;
-									cout<< cur_token[answer[g]].origin << endl;
+									cout << cur_token[ask.rela_data[va[g]]].origin << " = ";
+									cout << cur_token[answer[g]].origin << endl;
 									answer.clear();
 									va.clear();
 								}
@@ -240,7 +245,7 @@ int mysystem::run()
 					{
 						cout << "没有匹配的相关项" << endl;
 					}
-L1:					continue;
+				L1:					continue;
 
 				}
 				else
@@ -273,7 +278,7 @@ L1:					continue;
 						}
 					}
 					cout << "没有相关问题的匹配项" << endl;
-L2:					continue;
+				L2:					continue;
 				}
 			}
 			cout << "指令不合法，没看懂" << endl;
@@ -284,10 +289,10 @@ L2:					continue;
 	return 0;
 }
 
-int mysystem::take_in(string a,int b)
+int mysystem::take_in(string a, int b)
 {
 	vector<myrelation>temp_relation;
-	if (a[0] <= 'z'&&a[0] >= 'a'&&a[0]!='/');
+	if (a[0] <= 'z'&&a[0] >= 'a'&&a[0] != '/');
 	else
 	{
 		cout << "语法错误，开头不是小写的信息" << endl;
@@ -306,10 +311,10 @@ int mysystem::take_in(string a,int b)
 	int left_large(0);
 	int right_larger(0);
 	string temp_infor;
-	for (int i=0; i < a.size(); i++)
+	for (int i = 0; i < a.size(); i++)
 	{
 		cur_event = detect_event(a[i]);
-		if (cur_event == 9&&cur_status!=6)
+		if (cur_event == 9 && cur_status != 6)
 		{
 			cur_status = 8;
 			continue;
@@ -324,7 +329,7 @@ int mysystem::take_in(string a,int b)
 			cout << "error" << endl;//这里是只有/，但是下一个字符并不是*的报错
 			return 0;
 		}
-		
+
 	}
 }
 
@@ -363,9 +368,9 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 	int pos(0);
 	for (int i(0); i < a.size(); i++)
 	{
-		if (a[i] == '/'&&left_1==0)
+		if (a[i] == '/'&&left_1 == 0)
 		{
-			if (i < a.size() - 3&&a[i+1]=='*')
+			if (i < a.size() - 3 && a[i + 1] == '*')
 			{
 				left_1 = 1;
 				left_2 = 1;
@@ -375,9 +380,9 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 		}
 		if (a[i] == '*'&&i < a.size() - 1)
 		{
-			if (a[i + 1] == '/'&&left_1==1&&left_2==1)
+			if (a[i + 1] == '/'&&left_1 == 1 && left_2 == 1)
 			{
-				a.erase(pos, i+2);
+				a.erase(pos, i + 2);
 				left_1 = 0;
 				left_2 = 0;
 			}
@@ -470,7 +475,7 @@ int mysystem::repair(vector<string>&a)
 			a.erase(a.begin() + i);
 			continue;
 		}
-		while(*a[i].begin() == ' ')
+		while (*a[i].begin() == ' ')
 		{
 			a[i].erase(a[i].begin());//去除字符串的头部的可能的空格
 		}
@@ -507,7 +512,7 @@ int mysystem::check_start(string a)
 	{
 		return 1;
 	}
-	if (a[0] <= 'z'&&a[0]>='a')
+	if (a[0] <= 'z'&&a[0] >= 'a')
 		return 1;
 	else
 		return 0;
@@ -536,7 +541,7 @@ int mysystem::delete_end(string &a)
 	{
 		return 0;
 	}
-	while (a[a.size()-1] == ' ')
+	while (a[a.size() - 1] == ' ')
 	{
 		a.pop_back();//去除字符串的头部的可能的空格
 		if (a.size() == 0)//传入空字符串的判断
@@ -569,10 +574,24 @@ int mysystem::first_check(string a)
 		}
 	}
 	if (flag1 == 0)
+	{
+		cout << "语法错误 没有找到左括号" ;
 		return -1;
+	}
 	mrelation = a.substr(0, pos1);
 	//test1
-
+	int flag23 = 0;
+	flag23 = check_word(mrelation);
+	if (flag23 == -1)
+	{
+		cout << "词法错误 有不合法字符的单词";
+		return -5;
+	}
+	if (flag23 == 0)
+	{
+		cout << "语法错误 有单词是空的";
+		return -6;
+	}
 	string sub_head;
 	int flag2(0);
 	int pos2(0);
@@ -586,7 +605,10 @@ int mysystem::first_check(string a)
 		}
 	}
 	if (flag2 == 0)
-		return -1;
+	{
+		cout << "没有找到右括号";
+		return -2;
+	}
 	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);
 	//test2
 	/*
@@ -597,13 +619,15 @@ int mysystem::first_check(string a)
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		return -1;//说明没有提取到有用的参数的信息
+		cout << "括号中没有信息";
+		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			return -1;
+			cout << "逗号中没有信息";
+			return -4;
 		}
 	}
 	//test3
@@ -621,13 +645,13 @@ int mysystem::first_check(string a)
 		flag3 = check_word(ini_para1[i]);
 		if (flag3 == -1)
 		{
-			cout << "error 单词带有不合法的字符" << ini_para1[i] << endl;
-			return -1;
+			cout << "有不合法字符的单词";
+			return -5;
 		}
 		if (flag3 == 0)
 		{
-			cout << "error 单词的字符是空的" << ini_para1[i] << endl;
-			return -1;
+			cout << "有空的单词" << endl;
+			return -6;
 		}
 	}
 	for (int i(0); i < ini_para1.size(); i++)
@@ -675,11 +699,11 @@ int mysystem::first_check(string a)
 	}
 	if (flag3 == 0)
 	{
-		cout << "没有找到复合关系的分割符" << endl;
-		return -1;
+		cout << "没有找到分割符";
+		return -7;
 	}
 	string infor;
-	infor = a.substr(pos3+2, a.size()-2-pos3);
+	infor = a.substr(pos3 + 2, a.size() - 2 - pos3);
 	//cout << "infor                       "<<infor << endl;//这里是已经把复合关系的后面的具体的信息数据都拿到了
 	vector<string> ini_para2;//这里是预计对后面的具体的信息进行进一步的分解
 	ini_para2 = command_split(infor, ")");
@@ -708,9 +732,9 @@ int mysystem::first_check(string a)
 		}
 		if (flag9 > 1)
 		{
-			cout << "error   因为出现了不止一个逗号" << endl;
-			return -1;
-		} 
+			cout << "有多余的逗号";
+			return -8;
+		}
 		ini_para2[i].push_back(')');
 	}
 	int count(0);
@@ -718,28 +742,31 @@ int mysystem::first_check(string a)
 	{
 		delete_end(ini_para2[i]);
 		delete_start(ini_para2[i]);
-		if (third_check(ini_para2[i]) != -1)
+		if (third_check(ini_para2[i],1) > 0)
 		{
 			count++;
 		}
 		else
 		{
-			cout << "创建失败！！！！    " << endl;
-			return -1;
+			return -9;
 		}
 	}
-	
+
 	temp6.name = mrelation;
 	for (int k(0); k < count; k++)
 	{
 		temp6.double_rela_data.push_back(cur_relation[cur_relation.size() - count + k]);
 	}
 	cur_double.push_back(temp6);
-	return 0;
+	return 1;
 }
 
-int mysystem::third_check(string a)
+int mysystem::third_check(string a,int q)
 {
+	if (a.size() == 0)
+	{
+		cout << "语法错误  输入了空的字符";
+	}
 	if (a[a.size() - 1] == '.')
 	{
 		a.pop_back();
@@ -749,8 +776,9 @@ int mysystem::third_check(string a)
 	int flag1(0);
 	for (int i(0); i < a.size(); i++)
 	{
-		if (a[i] == ' ')
-			break;
+		
+//		if (a[i] == ' ')
+	//		break;
 		if (a[i] == '(')//想要先找到这个开头的位置的名词
 		{
 			pos1 = i;
@@ -759,8 +787,23 @@ int mysystem::third_check(string a)
 		}
 	}
 	if (flag1 == 0)
+	{
+		cout << "语法错误 没找到左括号";
 		return -1;
+	}
 	mrelation = a.substr(0, pos1);//这里是关系名字
+	int flag13 = 0;
+	flag13 = check_word(mrelation);
+	if (flag13 == -1)
+	{
+		cout << "词法错误 有不合法字符的单词";
+		return -5;
+	}
+	if (flag13 == 0)
+	{
+		cout << "语法错误 有单词是空的";
+		return -6;
+	}
 	//test1
 	//cout << mrelation << endl;
 	string sub_head;
@@ -776,39 +819,51 @@ int mysystem::third_check(string a)
 		}
 	}
 	if (flag2 == 0)
-		return -1;
+	{
+		cout << "语法错误 没有找到右括号" ;
+		return -2;
+	}
 	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);//这里是关系的内容
 	vector<string>ini_para1;
-	
+
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		return -1;//说明没有提取到有用的参数的信息
+		cout << "语法错误 括号中没有信息";
+		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			return -1;
+			cout << "语法错误 逗号之间没有信息";
+
+			return -4;
 		}
 	}
-	
+
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		int flag3 = 0;
 		flag3 = check_word(ini_para1[i]);
 		if (flag3 == -1)
 		{
-			cout << "error 单词带有不合法的字符" << ini_para1[i] << endl;
-			return -1;
+			cout << "词法错误 有不合法字符的单词";
+			return -5;
 		}
 		if (flag3 == 0)
 		{
-			cout << "error 单词的字符是空的" << ini_para1[i] << endl;
-			return -1;
+			cout << "语法错误 有单词是空的";
+			return -6;
+		}
+		int flag100 = judge_word(ini_para1[i]);
+		if (flag100 == 2 && q == 0)
+		{
+			cout << "语法错误 含有参数";
+			return -10;
 		}
 	}
-
+	
 	myrelation temp5;
 	temp5.name = mrelation;
 	for (int i(0); i < ini_para1.size(); i++)
@@ -836,7 +891,7 @@ int mysystem::third_check(string a)
 	}
 	cur_relation.push_back(temp5);
 
-	return 0;
+	return 1;
 }
 
 vector<string> mysystem::command_split(const string &s, const string &seperator)
@@ -903,7 +958,7 @@ int mysystem::check_word(string &a)
 	if (a.size() == 0)
 		return 0;//代表是空串，方便后面直接用下表进行遍历
 	if (a[0] <= 'z'&&a[0] >= 'a')
-		legal= 1;
+		legal = 1;
 	if (a[0] >= 'A'&&a[0] <= 'Z')
 		legal = 2;
 	if (legal == 0)
@@ -925,10 +980,12 @@ int mysystem::check_word(string &a)
 
 int mysystem::delete_empty(vector<string>&a)
 {
+	int count(0);
 	for (int i(0); i < a.size();)
 	{
-		if (a[i].size()==0)
+		if (a[i].size() == 0)
 		{
+			count++;
 			a.erase(a.begin() + i);
 			continue;
 		}
@@ -937,16 +994,17 @@ int mysystem::delete_empty(vector<string>&a)
 		if (a[i].size() == 0)
 		{
 			a.erase(a.begin() + i);
+			count++;
 			continue;
 		}
 		i++;
 	}
-	return 1;
+	return count;
 }
 
 int mysystem::test_multi_relation(double_rela a)
 {
-	cout << "复合关系的名字"<<a.name << endl;
+	cout << "复合关系的名字" << a.name << endl;
 	cout << "自己的参数列表是" << endl;
 	for (int i(0); i < a.rela_data.size(); i++)
 	{
@@ -1000,11 +1058,11 @@ int mysystem::file_out()
 	}
 	for (int i(0); i < cur_relation.size(); i++)
 	{
-		outfile << cur_relation[i].name<<endl;
+		outfile << cur_relation[i].name << endl;
 	}
 	for (int i(0); i < cur_double.size(); i++)
 	{
-		outfile << cur_double[i].name<<endl;
+		outfile << cur_double[i].name << endl;
 	}
 	outfile << "varible   " << endl;
 	for (int i(0); i < cur_token.size(); i++)
@@ -1023,6 +1081,5 @@ int mysystem::file_out()
 
 	return 0;
 }
-
 
 
