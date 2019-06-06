@@ -5,6 +5,7 @@ int main()
 	mysystem cur_system;
 	cur_system.run();
 	//暂时信息
+	cout << "running end" << endl;
 	int a(0);
 	cin >> a;
 	return 0;
@@ -18,7 +19,7 @@ int mysystem::file_in(string path)
 	myoperate.open(I);
 	if (myoperate.fail())
 	{
-		cout << "文件不存在" << endl;
+		cout << "文件不存在，或者是输入的非法的字符" << endl;
 
 		return 0;
 	}
@@ -35,142 +36,197 @@ int mysystem::file_in(string path)
 
 int mysystem::run()
 {
-	cout << "haha start test!!!" << endl;
-	string mypath;
-	cin >> mypath;
-	file_in(mypath);
-	for (int i(0); i < cur_infor.size(); i++)
+	while (1)
 	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "file_in test completed" << endl;
-	cout << endl;
+		cout << "~~~~~?  ";
+		string tmp;
+		rewind(stdin);
+		cin >> tmp;
+		if (tmp == "halt")
+			return 0;
+		rewind(stdin);
+		if (check_pair(tmp))
+		{
+			return 0;
+		}
+		if (!check_end(tmp))
+		{
+			return 0;
+		}
+		string k = "consult";
+		if (tmp.size() > 7)
+		{
+			int flag11(1);
+			for (int i(0); i < 7; i ++ )
+			{
+				if (k[i] != tmp[i])
+				{
+					flag11 = 0;
+					break;
+				}
+			}
+			if (flag11 != 0)
+			{
+				int flag12(0);
+				string f = tmp.substr(7,tmp.size()-7);
+				f.pop_back();
+				delete_start(f);
+				if (f[0] != '(')
+				{
+					cout << "没有检测到括号，检查输入" << endl;
+					return -1;
+				}
+				f.pop_back();
+				f.erase(f.begin());
+				file_in(f);
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cur_infor.pop_back();
+				cout << "file_in test completed" << endl;
+				cout << endl;
 
-	delete_empty(cur_infor);
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "delete test completed" << endl;
-	cout << endl;
+				delete_empty(cur_infor);
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "delete test completed" << endl;
+				cout << endl;
 
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		find_anno(cur_infor[i]);
-	}
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "delete test completed!" << endl;
-	cout << endl;
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					find_anno(cur_infor[i]);
+				}
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "delete test completed!" << endl;
+				cout << endl;
 
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		if (check_pair(cur_infor[i]) != 0)
-			cout << "error !!!!" << endl;
-	}
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "check_pair test completed!" << endl;
-	cout << endl;
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					if (check_pair(cur_infor[i]) != 0)
+						cout << "error !!!!" << endl;
+				}
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "check_pair test completed!" << endl;
+				cout << endl;
 
-	repair(cur_infor);
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "repair test completed!" << endl;
-	cout << endl;
+				repair(cur_infor);
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "repair test completed!" << endl;
+				cout << endl;
 
-	for (int i(0); i < cur_infor.size();)
-	{
-		if (check_end(cur_infor[i]) == 0)
+				for (int i(0); i < cur_infor.size();)
+				{
+					if (check_end(cur_infor[i]) == 0)
+					{
+						cout << "error !!!!" << endl;
+						cur_infor.erase(cur_infor.begin() + i);
+					}
+					else
+						i++;
+				}
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "check_end test completed!" << endl;
+				cout << endl;
+
+
+				for (int i(0); i < cur_infor.size();)
+				{
+					if (check_start(cur_infor[i]) == 0)
+					{
+						cout << "error !!!!" << endl;
+						cur_infor.erase(cur_infor.begin() + i);
+					}
+					else
+						i++;
+				}
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << cur_infor[i] << endl;
+				}
+				cout << "check_start test completed!" << endl;
+				cout << endl;
+
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					cout << judge_kind(cur_infor[i]) << endl;
+				}
+				cout << "judge_kind test completed!" << endl;
+				cout << endl;
+
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					if (judge_kind(cur_infor[i]) == 1)
+					{
+						first_check(cur_infor[i]);
+					}
+				}
+				cout << "first_check test completed!" << endl;
+				cout << endl;
+
+				for (int i(0); i < cur_infor.size(); i++)
+				{
+					if (judge_kind(cur_infor[i]) != 1)
+					{
+						third_check(cur_infor[i]);
+					}
+				}
+				cout << "third_check test completed!" << endl;
+				cout << endl;
+				/*
+				for (int i(0); i < cur_relation.size(); i++)
+				{
+					cout << cur_relation[i].name <<endl;
+					for (int j(0); j < cur_relation[i].rela_data.size(); j++)
+					{
+						cout << cur_token[cur_relation[i].rela_data[j]].origin << "--" << endl;
+					}
+				}
+				*/
+
+
+				cout << "final test start!!!   " << endl;
+				for (int i(0); i < cur_relation.size(); i++)
+				{
+					myrelation a = cur_relation[i];
+					test_relation(a);
+				}
+
+				for (int i(0); i < cur_double.size(); i++)
+				{
+					test_multi_relation(cur_double[i]);
+				}
+			}
+			continue;
+		}
+		if (check_pair(tmp) != 0)
 		{
 			cout << "error !!!!" << endl;
-			cur_infor.erase(cur_infor.begin() + i);
+			return 0;
 		}
-		else
-			i++;
-	}
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "check_end test completed!" << endl;
-	cout << endl;
-
-
-	for (int i(0); i < cur_infor.size();)
-	{
-		if (check_start(cur_infor[i]) == 0)
+		if (judge_kind(tmp) == 1)
 		{
-			cout << "error !!!!" << endl;
-			cur_infor.erase(cur_infor.begin() + i);
+			first_check(tmp);
 		}
-		else
-			i++;
-	}
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << cur_infor[i] << endl;
-	}
-	cout << "check_start test completed!" << endl;
-	cout << endl;
-
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		cout << judge_kind(cur_infor[i]) << endl;
-	}
-	cout << "judge_kind test completed!" << endl;
-	cout << endl;
-
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		if (judge_kind(cur_infor[i]) == 1)
+		if (judge_kind(tmp) != 1)
 		{
-			first_check(cur_infor[i]);
+			third_check(tmp);
 		}
 	}
-	cout << "first_check test completed!" << endl;
-	cout << endl;
-	
-	for (int i(0); i < cur_infor.size(); i++)
-	{
-		if (judge_kind(cur_infor[i]) != 1)
-		{
-			third_check(cur_infor[i]);
-		}
-	}
-	cout << "third_check test completed!" << endl;
-	cout << endl;
-	/*
-	for (int i(0); i < cur_relation.size(); i++)
-	{
-		cout << cur_relation[i].name <<endl;
-		for (int j(0); j < cur_relation[i].rela_data.size(); j++)
-		{
-			cout << cur_token[cur_relation[i].rela_data[j]].origin << "--" << endl;
-		}
-	}
-
-	*/
-
-
-	cout << "final test start!!!   " << endl;
-	for (int i(0); i < cur_relation.size(); i++)
-	{
-		myrelation a = cur_relation[i];
- 		test_relation(a);
-	}
-
-	for (int i(0); i < cur_double.size(); i++)
-	{
-		test_multi_relation(cur_double[i]);
-	}
-	return 0;
 }
 
 int mysystem::take_in(string a,int b)
