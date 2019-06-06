@@ -42,7 +42,8 @@ public:
 class double_rela {
 public:
 	string name;
-	vector<int>double_rela_data;//保存的是子关系，也就是说这个关系的组成
+	vector<int>rela_data;//自己的参数的列表
+	vector<myrelation>double_rela_data;//保存的是子关系，也就是说这个关系的组成
 	vector<int>divide_re;
 };
 
@@ -67,6 +68,7 @@ public:
 	vector<mytoken> cur_token;
 	vector<myrelation>cur_relation;
 	vector<string> cur_infor;
+	vector<double_rela>cur_double;
 	int file_in(string path);
 	int run();
 	int take_in(string a,int b);//这里的a就是这一行的文字信息，b是行数
@@ -84,6 +86,9 @@ public:
 	int delete_end(string &a);
 	int check_word(string &a);
 	int delete_empty(vector<string>&a);
+
+	int test_relation(myrelation a);
+	int test_multi_relation(double_rela a);
 	vector<string> analyze_bracket(string &a);//这里的函数是对括号里的内容进行解析，获取参数列表
 	vector<string> command_split(const string &s, const string &seperator);
 };
