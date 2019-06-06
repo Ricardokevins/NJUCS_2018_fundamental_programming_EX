@@ -46,6 +46,14 @@ int mysystem::run()
 	cout << "file_in test completed" << endl;
 	cout << endl;
 
+	delete_empty(cur_infor);
+	for (int i(0); i < cur_infor.size(); i++)
+	{
+		cout << cur_infor[i] << endl;
+	}
+	cout << "delete test completed" << endl;
+	cout << endl;
+
 	for (int i(0); i < cur_infor.size(); i++)
 	{
 		find_anno(cur_infor[i]);
@@ -118,6 +126,38 @@ int mysystem::run()
 	}
 	cout << "judge_kind test completed!" << endl;
 	cout << endl;
+
+	for (int i(0); i < cur_infor.size(); i++)
+	{
+		if (judge_kind(cur_infor[i]) == 1)
+		{
+			first_check(cur_infor[i]);
+		}
+	}
+	cout << "first_check test completed!" << endl;
+	cout << endl;
+	
+	for (int i(0); i < cur_infor.size(); i++)
+	{
+		if (judge_kind(cur_infor[i]) == 3)
+		{
+			third_check(cur_infor[i]);
+		}
+	}
+	cout << "third_check test completed!" << endl;
+	cout << endl;
+	/*
+	for (int i(0); i < cur_relation.size(); i++)
+	{
+		cout << cur_relation[i].name <<endl;
+		for (int j(0); j < cur_relation[i].rela_data.size(); j++)
+		{
+			cout << cur_token[cur_relation[i].rela_data[j]].origin << "--" << endl;
+		}
+	}
+
+	*/
+
 	return 0;
 }
 
@@ -294,9 +334,9 @@ int mysystem::judge_kind(string a)
 	for (int i(0); i < a.size(); i++)
 	{
 		if (a[i] == ',')//应该是一个relation
-			return 2;
+			return 3;
 	}
-	return 3;
+	return 2;
 }
 
 int mysystem::repair(vector<string>&a)
@@ -346,4 +386,349 @@ int mysystem::check_start(string a)
 		return 1;
 	else
 		return 0;
+}
+
+int mysystem::delete_start(string &a)
+{
+	if (a.size() == 0)//传入空字符串的判断
+	{
+		return 0;
+	}
+	while (a[0] == ' ')
+	{
+		a.erase(a.begin());//去除字符串的头部的可能的空格
+		if (a.size() == 0)//传入空字符串的判断
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int mysystem::delete_end(string &a)
+{
+	if (a.size() == 0)//传入空字符串的判断
+	{
+		return 0;
+	}
+	while (a[a.size()-1] == ' ')
+	{
+		a.pop_back();//去除字符串的头部的可能的空格
+		if (a.size() == 0)//传入空字符串的判断
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int mysystem::first_check(string a)
+{
+	a.pop_back();
+	string mrelation;
+	int pos1(0);
+	int flag1(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ' ')
+			break;
+		if (a[i] == '(')//想要先找到这个开头的位置的名词
+		{
+			pos1 = i;
+			flag1 = i;
+			break;
+		}
+	}
+	if (flag1 == 0)
+		return -1;
+	mrelation = a.substr(0, pos1);
+	//test1
+	cout << mrelation << endl;
+	string sub_head;
+	int flag2(0);
+	int pos2(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ')')//想要先找到这个开头的位置的名词
+		{
+			pos2 = i;
+			flag2 = i;
+			break;
+		}
+	}
+	if (flag2 == 0)
+		return -1;
+	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);
+	//test2
+	/*
+	cout << sub_head << endl;//提取得到括号里面的子串
+	*/
+
+	vector<string>ini_para1;
+	ini_para1 = analyze_bracket(sub_head);
+	if (ini_para1.size() == 0)
+	{
+		return -1;//说明没有提取到有用的参数的信息
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
+		{
+			return -1;
+		}
+	}
+	//test3
+	/*
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		cout << ini_para1[i] << endl;
+	}
+	cout << endl << endl;
+	*/
+
+	//截至到这里已经就完成了第一个括号的内容的提取
+	int pos3(0);
+	int flag3(0);//这里是在标记一下“：-”的位置
+	for (int i(pos2); i < a.size(); i++)
+	{
+		if (a[i] == ':')
+		{
+			if (a[i + 1] == '-')
+			{
+				pos3 = i;
+				flag3 = 1;
+				break;
+			}
+		}
+	}
+	if (flag3 == 0)
+	{
+		cout << "没有找到复合关系的分割符" << endl;
+		return -1;
+	}
+	string infor;
+	infor = a.substr(pos3+2, a.size()-2-pos3);
+	//cout << "infor                       "<<infor << endl;//这里是已经把复合关系的后面的具体的信息数据都拿到了
+	vector<string> ini_para2;//这里是预计对后面的具体的信息进行进一步的分解
+	ini_para2 = command_split(infor, ",");
+	for (int i(0); i < ini_para2.size(); i++)
+	{
+		delete_end(ini_para2[i]);
+		delete_start(ini_para2[i]);
+		if (check_word(ini_para2[i]) <= 0)
+		{
+			cout << "error with          "<<ini_para2[i]<< endl;//检查出现了错误
+			continue;
+		}
+	}
+
+	return 0;
+}
+
+int mysystem::third_check(string a)
+{
+	a.pop_back();
+	string mrelation;
+	int pos1(0);
+	int flag1(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ' ')
+			break;
+		if (a[i] == '(')//想要先找到这个开头的位置的名词
+		{
+			pos1 = i;
+			flag1 = i;
+			break;
+		}
+	}
+	if (flag1 == 0)
+		return -1;
+	mrelation = a.substr(0, pos1);//这里是关系名字
+	//test1
+	//cout << mrelation << endl;
+	string sub_head;
+	int flag2(0);
+	int pos2(0);
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ')')//想要先找到这个开头的位置的名词
+		{
+			pos2 = i;
+			flag2 = i;
+			break;
+		}
+	}
+	if (flag2 == 0)
+		return -1;
+	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);//这里是关系的内容
+	vector<string>ini_para1;
+	
+	ini_para1 = analyze_bracket(sub_head);
+	if (ini_para1.size() == 0)
+	{
+		return -1;//说明没有提取到有用的参数的信息
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
+		{
+			return -1;
+		}
+	}
+	
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		int flag3 = 0;
+		flag3 = check_word(ini_para1[i]);
+		if (flag3 == -1)
+		{
+			cout << "error 单词带有不合法的字符" << ini_para1[i] << endl;
+			return -1;
+		}
+		if (flag3 == 0)
+		{
+			cout << "error 单词的字符是空的" << ini_para1[i] << endl;
+			return -1;
+		}
+	}
+
+	myrelation temp5;
+	temp5.name = mrelation;
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		int small_flag(0);
+		for (int j(0); j < cur_token.size(); j++)
+		{
+			if (ini_para1[i] == cur_token[j].origin)
+			{
+				cur_token[i].num++;
+				small_flag = 1;
+				temp5.rela_data.push_back(j);
+				break;
+			}
+		}
+		if (!small_flag)
+		{
+			mytoken temp2;
+			temp2.num = 1;
+			temp2.order = cur_token.size();
+			temp2.origin = ini_para1[i];
+			cur_token.push_back(temp2);
+			temp5.rela_data.push_back(temp2.order);
+		}
+	}
+	cur_relation.push_back(temp5);
+	cout <<"关系名 "<<temp5.name << endl;
+	for (int j(0); j < temp5.rela_data.size(); j++)
+	{
+		cout << cur_token[temp5.rela_data[j]].origin << "--" << endl;
+	}
+	cout << endl << endl;
+	return 0;
+}
+
+vector<string> mysystem::command_split(const string &s, const string &seperator)
+{
+	vector<string> result;
+	typedef string::size_type string_size;
+	string_size i = 0;
+
+	while (i != s.size())
+	{
+		//找到字符串中首个不等于分隔符的字母；
+		int flag = 0;
+		while (i != s.size() && flag == 0)
+		{
+			flag = 1;
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[i] == seperator[x]) {
+					++i;
+					flag = 0;
+					break;
+				}
+		}
+
+		//找到又一个分隔符，将两个分隔符之间的字符串取出；
+		flag = 0;
+		string_size j = i;
+		while (j != s.size() && flag == 0) {
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[j] == seperator[x]) {
+					flag = 1;
+					break;
+				}
+			if (flag == 0)
+				++j;
+		}
+		if (i != j) {
+			result.push_back(s.substr(i, j - i));
+			i = j;
+		}
+	}
+	return result;
+}
+
+vector<string>mysystem::analyze_bracket(string& a)//对括号内的字符串进行切割，然后去掉每一个组分的头尾的空格
+{
+	vector<string>ini_para1;
+	ini_para1 = command_split(a, ",");
+	if (ini_para1.size() == 0)
+	{
+		return ini_para1;//说明没有提取到有用的参数的信息
+	}
+	for (int i(0); i < ini_para1.size(); i++)
+	{
+		delete_end(ini_para1[i]);
+		delete_start(ini_para1[i]);
+	}
+	return ini_para1;
+
+}
+
+int mysystem::check_word(string &a)
+{
+	int legal(1);
+	if (a.size() == 0)
+		return 0;//代表是空串，方便后面直接用下表进行遍历
+	if (a[0] <= 'z'&&a[0] >= 'a')
+		legal= 1;
+	if (a[0] >= 'A'&&a[0] <= 'Z')
+		legal = 2;
+	if (legal == 0)
+		return -1;
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] <= 'z'&&a[i] >= 'a')
+			continue;
+		if (a[i] >= 'A'&&a[i] <= 'Z')
+			continue;
+		if (a[i] >= '0'&&a[i] <= '9')
+			continue;
+		if (a[i] == '_')
+			continue;
+		return -1;
+	}
+	return legal;//返回一说明是小写开头，二是大写开头
+}
+
+int mysystem::delete_empty(vector<string>&a)
+{
+	for (int i(0); i < a.size();)
+	{
+		if (a[i].size()==0)
+		{
+			a.erase(a.begin() + i);
+			continue;
+		}
+		delete_start(a[i]);
+		delete_end(a[i]);
+		if (a[i].size() == 0)
+		{
+			a.erase(a.begin() + i);
+			continue;
+		}
+		i++;
+	}
+	return 1;
 }

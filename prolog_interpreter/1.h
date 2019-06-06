@@ -10,7 +10,7 @@
 #include<cmath>
 using namespace std;
 
-class outtoken {//这个是用来记录一下外来引入的那些名词    jingbo  di....
+class mytoken {//这个是用来记录一下外来引入的那些名词    jingbo  di....
 public:
 	string origin;//表示的原来的字符
 	int order;//记录一下序列号
@@ -34,22 +34,17 @@ public:
 
 class myrelation {
 public:
-	vector<vector<int>>rela_data;//预计是使用一个双重的vector来保存某种关系，每一层的vector是一个偏序格
+	string name;
+	vector<int>rela_data;//预计是使用一个双重的vector来保存某种关系，每一层的vector是一个偏序格
 };
+
 
 class double_rela {
 public:
+	string name;
 	vector<int>double_rela_data;//保存的是子关系，也就是说这个关系的组成
+	vector<int>divide_re;
 };
-
-class myvariable {
-public:
-	string origin;
-	int order;
-	int num;
-
-};
-
 
 
 class mystatus {
@@ -69,8 +64,7 @@ class mysystem {
 public:
 	vector<myerror> cur_error;
 	vector<mysymbol> cur_symbol;
-	vector<outtoken> cur_token;
-	vector<myvariable>cur_varible;
+	vector<mytoken> cur_token;
 	vector<myrelation>cur_relation;
 	vector<string> cur_infor;
 	int file_in(string path);
@@ -83,4 +77,13 @@ public:
 	int repair(vector<string>&a);
 	int check_end(string a);
 	int check_start(string a);
+	int first_check(string a);
+	int second_check(string a);
+	int third_check(string a);
+	int delete_start(string &a);//这两个函数是为了删除提取到的不算是错误的空格。也就是分割得到之后的头部和尾部的空格
+	int delete_end(string &a);
+	int check_word(string &a);
+	int delete_empty(vector<string>&a);
+	vector<string> analyze_bracket(string &a);//这里的函数是对括号里的内容进行解析，获取参数列表
+	vector<string> command_split(const string &s, const string &seperator);
 };
