@@ -1,4 +1,5 @@
 
+
 #pragma once
 #include<iostream>
 #include<sstream>
@@ -72,7 +73,7 @@ public:
 	vector<double_rela>cur_double;
 	int file_in(string path);
 	int run();
-	int take_in(string a,int b);//这里的a就是这一行的文字信息，b是行数
+	int take_in(string a, int b);//这里的a就是这一行的文字信息，b是行数
 	int detect_event(char a);
 	int find_anno(string &a);
 	int check_pair(string &a);
@@ -81,7 +82,7 @@ public:
 	int check_end(string a);
 	int check_start(string a);
 	int first_check(string a);
-	int third_check(string a,int q);
+	int third_check(string a, int q);
 	int delete_start(string &a);//这两个函数是为了删除提取到的不算是错误的空格。也就是分割得到之后的头部和尾部的空格
 	int delete_end(string &a);
 	int check_word(string &a);
@@ -99,4 +100,5 @@ public:
 	int juhao;
 };
 
-  
+
+
