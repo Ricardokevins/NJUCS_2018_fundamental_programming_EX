@@ -93,7 +93,7 @@ int mysystem::run()
 				f.erase(f.begin());
 				file_in(f);
 
-				delete_empty(cur_infor);
+				//count_delete+=delete_empty(cur_infor);
 				for (int i(0); i < cur_infor.size(); i++)
 				{
 					for (int k(0); k < cur_infor[i].size(); k++)
@@ -112,6 +112,13 @@ int mysystem::run()
 				}
 				for (int i(0); i < cur_infor.size();)
 				{
+					if (cur_infor[i].size() == 0)
+					{
+						i++;
+						continue;
+					}
+					delete_end(cur_infor[i]);
+					delete_start(cur_infor[i]);
 					if (find_anno(cur_infor[i]) == -1)
 					{
 						cout << "词法错误 左右注释符号没有匹配在" << i + count_delete + 1 << "行" << endl;
@@ -122,7 +129,7 @@ int mysystem::run()
 					}
 					if (cur_infor[i].size() == 0)
 					{
-						delete_empty(cur_infor);
+						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
 					}
 					if (check_pair(cur_infor[i]) != 0)
@@ -504,7 +511,9 @@ int mysystem::check_end(string a)
 		return 1;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 int mysystem::check_start(string a)
