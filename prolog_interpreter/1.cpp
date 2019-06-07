@@ -164,7 +164,7 @@ int mysystem::run()
 					}
 					if (judge_kind(cur_infor[i]) != 1)
 					{
-						if (third_check(cur_infor[i],0) <= 0)
+						if (third_check(cur_infor[i], 0) <= 0)
 						{
 							read_wrong++;
 							cur_infor.erase(cur_infor.begin() + i);
@@ -184,7 +184,7 @@ int mysystem::run()
 
 		if (judge_kind(tmp) != 1)
 		{
-			if (third_check(tmp,1) > 0)//说明是成功的使用了这个语句生成了一个relation的对象
+			if (third_check(tmp, 1) > 0)//说明是成功的使用了这个语句生成了一个relation的对象
 			{
 				myrelation ask = cur_relation[cur_relation.size() - 1];//那么我就提取出这个对象
 				cur_relation.pop_back();//下面就是要基于问题的查询的功能的实现了
@@ -286,7 +286,7 @@ int mysystem::run()
 			cout << "指令不合法，没看懂" << endl;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -383,7 +383,7 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 		{
 			if (a[i + 1] == '/'&&left_1 == 1 && left_2 == 1)
 			{
-				a.erase(pos, i + 2);
+				a.erase(pos, i + 2 - pos);
 				left_1 = 0;
 				left_2 = 0;
 			}
@@ -576,7 +576,7 @@ int mysystem::first_check(string a)
 	}
 	if (flag1 == 0)
 	{
-		cout << "语法错误 没有找到左括号" ;
+		cout << "语法错误 没有找到左括号";
 		return -1;
 	}
 	mrelation = a.substr(0, pos1);
@@ -743,7 +743,7 @@ int mysystem::first_check(string a)
 	{
 		delete_end(ini_para2[i]);
 		delete_start(ini_para2[i]);
-		if (third_check(ini_para2[i],1) > 0)
+		if (third_check(ini_para2[i], 1) > 0)
 		{
 			count++;
 		}
@@ -762,7 +762,7 @@ int mysystem::first_check(string a)
 	return 1;
 }
 
-int mysystem::third_check(string a,int q)
+int mysystem::third_check(string a, int q)
 {
 	if (a.size() == 0)
 	{
@@ -777,9 +777,9 @@ int mysystem::third_check(string a,int q)
 	int flag1(0);
 	for (int i(0); i < a.size(); i++)
 	{
-		
-//		if (a[i] == ' ')
-	//		break;
+
+		//		if (a[i] == ' ')
+			//		break;
 		if (a[i] == '(')//想要先找到这个开头的位置的名词
 		{
 			pos1 = i;
@@ -821,7 +821,7 @@ int mysystem::third_check(string a,int q)
 	}
 	if (flag2 == 0)
 	{
-		cout << "语法错误 没有找到右括号" ;
+		cout << "语法错误 没有找到右括号";
 		return -2;
 	}
 	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);//这里是关系的内容
@@ -864,7 +864,7 @@ int mysystem::third_check(string a,int q)
 			return -10;
 		}
 	}
-	
+
 	myrelation temp5;
 	temp5.name = mrelation;
 	for (int i(0); i < ini_para1.size(); i++)
