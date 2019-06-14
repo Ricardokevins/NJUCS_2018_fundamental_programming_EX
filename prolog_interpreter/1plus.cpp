@@ -167,6 +167,7 @@ int mysystem::run()
 					{
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
+						continue;
 					}
 					if (check_pair(cur_infor[i]) != 0)
 					{
@@ -280,9 +281,9 @@ int mysystem::run()
 								{
 									cout << cur_token[ask.rela_data[va[g]]].origin << " = ";
 									cout << cur_token[answer[g]].origin << endl;
-									answer.clear();
-									va.clear();
 								}
+								answer.clear();
+								va.clear();
 							}
 
 						}
@@ -420,16 +421,20 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 				left_1 = 1;
 				left_2 = 1;
 				pos = i;
-				continue;
+				break;
 			}
 		}
-		if (a[i] == '*'&&i < a.size() - 1)
+	}
+	for (int i= a.size()-1; i >=0; i--)
+	{
+		if (a[i] == '/'&&i >=1)
 		{
-			if (a[i + 1] == '/'&&left_1 == 1 && left_2 == 1)
+			if (a[i - 1] == '*'&&left_1 == 1 && left_2 == 1)
 			{
 				a.erase(pos, i + 2 - pos);
 				left_1 = 0;
 				left_2 = 0;
+				break;
 			}
 		}
 	}
@@ -666,14 +671,14 @@ int mysystem::first_check(string a)
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		cout << "括号中没有信息";
+		cout << "括号中缺失信息";
 		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			cout << "逗号中没有信息";
+			cout << "括号中缺失信息";
 			return -4;
 		}
 	}
@@ -876,14 +881,14 @@ int mysystem::third_check(string a, int q)
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		cout << "\033[31m语法错误\033[0m 括号中没有信息";
+		cout << "\033[31m语法错误\033[0m 括号中缺失信息";
 		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			cout << "\033[31m语法错误\033[0m 逗号之间没有信息";
+			cout << "\033[31m语法错误\033[0m 括号中缺失信息";
 
 			return -4;
 		}
@@ -985,6 +990,13 @@ vector<string> mysystem::command_split(const string &s, const string &seperator)
 vector<string>mysystem::analyze_bracket(string& a)//对括号内的字符串进行切割，然后去掉每一个组分的头尾的空格
 {
 	vector<string>ini_para1;
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ','&&a[i + 1] == ',')
+		{
+			return ini_para1;
+		}
+	}
 	ini_para1 = command_split(a, ",");
 	if (ini_para1.size() == 0)
 	{
@@ -1095,28 +1107,27 @@ int mysystem::file_out()
 	{
 		cout << "创建文件失败" << endl;
 	}
-	outfile << "atom " << endl;
 	for (int i(0); i < cur_token.size(); i++)
 	{
 		if (judge_word(cur_token[i].origin) == 1)
 		{
-			outfile << cur_token[i].origin << endl;
+			outfile << cur_token[i].origin << "   atom " << endl;
 		}
+
 	}
 	for (int i(0); i < cur_relation.size(); i++)
 	{
-		outfile << cur_relation[i].name << endl;
+		outfile << cur_relation[i].name << "   atom " << endl;
 	}
 	for (int i(0); i < cur_double.size(); i++)
 	{
-		outfile << cur_double[i].name << endl;
+		outfile << cur_double[i].name << "   atom " << endl;
 	}
-	outfile << "varible   " << endl;
 	for (int i(0); i < cur_token.size(); i++)
 	{
 		if (judge_word(cur_token[i].origin) == 2)
 		{
-			outfile << cur_token[i].origin << endl;
+			outfile << cur_token[i].origin << "   varible   " << endl;
 		}
 	}
 	outfile << "symbol   " << endl;
@@ -1128,6 +1139,8 @@ int mysystem::file_out()
 
 	return 0;
 }
+
+
 
 
 
