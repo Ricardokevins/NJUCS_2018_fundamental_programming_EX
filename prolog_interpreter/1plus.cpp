@@ -1,4 +1,5 @@
 
+
 #include"1.h"
 
 int main()
@@ -56,6 +57,10 @@ int mysystem::run()
 		{
 			add_flag = 1;
 			continue;
+		}
+		if (tmp == "print.")
+		{
+
 		}
 		rewind(stdin);
 		delete_start(tmp);
@@ -214,7 +219,7 @@ int mysystem::run()
 					}
 					i++;
 				}
-                cur_infor.clear();
+				cur_infor.clear();
 				if (read_wrong == 0)
 					file_out();
 				continue;
@@ -1123,7 +1128,6 @@ int mysystem::file_out()
 
 	return 0;
 }
-
 
 
 
