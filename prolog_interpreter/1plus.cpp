@@ -997,6 +997,10 @@ vector<string>mysystem::analyze_bracket(string& a)//对括号内的字符串进�
 			return ini_para1;
 		}
 	}
+	if (a[a.size() - 1] == ',')
+	{
+		return ini_para1;
+	}
 	ini_para1 = command_split(a, ",");
 	if (ini_para1.size() == 0)
 	{
