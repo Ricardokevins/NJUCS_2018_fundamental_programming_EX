@@ -1,0 +1,6 @@
+consult(test_true).
+consult(test_error).
+mother(cercei,joffrey).
+friend(jon_Snow, X).
+lannister(ned).
+family(X,Y,Z).
