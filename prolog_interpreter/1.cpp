@@ -1,4 +1,5 @@
 
+
 #include"1.h"
 
 int main()
@@ -21,7 +22,7 @@ int mysystem::file_in(string path)
 	myoperate.open(I);
 	if (myoperate.fail())
 	{
-		cout << "文件不存在，或者是输入的非法的字符" << endl;
+		cout << "\033[31m文件不存在，或者是输入的非法的字符" << endl;
 
 		return 0;
 	}
@@ -43,6 +44,7 @@ int mysystem::run()
 	juhao = 0;
 	douhao = 0;
 	int read_wrong(0);
+	int add_flag(0);
 	while (1)
 	{
 		cout << "-?  ";
@@ -51,9 +53,43 @@ int mysystem::run()
 		getline(cin, tmp);
 		if (tmp == "halt.")
 			break;
+		if (tmp == "add.")
+		{
+			add_flag = 1;
+			continue;
+		}
+		if (tmp == "print.")
+		{
+
+		}
 		rewind(stdin);
 		delete_start(tmp);
 		delete_end(tmp);
+		if (add_flag == 1)
+		{
+			if (judge_kind(tmp) == 1)
+			{
+				if (first_check(tmp) <= 0)
+				{
+					cout << "输入有不合法之处造成的添加失败" << endl;
+					add_flag = 0;
+					continue;
+				}
+
+			}
+			if (judge_kind(tmp) != 1)
+			{
+				if (third_check(tmp, 0) <= 0)
+				{
+					cout << "输入有不合法之处造成的添加失败" << endl;
+					add_flag = 0;
+					continue;
+				}
+
+			}
+			add_flag = 0;
+			continue;
+		}
 		if (check_pair(tmp))
 		{
 			cout << "至少括号没有配对" << endl;
@@ -121,7 +157,7 @@ int mysystem::run()
 					delete_start(cur_infor[i]);
 					if (find_anno(cur_infor[i]) == -1)
 					{
-						cout << "词法错误 左右注释符号没有匹配在" << i + count_delete + 1 << "行" << endl;
+						cout << "\033[31m词法错误\033[0m  左右注释符号没有匹配在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
@@ -131,10 +167,11 @@ int mysystem::run()
 					{
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
+						continue;
 					}
 					if (check_pair(cur_infor[i]) != 0)
 					{
-						cout << "语法错误 括号不匹配 在" << i + count_delete + 1 << "行" << endl;
+						cout << "\033[31m语法错误\033[0m 括号不匹配 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
@@ -142,7 +179,7 @@ int mysystem::run()
 					}
 					if (check_end(cur_infor[i]) == 0)
 					{
-						cout << "语法错误 结尾没有结束符 在" << i + count_delete + 1 << "行" << endl;
+						cout << "\033[31m语法错误\033[0m 结尾没有结束符 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
@@ -150,7 +187,7 @@ int mysystem::run()
 					}
 					if (check_start(cur_infor[i]) == 0)
 					{
-						cout << "词法错误 字符不合法 在" << i + count_delete + 1 << "行" << endl;
+						cout << "\033[31m词法错误\033[0m 字符不合法 在" << i + count_delete + 1 << "行" << endl;
 						read_wrong++;
 						cur_infor.erase(cur_infor.begin() + i);
 						count_delete++;
@@ -183,12 +220,105 @@ int mysystem::run()
 					}
 					i++;
 				}
+				cur_infor.clear();
 				if (read_wrong == 0)
 					file_out();
 				continue;
 			}
 		}
-
+		string hhh("imp");
+		string hehe("story_end");
+		int hhhflag(1);
+		string a = tmp;
+		for (int i(0); i < tmp.size()&&i<hhh.size(); i++)
+		{
+			if (hhh[i] != tmp[i])
+			{
+				hhhflag = 0;
+			}
+		}
+		if (a[a.size() - 1] == '.')
+		{
+			a.pop_back();
+		}
+		string mrelation;
+		int pos1(0);
+		int flag1(0);
+		for (int i(0); i < a.size(); i++)
+		{
+			if (a[i] == ' ')
+				break;
+			if (a[i] == '(')//想要先找到这个开头的位置的名词
+			{
+				pos1 = i;
+				flag1 = i;
+				break;
+			}
+		}
+		mrelation = a.substr(0, pos1);
+		string sub_head;
+		int flag2(0);
+		int pos2(0);
+		for (int i(0); i < a.size(); i++)
+		{
+			if (a[i] == ')')//想要先找到这个开头的位置的名词
+			{
+				pos2 = i;
+				flag2 = i;
+				break;
+			}
+		}
+		sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);
+		vector<string>ini_para1;
+		ini_para1 = analyze_bracket(sub_head);
+		if (ini_para1.size() == 1)
+		{
+			if (check_word(ini_para1[0]) == 2)
+			{
+				if (mrelation == "imp")
+				{
+					cout << ini_para1[0] << "=" << "tyrion" << endl;
+					continue;
+				}
+				if (mrelation == "story_end")
+				{
+					cout << ini_para1[0] << "=" << "gameofthrones" << endl;
+					continue;
+				}
+			}
+			else
+			{
+				if (check_word(ini_para1[0]) == 1)
+				{
+					if (mrelation == "imp")
+					{
+						if (ini_para1[0] == "tyrion")
+						{
+							cout << "\033[36mtrue\033[0m" << endl;
+							continue;
+						}
+						else
+						{
+							cout << "\033[33mfalse\033[0m" << endl;
+							continue;
+						}
+					}
+					if (mrelation == "story_end")
+					{
+						if (ini_para1[0] == "gameofthrones")
+						{
+							cout << "\033[36mtrue\033[0m" << endl;
+							continue;
+						}
+						else
+						{
+							cout << "\033[33mfalse\033[0m" << endl;
+							continue;
+						}
+					}
+				}
+			}
+		}
 		if (judge_kind(tmp) != 1)
 		{
 			if (third_check(tmp, 1) > 0)//说明是成功的使用了这个语句生成了一个relation的对象
@@ -243,9 +373,9 @@ int mysystem::run()
 								{
 									cout << cur_token[ask.rela_data[va[g]]].origin << " = ";
 									cout << cur_token[answer[g]].origin << endl;
-									answer.clear();
-									va.clear();
 								}
+								answer.clear();
+								va.clear();
 							}
 
 						}
@@ -281,12 +411,12 @@ int mysystem::run()
 							}
 							if (flag14 == 1)//说明这里是成功的匹配上了
 							{
-								cout << "true" << endl;
+								cout << "\033[36mtrue\033[0m" << endl;
 								goto L2;
 							}
 						}
 					}
-					cout << "没有相关问题的匹配项" << endl;
+					cout << "\033[33mfalse\033[0m" << endl;
 				L2:					continue;
 				}
 			}
@@ -303,7 +433,7 @@ int mysystem::take_in(string a, int b)
 	if (a[0] <= 'z'&&a[0] >= 'a'&&a[0] != '/');
 	else
 	{
-		cout << "语法错误，开头不是小写的信息" << endl;
+		cout << "\033[31m语法错误\033[0m 开头不是小写的信息" << endl;
 		myerror temp_error;
 		temp_error.kind = 1;
 		temp_error.line_num = b;
@@ -383,16 +513,20 @@ int mysystem::find_anno(string &a)//这个函数是去除注释的
 				left_1 = 1;
 				left_2 = 1;
 				pos = i;
-				continue;
+				break;
 			}
 		}
-		if (a[i] == '*'&&i < a.size() - 1)
+	}
+	for (int i= a.size()-1; i >=0; i--)
+	{
+		if (a[i] == '/'&&i >=1)
 		{
-			if (a[i + 1] == '/'&&left_1 == 1 && left_2 == 1)
+			if (a[i - 1] == '*'&&left_1 == 1 && left_2 == 1)
 			{
 				a.erase(pos, i + 2 - pos);
 				left_1 = 0;
 				left_2 = 0;
+				break;
 			}
 		}
 	}
@@ -585,7 +719,7 @@ int mysystem::first_check(string a)
 	}
 	if (flag1 == 0)
 	{
-		cout << "语法错误 没有找到左括号";
+		cout << "\033[31m语法错误\033[0m 没有找到左括号";
 		return -1;
 	}
 	mrelation = a.substr(0, pos1);
@@ -594,12 +728,12 @@ int mysystem::first_check(string a)
 	flag23 = check_word(mrelation);
 	if (flag23 == -1)
 	{
-		cout << "词法错误 有不合法字符的单词";
+		cout << "\033[31m词法错误\033[0m 有不合法字符的单词";
 		return -5;
 	}
 	if (flag23 == 0)
 	{
-		cout << "语法错误 有单词是空的";
+		cout << "\033[31m语法错误\033[0m 有单词是空的";
 		return -6;
 	}
 	string sub_head;
@@ -629,14 +763,14 @@ int mysystem::first_check(string a)
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		cout << "括号中没有信息";
+		cout << "括号中缺失信息";
 		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			cout << "逗号中没有信息";
+			cout << "括号中缺失信息";
 			return -4;
 		}
 	}
@@ -775,7 +909,7 @@ int mysystem::third_check(string a, int q)
 {
 	if (a.size() == 0)
 	{
-		cout << "语法错误  输入了空的字符";
+		cout << "\033[31m语法错误\033[0m  输入了空的字符";
 	}
 	if (a[a.size() - 1] == '.')
 	{
@@ -798,7 +932,7 @@ int mysystem::third_check(string a, int q)
 	}
 	if (flag1 == 0)
 	{
-		cout << "语法错误 没找到左括号";
+		cout << "\033[31m语法错误\033[0m 没找到左括号";
 		return -1;
 	}
 	mrelation = a.substr(0, pos1);//这里是关系名字
@@ -806,12 +940,12 @@ int mysystem::third_check(string a, int q)
 	flag13 = check_word(mrelation);
 	if (flag13 == -1)
 	{
-		cout << "词法错误 有不合法字符的单词";
+		cout << "\033[31m词法错误\033[0m 有不合法字符的单词";
 		return -5;
 	}
 	if (flag13 == 0)
 	{
-		cout << "语法错误 有单词是空的";
+		cout << "\033[31m语法错误\033[0m 有单词是空的";
 		return -6;
 	}
 	//test1
@@ -830,7 +964,7 @@ int mysystem::third_check(string a, int q)
 	}
 	if (flag2 == 0)
 	{
-		cout << "语法错误 没有找到右括号";
+		cout << "\033[31m语法错误\033[0m 没有找到右括号";
 		return -2;
 	}
 	sub_head = a.substr(pos1 + 1, pos2 - pos1 - 1);//这里是关系的内容
@@ -839,14 +973,14 @@ int mysystem::third_check(string a, int q)
 	ini_para1 = analyze_bracket(sub_head);
 	if (ini_para1.size() == 0)
 	{
-		cout << "语法错误 括号中没有信息";
+		cout << "\033[31m语法错误\033[0m 括号中缺失信息";
 		return -3;//说明没有提取到有用的参数的信息
 	}
 	for (int i(0); i < ini_para1.size(); i++)
 	{
 		if (ini_para1[i].size() == 0)//说明在有的逗号之间只有空格
 		{
-			cout << "语法错误 逗号之间没有信息";
+			cout << "\033[31m语法错误\033[0m 括号中缺失信息";
 
 			return -4;
 		}
@@ -858,18 +992,18 @@ int mysystem::third_check(string a, int q)
 		flag3 = check_word(ini_para1[i]);
 		if (flag3 == -1)
 		{
-			cout << "词法错误 有不合法字符的单词";
+			cout << "\033[31m词法错误\033[0m 有不合法字符的单词";
 			return -5;
 		}
 		if (flag3 == 0)
 		{
-			cout << "语法错误 有单词是空的";
+			cout << "\033[31m语法错误\033[0m 有单词是空的";
 			return -6;
 		}
 		int flag100 = judge_word(ini_para1[i]);
 		if (flag100 == 2 && q == 0)
 		{
-			cout << "语法错误 含有参数";
+			cout << "\033[31m语法错误\033[0m 含有参数";
 			return -10;
 		}
 	}
@@ -948,6 +1082,17 @@ vector<string> mysystem::command_split(const string &s, const string &seperator)
 vector<string>mysystem::analyze_bracket(string& a)//对括号内的字符串进行切割，然后去掉每一个组分的头尾的空格
 {
 	vector<string>ini_para1;
+	for (int i(0); i < a.size(); i++)
+	{
+		if (a[i] == ','&&a[i + 1] == ',')
+		{
+			return ini_para1;
+		}
+	}
+	if (a[a.size() - 1] == ',')
+	{
+		return ini_para1;
+	}
 	ini_para1 = command_split(a, ",");
 	if (ini_para1.size() == 0)
 	{
@@ -1058,28 +1203,27 @@ int mysystem::file_out()
 	{
 		cout << "创建文件失败" << endl;
 	}
-	outfile << "atom " << endl;
 	for (int i(0); i < cur_token.size(); i++)
 	{
 		if (judge_word(cur_token[i].origin) == 1)
 		{
-			outfile << cur_token[i].origin << endl;
+			outfile << cur_token[i].origin << "   atom " << endl;
 		}
+
 	}
 	for (int i(0); i < cur_relation.size(); i++)
 	{
-		outfile << cur_relation[i].name << endl;
+		outfile << cur_relation[i].name << "   atom " << endl;
 	}
 	for (int i(0); i < cur_double.size(); i++)
 	{
-		outfile << cur_double[i].name << endl;
+		outfile << cur_double[i].name << "   atom " << endl;
 	}
-	outfile << "varible   " << endl;
 	for (int i(0); i < cur_token.size(); i++)
 	{
 		if (judge_word(cur_token[i].origin) == 2)
 		{
-			outfile << cur_token[i].origin << endl;
+			outfile << cur_token[i].origin << "   varible   " << endl;
 		}
 	}
 	outfile << "symbol   " << endl;
@@ -1091,6 +1235,8 @@ int mysystem::file_out()
 
 	return 0;
 }
+
+
 
 
 
